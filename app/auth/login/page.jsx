@@ -56,7 +56,7 @@ export default function LoginPage() {
       setPopup({ show: false, message: "", success: false, fadeOut: false });
       if (isSuccess) {
         localStorage.setItem("currentUser", JSON.stringify(user));
-        router.push("/dashboard");
+        router.push("/tutorail");
       }
     }, 3000);
   };
@@ -91,7 +91,7 @@ export default function LoginPage() {
 
         {/* กล่อง form */}
         <div className="flex justify-center items-center w-1/2 z-20">
-          <div className="w-[460px] bg-gradient-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
+          <div className="w-[460px] bg-linear-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
             <h1 className="text-[28px] font-semibold text-gray-800 mb-1">
               LOGIN
             </h1>
@@ -136,7 +136,7 @@ export default function LoginPage() {
                     placeholder="Password"
                     className="w-full outline-none text-black placeholder-gray-400"
                   />
-                  <span className="w-[1px] h-5 bg-gray-300 mx-2"></span>
+                  <span className="w-px h-5 bg-gray-300 mx-2"></span>
                   <button
                     type="button"
                     className="text-gray-500 hover:text-gray-700"
@@ -176,9 +176,9 @@ export default function LoginPage() {
               {/* Social login */}
               <div className="flex flex-col items-center mt-4">
                 <div className="flex items-center w-full mb-4">
-                  <div className="flex-grow h-[1px] bg-gray-300" />
+                  <div className="grow h-px bg-gray-300" />
                   <span className="px-2 text-gray-500 text-sm">หรือ</span>
-                  <div className="flex-grow h-[1px] bg-gray-300" />
+                  <div className="grow h-px bg-gray-300" />
                 </div>
 
                 <div className="flex justify-center gap-6">
@@ -213,7 +213,7 @@ export default function LoginPage() {
                 : "scale-100 opacity-100 translate-y-0"
             }`}
           >
-           
+          
             <button
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
               onClick={closePopup}
@@ -239,3 +239,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

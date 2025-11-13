@@ -73,7 +73,7 @@ export default function RegisterPage() {
 
     
         <div className="flex justify-center items-center w-1/2 z-20">
-          <div className="w-[460px] bg-gradient-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
+          <div className="w-[460px] bg-linear-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
             <h1 className="text-[28px] font-semibold text-gray-800 mb-1">REGISTER</h1>
             <p className="text-gray-500 mb-6 text-sm">สมัครสมาชิกเพื่อใช้งาน</p>
 
@@ -108,7 +108,7 @@ export default function RegisterPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
-                  <span className="w-[1px] h-5 bg-gray-300 mx-2"></span>
+                  <span className="w-px h-5 bg-gray-300 mx-2"></span>
                   <button
                     type="button"
                     className="text-gray-500 hover:text-gray-700"
@@ -165,9 +165,9 @@ export default function RegisterPage() {
           
               <div className="flex flex-col items-center mt-4">
                 <div className="flex items-center w-full mb-4">
-                  <div className="flex-grow h-[1px] bg-gray-300" />
+                  <div className="grow h-px bg-gray-300" />
                   <span className="px-2 text-gray-500 text-sm">หรือ</span>
-                  <div className="flex-grow h-[1px] bg-gray-300" />
+                  <div className="grow h-px bg-gray-300" />
                 </div>
 
                 <div className="flex justify-center gap-6">
