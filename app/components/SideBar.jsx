@@ -175,9 +175,12 @@ export default function Sidebar() {
                                     )
                                 }
                                 links={[
-                                    { href: "/report/allchat", label: "All Chat" },
-                                    { href: "/report/facebook", label: "Facebook" },
-                                    { href: "/report/line", label: "Line" },
+                                    { href: "/Report/contacts", label: "Contact Report" },
+                                    { href: "/Report/conversation", label: "Conversation Report" },
+                                    { href: "/Report/message", label: "Message Report" },
+                                    { href: "/Report/responses", label: "Responses Report" },
+                                    { href: "/Report/users", label: "Users Report" },
+                                    { href: "/Report/#", label: "Ai Token Report" }
                                 ]}
                                 pathname={pathname}
                             />

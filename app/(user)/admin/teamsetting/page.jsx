@@ -61,24 +61,28 @@ function TeamModal({
         {/* Members */}
         <div className="mb-5">
           <label className="block text-sm mb-2">Team Members</label>
-          <select
-            multiple
-            value={teamMembers}
-            onChange={(e) =>
-              setTeamMembers(
-                Array.from(e.target.selectedOptions, (o) => o.value)
-              )
-            }
-            className="w-full bg-[#1c1d25] border border-white/30 rounded-lg px-3 py-2 text-white h-[110px] cursor-pointer"
-          >
+          <div className="bg-[#1c1d25] border border-white/30 rounded-lg p-3 h-[150px] overflow-y-auto">
             {userOptions.map((user) => (
-              <option key={user} value={user}>
-                {user}
-              </option>
+              <label
+                key={user}
+                className="flex items-center gap-2 mb-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={teamMembers.includes(user)}
+                  onChange={() => {
+                    if (teamMembers.includes(user)) {
+                      setTeamMembers(teamMembers.filter((u) => u !== user));
+                    } else {
+                      setTeamMembers([...teamMembers, user]);
+                    }
+                  }}
+                />
+                <span>{user}</span>
+              </label>
             ))}
-          </select>
+          </div>
         </div>
-
         <div className="flex justify-end gap-3 mt-8">
           <button
             onClick={onClose}

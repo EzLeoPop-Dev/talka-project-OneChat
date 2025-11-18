@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { User, Lock, Eye, EyeOff, X } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -66,8 +67,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="flex w-[1200px] h-[750px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden">
+    <div className="relative flex justify-center items-center min-h-screen">
+      {/* Background Step 1 */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        animate={{
+          background: [
+            "linear-gradient(135deg, #0f0f14, #1a1a2e, #0f0f14)",
+            "linear-gradient(135deg, #1a1a2e, #0f0f14, #1a1a2e)",
+          ],
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      />
+      <motion.div
+        className="absolute w-[600px] h-[600px] bg-[rgba(184,110,159,0.69)] rounded-full filter blur-3xl opacity-40"
+        initial={{ x: -480, y: -50 }}
+        animate={{ x: [-480, 480, -480] }}
+        transition={{ duration: 12, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute w-[500px] h-[500px] bg-[rgba(110,184,159,0.69)] rounded-full filter blur-3xl opacity-40"
+        initial={{ x: 480, y: 100 }}
+        animate={{ x: [480, -480, 480] }}
+        transition={{ duration: 14, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
+      />
+
+      {/* Original Login Content */}
+      <div className="flex w-[1200px] h-[750px] bg-[rgba(152,85,120,0.4)] border border-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
         {/* ข้อความฝั่งซ้าย */}
         <div className="flex flex-col justify-center pl-16 w-1/2 text-white relative z-10 font-inter">
           <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">
@@ -86,7 +112,7 @@ export default function LoginPage() {
         </div>
 
         {/* ฟองน้ำตกแต่ง */}
-        <div className="absolute w-64 h-64 bg-[linear-gradient(180deg,rgba(127,24,220,1)_20%,rgba(22,3,38,1))] rounded-full opacity-40 top-[-60px] left-[-60px]" />
+        <div className="absolute w-64 h-64 bg-[linear-gradient(180deg,rgba(127,24,220,1)_20%,rgba(22,3,38,1))]  rounded-full opacity-40 top-[-60px] left-[-60px]" />
         <div className="absolute w-80 h-80 bg-[linear-gradient(120deg,rgba(127,24,220,1)_30%,rgba(22,3,38,1)_70%)] rounded-full opacity-40 bottom-[-60px] right-[-60px]" />
 
         {/* กล่อง form */}
@@ -101,9 +127,8 @@ export default function LoginPage() {
               {/* Username */}
               <div className="relative">
                 <div
-                  className={`flex items-center border rounded-full px-3 py-2.5 ${
-                    errorUser ? "border-red-500" : "border-gray-300"
-                  } focus-within:ring-1 focus-within:ring-purple-400`}
+                  className={`flex items-center border rounded-full px-3 py-2.5 ${errorUser ? "border-red-500" : "border-gray-300"
+                    } focus-within:ring-1 focus-within:ring-purple-400`}
                 >
                   <User className="text-purple-600 mr-2" size={18} />
                   <input
@@ -124,9 +149,8 @@ export default function LoginPage() {
               {/* Password */}
               <div className="relative">
                 <div
-                  className={`flex items-center border rounded-full px-3 py-2.5 ${
-                    errorPass ? "border-red-500" : "border-gray-300"
-                  } focus-within:ring-1 focus-within:ring-purple-400`}
+                  className={`flex items-center border rounded-full px-3 py-2.5 ${errorPass ? "border-red-500" : "border-gray-300"
+                    } focus-within:ring-1 focus-within:ring-purple-400`}
                 >
                   <Lock className="text-purple-600 mr-2" size={18} />
                   <input
@@ -192,7 +216,6 @@ export default function LoginPage() {
                       className="w-8 h-8 object-contain"
                     />
                   </button>
-
                 </div>
               </div>
             </form>
@@ -202,18 +225,15 @@ export default function LoginPage() {
 
       {popup.show && (
         <div
-          className={`fixed inset-0 bg-black/40 flex justify-center items-center z-50 transition-opacity duration-300 ${
-            popup.fadeOut ? "opacity-0" : "opacity-100"
-          }`}
+          className={`fixed inset-0 bg-black/40 flex justify-center items-center z-50 transition-opacity duration-300 ${popup.fadeOut ? "opacity-0" : "opacity-100"
+            }`}
         >
           <div
-            className={`relative w-[600px] h-[400px] bg-white shadow-2xl rounded-4xl p-8 text-center flex flex-col justify-center items-center gap-10 transform transition-all duration-300 ${
-              popup.fadeOut
+            className={`relative w-[600px] h-[400px] bg-white shadow-2xl rounded-4xl p-8 text-center flex flex-col justify-center items-center gap-10 transform transition-all duration-300 ${popup.fadeOut
                 ? "scale-95 opacity-0 translate-y-4"
                 : "scale-100 opacity-100 translate-y-0"
-            }`}
+              }`}
           >
-          
             <button
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
               onClick={closePopup}
@@ -227,9 +247,8 @@ export default function LoginPage() {
               className="w-20 h-20 object-contain"
             />
             <h2
-              className={`text-xl font-semibold ${
-                popup.success ? "text-green-600" : "text-red-600"
-              }`}
+              className={`text-xl font-semibold ${popup.success ? "text-green-600" : "text-red-600"
+                }`}
             >
               {popup.message}
             </h2>
@@ -239,4 +258,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

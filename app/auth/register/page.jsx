@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -51,13 +52,38 @@ export default function RegisterPage() {
     localStorage.setItem("users", JSON.stringify(users));
 
     alert("สมัครสมาชิกสำเร็จ!");
-    router.push("/auth/login");
+    router.push("/Creatworkspace/step1");
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="flex w-[1200px] h-[750px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden">
-       
+    <div className="relative flex justify-center items-center min-h-screen">
+      {/* Background Step 1 */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        animate={{
+          background: [
+            "linear-gradient(135deg, #0f0f14, #1a1a2e, #0f0f14)",
+            "linear-gradient(135deg, #1a1a2e, #0f0f14, #1a1a2e)",
+          ],
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      />
+      <motion.div
+        className="absolute w-[600px] h-[600px] bg-[rgba(184,110,159,0.69)] rounded-full filter blur-3xl opacity-40"
+        initial={{ x: -480, y: -50 }}
+        animate={{ x: [-480, 480, -480] }}
+        transition={{ duration: 12, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute w-[500px] h-[500px] bg-[rgba(110,184,159,0.69)] rounded-full filter blur-3xl opacity-40"
+        initial={{ x: 480, y: 100 }}
+        animate={{ x: [480, -480, 480] }}
+        transition={{ duration: 14, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
+      />
+
+      {/* Original Register Content */}
+      <div className="flex w-[1200px] h-[750px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
+        {/* ข้อความฝั่งซ้าย */}
         <div className="flex flex-col justify-center pl-16 w-1/2 text-white relative z-10 font-inter">
           <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">JOIN US</h1>
           <h2 className="text-[32px] font-light mb-4 text-[#E8E3F2]">At Talka</h2>
@@ -67,18 +93,18 @@ export default function RegisterPage() {
           </p>
         </div>
 
-       
+        {/* ฟองน้ำตกแต่ง */}
         <div className="absolute w-64 h-64 bg-[linear-gradient(180deg,rgba(127,24,220,1)_20%,rgba(22,3,38,1))] rounded-full opacity-40 top-[-60px] left-[-60px]" />
         <div className="absolute w-80 h-80 bg-[linear-gradient(120deg,rgba(127,24,220,1)_30%,rgba(22,3,38,1)_70%)] rounded-full opacity-40 bottom-[-60px] right-[-60px]" />
 
-    
+        {/* กล่อง form */}
         <div className="flex justify-center items-center w-1/2 z-20">
           <div className="w-[460px] bg-linear-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
             <h1 className="text-[28px] font-semibold text-gray-800 mb-1">REGISTER</h1>
             <p className="text-gray-500 mb-6 text-sm">สมัครสมาชิกเพื่อใช้งาน</p>
 
             <form className="w-full space-y-5 relative" onSubmit={handleRegister}>
-         
+              {/* Username */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
                 <div className={`flex items-center border rounded-full px-3 py-2.5 ${errorUser ? "border-red-500" : "border-gray-300"} focus-within:ring-1 focus-within:ring-purple-400`}>
@@ -91,12 +117,10 @@ export default function RegisterPage() {
                     onChange={(e) => setUsername(e.target.value)}
                   />
                 </div>
-                {errorUser && (
-                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorUser}</p>
-                )}
+                {errorUser && <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorUser}</p>}
               </div>
 
-             
+              {/* Password */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
                 <div className={`flex items-center border rounded-full px-3 py-2.5 ${errorPass ? "border-red-500" : "border-gray-300"} focus-within:ring-1 focus-within:ring-purple-400`}>
@@ -109,20 +133,14 @@ export default function RegisterPage() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <span className="w-px h-5 bg-gray-300 mx-2"></span>
-                  <button
-                    type="button"
-                    className="text-gray-500 hover:text-gray-700"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
+                  <button type="button" className="text-gray-500 hover:text-gray-700" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                {errorPass && (
-                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorPass}</p>
-                )}
+                {errorPass && <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorPass}</p>}
               </div>
 
-             
+              {/* Confirm Password */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
                 <div className={`flex items-center border rounded-full px-3 py-2.5 ${errorConfirm ? "border-red-500" : "border-gray-300"} focus-within:ring-1 focus-within:ring-purple-400`}>
@@ -135,12 +153,9 @@ export default function RegisterPage() {
                     onChange={(e) => setConfirm(e.target.value)}
                   />
                 </div>
-                {errorConfirm && (
-                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorConfirm}</p>
-                )}
+                {errorConfirm && <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorConfirm}</p>}
               </div>
 
-              
               <button
                 type="submit"
                 style={{
@@ -152,17 +167,12 @@ export default function RegisterPage() {
                 สมัครสมาชิก
               </button>
 
-         
               <Link href="/auth/login">
-                <button
-                  type="button"
-                  className="w-full bg-white text-purple-700 py-2.5 rounded-full hover:bg-gray-200  transition shadow-sm"
-                >
+                <button type="button" className="w-full bg-white text-purple-700 py-2.5 rounded-full hover:bg-gray-200  transition shadow-sm">
                   เข้าสู่ระบบ
                 </button>
               </Link>
 
-          
               <div className="flex flex-col items-center mt-4">
                 <div className="flex items-center w-full mb-4">
                   <div className="grow h-px bg-gray-300" />
@@ -171,17 +181,11 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="flex justify-center gap-6">
-                  <button
-                    type="button"
-                    onClick={() => alert("Register with Google")}
-                    className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200"
-                  >
+                  <button type="button" onClick={() => alert("Register with Google")} className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200">
                     <img src="/google.png" alt="Google Login" className="w-8 h-8 object-contain" />
                   </button>
-
                 </div>
               </div>
-
             </form>
           </div>
         </div>
