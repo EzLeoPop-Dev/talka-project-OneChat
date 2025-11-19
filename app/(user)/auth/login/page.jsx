@@ -68,7 +68,7 @@ export default function LoginPage() {
   return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="flex w-[1200px] h-[750px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden">
-        {/* ข้อความฝั่งซ้าย */}
+      
         <div className="flex flex-col justify-center pl-16 w-1/2 text-white relative z-10 font-inter">
           <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">
             WELCOME
@@ -81,16 +81,16 @@ export default function LoginPage() {
             <br />
             สะดวก รวดเร็ว ไม่ต้องสลับแอป
             <br />
-            เชื่อมต่อทุกแพลตฟอร์ม แชทได้ต่อเนื่องทันใจ
+            เชื่อมต่อทุกแพลตฟอร์ม แชทได้ต่อเนื่องไม่มีสะดุด
           </p>
         </div>
 
-        {/* ฟองน้ำตกแต่ง */}
+        
         <div className="absolute w-64 h-64 bg-[linear-gradient(180deg,rgba(127,24,220,1)_20%,rgba(22,3,38,1))] rounded-full opacity-40 top-[-60px] left-[-60px]" />
         <div className="absolute w-80 h-80 bg-[linear-gradient(120deg,rgba(127,24,220,1)_30%,rgba(22,3,38,1)_70%)] rounded-full opacity-40 bottom-[-60px] right-[-60px]" />
 
-        {/* กล่อง form */}
-        <div className="flex justify-center items-center w-1/2 z-20">
+        
+        <div className="flex justify-center items-center w-1/2 ">
           <div className="w-[460px] bg-gradient-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
             <h1 className="text-[28px] font-semibold text-gray-800 mb-1">
               LOGIN
@@ -98,7 +98,7 @@ export default function LoginPage() {
             <p className="text-gray-500 mb-8 text-sm">เข้าสู่ระบบเพื่อใช้งาน</p>
 
             <form className="w-full space-y-6" onSubmit={handleSubmit}>
-              {/* Username */}
+            
               <div className="relative">
                 <div
                   className={`flex items-center border rounded-full px-3 py-2.5 ${
@@ -121,7 +121,6 @@ export default function LoginPage() {
                 )}
               </div>
 
-              {/* Password */}
               <div className="relative">
                 <div
                   className={`flex items-center border rounded-full px-3 py-2.5 ${
@@ -152,7 +151,6 @@ export default function LoginPage() {
                 )}
               </div>
 
-              {/* ปุ่ม login / register */}
               <div className="pt-2 space-y-3">
                 <button
                   type="submit"
@@ -173,7 +171,7 @@ export default function LoginPage() {
                 </Link>
               </div>
 
-              {/* Social login */}
+        
               <div className="flex flex-col items-center mt-4">
                 <div className="flex items-center w-full mb-4">
                   <div className="flex-grow h-[1px] bg-gray-300" />
