@@ -12,7 +12,6 @@ export default function AiSuppBtn({ onClick, isOpen }) {
                 }
             `}
         >
-            {/* ถ้าเปิดอยู่ให้เป็นปุ่มกากบาท ถ้าปิดอยู่ให้เป็นปุ่ม Sparkles */}
             {isOpen ? <X className="w-5 h-5" /> : <Sparkles className="w-5 h-5 animate-pulse" />}
         </button>
     );

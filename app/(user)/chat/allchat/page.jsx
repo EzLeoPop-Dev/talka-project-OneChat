@@ -94,10 +94,8 @@ export default function ChatPage() {
         const savedAgents = localStorage.getItem("onechat_ai_agents");
         
         if (savedAgents) {
-            // ถ้ามีข้อมูลที่เคยเซฟไว้ (เช่น สร้างบอทใหม่) ให้ใช้ข้อมูลนั้น
             setAvailableAgents(JSON.parse(savedAgents));
         } else {
-            // ถ้าไม่มี (เปิดครั้งแรก) ให้ใช้ข้อมูล Default และเซฟลงเครื่อง
             setAvailableAgents(DEFAULT_AI_AGENTS);
             localStorage.setItem("onechat_ai_agents", JSON.stringify(DEFAULT_AI_AGENTS));
         }
@@ -154,17 +152,6 @@ export default function ChatPage() {
         }
     };
     const handleCloseChangeStatus = () => setIsChangeStatusOpen(false);
-
-    const handleToggleAiAssistant = () => {
-        setIsAiAssistantOpen(!isAiAssistantOpen);
-        
-        // (Optional) ถ้าเปิด AI Chat อยากให้ปิด Panel อื่นๆ ไหม?
-        if (!isAiAssistantOpen) {
-             // setIsAddTagModalOpen(false); 
-             // setIsContactDetailsOpen(false); 
-             // ฯลฯ
-        }
-    };
 
     const handleToggleTag = (tagName) => {
         if (!selectedChat) return;
@@ -266,7 +253,6 @@ export default function ChatPage() {
 
                 <ChatMessage 
                     chat={selectedChat}
-                    // 4. ส่ง availableAgents (State) ไปแทนค่า Hardcode
                     availableAgents={availableAgents} 
                     onSelectAiAgent={handleSelectAiAgent}
                     aiPrompts={activePrompts} 
@@ -319,15 +305,14 @@ export default function ChatPage() {
                 {isAiAssistantOpen && (
                 <AiAssistantPanel 
                     onClose={() => setIsAiAssistantOpen(false)}
-                    // 5. ส่ง availableAgents (State) ไปให้ Panel
                     availableAgents={availableAgents} 
                 />
-            )}
+                )}
 
-            <AiSuppBtn 
-                onClick={() => setIsAiAssistantOpen(!isAiAssistantOpen)} 
-                isOpen={isAiAssistantOpen} 
-            />
+                <AiSuppBtn 
+                    onClick={() => setIsAiAssistantOpen(!isAiAssistantOpen)} 
+                    isOpen={isAiAssistantOpen} 
+                />
             </div>
         </div>
     );
