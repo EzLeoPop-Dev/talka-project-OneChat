@@ -15,6 +15,7 @@ import ChangeStatus from "@/app/components/Changestatus";
 
 const ALL_AVAILABLE_TAGS = ["VIP"];
 const ALL_AVAILABLE_STATUS = ["New Chat", "Open", "Pending", "Closed"];
+const CHANNEL_FILTER = "Line";
 
 const processInitialData = (data) => {
     return data.map(chat => ({
@@ -23,7 +24,7 @@ const processInitialData = (data) => {
         country: chat.country || null,
         tags: chat.isVip ? ["VIP"] : [],
         notes: chat.notes || [],
-        status: chat.status || "New Chat" 
+        status: chat.status || "New Chat" // กำหนดค่าเริ่มต้นถ้าไม่มี
     }));
 };
 
@@ -38,7 +39,7 @@ export default function ChatPage() {
     const [isChangeStatusOpen, setIsChangeStatusOpen] = useState(false);
 
     const [activeFilter, setActiveFilter] = useState("All");
-    
+
     const [isLoaded, setIsLoaded] = useState(false); 
 
     {/* Load Data */}
@@ -65,11 +66,12 @@ export default function ChatPage() {
         setActiveFilter(filterValue);
     };
 
+    // --- Panel Open/Close Functions ---
     const handleOpenTagModal = () => {
         if (selectedChatId) {
             setIsContactDetailsOpen(false); 
             setIsAddNoteOpen(false); 
-            setIsChangeStatusOpen(false);
+            setIsChangeStatusOpen(false); 
             setIsAddTagModalOpen(true);
         } else {
             alert("Please select a chat first.");
@@ -81,7 +83,7 @@ export default function ChatPage() {
         if (selectedChatId) {
             setIsAddTagModalOpen(false); 
             setIsAddNoteOpen(false); 
-            setIsChangeStatusOpen(false);
+            setIsChangeStatusOpen(false); 
             setIsContactDetailsOpen(true);
         } else {
             alert("Please select a chat first.");
@@ -93,7 +95,7 @@ export default function ChatPage() {
         if (selectedChatId) {
             setIsAddTagModalOpen(false); 
             setIsContactDetailsOpen(false); 
-            setIsChangeStatusOpen(false);
+            setIsChangeStatusOpen(false); 
             setIsAddNoteOpen(true);
         } else {
             alert("Please select a chat first.");
@@ -176,7 +178,9 @@ export default function ChatPage() {
         );
     };
 
-    const filteredChats = chats.filter(chat => {
+    const channelFilteredChats = chats.filter(chat => chat.channel === CHANNEL_FILTER);
+
+    const finalFilteredChats = channelFilteredChats.filter(chat => {
         if (activeFilter === "All") {
             return true; 
         }
@@ -194,70 +198,70 @@ export default function ChatPage() {
             })
         );
     };
-
+    
     return (
-        <div className="container mx-auto">
-            
-            <ChatFitter onFilterChange={handleFilterChange} />
-
-            <div className="flex ">
-                <ChatList 
-                    chats={filteredChats} 
-                    onSelectChat={(chat) => setSelectedChatId(chat.id)}
-                    selectedId={selectedChatId} 
-                />
-
-                <ChatMessage 
-                    chat={selectedChat}
-                    onToggleAiMode={handleToggleAiMode} 
-                />
+            <div className="container mx-auto">
                 
-                {isAddTagModalOpen && (
-                    <AddTag 
-                        onClose={handleCloseTagModal}
-                        availableTags={ALL_AVAILABLE_TAGS}
-                        currentTargets={selectedChat ? selectedChat.tags : []}
-                        onToggleTag={handleToggleTag}
+                <ChatFitter onFilterChange={handleFilterChange} />
+    
+                <div className="flex ">
+                    <ChatList 
+                        chats={finalFilteredChats} 
+                        onSelectChat={(chat) => setSelectedChatId(chat.id)}
+                        selectedId={selectedChatId} 
                     />
-                )}
-
-                {isContactDetailsOpen && (
-                    <ContactDetails
-                        onClose={handleCloseContactDetails}
-                        contact={selectedChat}
-                        onUpdateContact={handleUpdateContactInfo} 
+    
+                    <ChatMessage 
+                        chat={selectedChat}
+                        onToggleAiMode={handleToggleAiMode}
                     />
-                )}
-
-                {isAddNoteOpen && (
-                    <AddNote
-                        onClose={handleCloseAddNote}
-                        onSaveNote={handleAddNote}
-                        currentNotes={selectedChat ? selectedChat.notes : []}
-                        onDeleteNote={handleDeleteNote}
-                    />
-                )}
-
-                {isChangeStatusOpen && (
-                    <ChangeStatus
-                        onClose={handleCloseChangeStatus}
-                        availableStatus={ALL_AVAILABLE_STATUS}
-                        currentTargets={selectedChat?.status ? [selectedChat.status] : []} 
-                        onToggleStatus={handleUpdateStatus}
-                    />
-                )}
-                
-                {selectedChatId && (
-                    <ControlPanel 
-                        onOpenAddTagModal={handleOpenTagModal} 
-                        onOpenContactDetails={handleOpenContactDetails} 
-                        onOpenAddNote={handleOpenAddNote} 
-                        onOpenChangeStatus={handleOpenChangeStatus}
-                    />
-                )}
-
-                <AiSuppBtn />
+                    
+                    {isAddTagModalOpen && (
+                        <AddTag 
+                            onClose={handleCloseTagModal}
+                            availableTags={ALL_AVAILABLE_TAGS}
+                            currentTargets={selectedChat ? selectedChat.tags : []}
+                            onToggleTag={handleToggleTag}
+                        />
+                    )}
+    
+                    {isContactDetailsOpen && (
+                        <ContactDetails
+                            onClose={handleCloseContactDetails}
+                            contact={selectedChat}
+                            onUpdateContact={handleUpdateContactInfo} 
+                        />
+                    )}
+    
+                    {isAddNoteOpen && (
+                        <AddNote
+                            onClose={handleCloseAddNote}
+                            onSaveNote={handleAddNote}
+                            currentNotes={selectedChat ? selectedChat.notes : []}
+                            onDeleteNote={handleDeleteNote}
+                        />
+                    )}
+    
+                    {isChangeStatusOpen && (
+                        <ChangeStatus
+                            onClose={handleCloseChangeStatus}
+                            availableStatus={ALL_AVAILABLE_STATUS}
+                            currentTargets={selectedChat?.status ? [selectedChat.status] : []} 
+                            onToggleStatus={handleUpdateStatus}
+                        />
+                    )}
+                    
+                    {selectedChatId && (
+                        <ControlPanel 
+                            onOpenAddTagModal={handleOpenTagModal} 
+                            onOpenContactDetails={handleOpenContactDetails} 
+                            onOpenAddNote={handleOpenAddNote} 
+                            onOpenChangeStatus={handleOpenChangeStatus}
+                        />
+                    )}
+    
+                    <AiSuppBtn />
+                </div>
             </div>
-        </div>
-    );
-}
+        );
+    }

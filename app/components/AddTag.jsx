@@ -3,7 +3,7 @@
 export default function AddTag({ onClose, availableTags, currentTargets, onToggleTag }) {
   return (
     <div
-      className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(50,61,80,0.5)] border border-[rgba(254,253,253,0.3)] backdrop-blur-2xl rounded-3xl shadow-2xl p-6 flex flex-col self-start" 
+      className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 flex flex-col self-start" 
     >
       <h2 className="text-white text-2xl font-semibold mb-5">Add Tag</h2>
 

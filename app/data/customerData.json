@@ -15,7 +15,9 @@
                 "from": "me",
                 "text": "สวัสดีครับคุณสมชาย ต้องการสั่งอะไรดีครับ?"
             }
-        ]
+        ],
+        "status": "Open",
+        "channel": "Line"
     },
     {
         "id": 2,
@@ -29,7 +31,10 @@
                 "from": "them",
                 "text": "นะโม นะโม"
             }
-        ]
+        ],
+        "status": "Closed",
+        "channel": "Facebook"
+
     },
     {
         "id": 3,
@@ -43,6 +48,8 @@
                 "from": "them",
                 "text": "กำลังตอบโดย AI ....."
             }
-        ]
+        ],
+        "status": "New Chat",
+        "channel": "Line"
     }
 ]
