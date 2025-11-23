@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { Tooltip } from 'react-tooltip';
 import Picker from "emoji-picker-react";
 
-export default function ChatMessage({ chat, onToggleAiMode }) { 
+export default function ChatMessage({ chat, availableAgents, onSelectAiAgent }) { 
     if (!chat) {
         return (
             <div className="flex-1 flex justify-center items-center text-white/60 text-lg">
@@ -17,6 +17,13 @@ export default function ChatMessage({ chat, onToggleAiMode }) {
 
     const [showAiPrompts, setShowAiPrompts] = useState(false);
     const dropdownRef = useRef(null);
+
+    const [showAiModelSelect, setShowAiModelSelect] = useState(false);
+    const aiModelDropdownRef = useRef(null);
+
+    const editorRef = useRef(null);
+    const fileInputRef = useRef(null);
+    const [files, setFiles] = useState([]);
 
     // ตัวอย่างข้อความ Prompt
     const AI_PROMPTS = [
@@ -51,6 +58,19 @@ export default function ChatMessage({ chat, onToggleAiMode }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowAiPrompts(false);
+            }
+            if (aiModelDropdownRef.current && !aiModelDropdownRef.current.contains(event.target)) {
+                setShowAiModelSelect(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     const handleMouseDown = (e) => {
         e.preventDefault();
         const startY = e.clientY;
@@ -70,10 +90,6 @@ export default function ChatMessage({ chat, onToggleAiMode }) {
         window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("mouseup", onMouseUp);
     };
-
-    const editorRef = useRef(null);
-    const fileInputRef = useRef(null);
-    const [files, setFiles] = useState([]);
 
     const handleAttachClick = () => {
         fileInputRef.current.click();
@@ -107,29 +123,29 @@ export default function ChatMessage({ chat, onToggleAiMode }) {
             {/* --- Header --- */}
             <div className="flex flex-wrap md:flex-nowrap items-center justify-between border-b border-white/20 pb-3 mb-3 gap-3 relative">
                 
-                {/* ฝั่งซ้าย: ข้อมูลลูกค้า */}
+                {/* ฝั่งซ้าย: โปรไฟล์ */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-12 h-12 bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg shrink-0">
-                        {chat.avatar}
+                    
+                    <div className="relative w-12 h-12 shrink-0">
+                        <div className="w-full h-full bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg">
+                            {chat.avatar}
+                        </div>
+
+                        {chat.channel && (
+                            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] shadow-sm
+                                ${chat.channel === 'Facebook' ? 'bg-[#1877F2]' : 
+                                    chat.channel === 'Line' ? 'bg-[#06C755]' : 'bg-gray-500'}
+                            `}>
+                                {chat.channel === 'Facebook' && <i className="fa-brands fa-facebook-f"></i>}
+                                {chat.channel === 'Line' && <i className="fa-brands fa-line"></i>}
+                            </div>
+                        )}
                     </div>
+
                     <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                             <h2 className="text-white font-semibold text-lg whitespace-nowrap truncate">{chat.name}</h2>
 
-                            {chat.channel && (
-                                <span className={`text-[10px] font-bold px-2 py-1 rounded-full border shrink-0 flex items-center
-                                    ${chat.channel === 'Facebook' 
-                                        ? 'text-blue-400 border-blue-400/30 bg-blue-500/10' 
-                                        : chat.channel === 'Line' 
-                                            ? 'text-green-400 border-green-400/30 bg-green-500/10' 
-                                            : 'border-white/30 bg-white/10 text-white/90'
-                                    }
-                                `}>
-                                    {chat.channel === 'Facebook' && <i className="fa-brands fa-facebook-f mr-1"></i>}
-                                    {chat.channel === 'Line' && <i className="fa-brands fa-line mr-1"></i>}
-                                    {chat.channel}
-                                </span>
-                            )}
                             
                             {/* Status */}
                             {chat.status && (
@@ -154,58 +170,74 @@ export default function ChatMessage({ chat, onToggleAiMode }) {
                 </div>
 
                 {/* --- ฝั่งขวา: AI --- */}
-                <div className="flex items-center gap-3 shrink-0 ml-auto md:ml-0" ref={dropdownRef}>
+                <div className="flex items-center gap-3 shrink-0 ml-auto md:ml-0 relative" ref={aiModelDropdownRef}>
         
-                    {/* --- AI Auto --- */}
                     <button 
-                        onClick={() => onToggleAiMode(chat.id)}
+                        onClick={() => setShowAiModelSelect(!showAiModelSelect)}
                         className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all shadow-lg border border-white/10 whitespace-nowrap
                             ${chat.isAiMode 
-                                ? 'bg-linear-to-r from-emerald-500 to-green-600 text-white shadow-green-500/30 animate-pulse' 
+                                ? 'bg-linear-to-r from-emerald-500 to-green-600 text-white shadow-green-500/30' 
                                 : 'bg-[rgba(32,41,59,0.25)] border-[rgba(254,253,253,0.5)] hover:bg-white/10 hover:scale-105 text-white/80' 
                             }`}
                     >
-                        <i className={`fa-solid fa-robot ${chat.isAiMode ? 'animate-bounce' : ''}`}></i>
-                        <span className="text-sm font-semibold hidden sm:inline">AI Auto</span> {/* ซ่อน text ถ้าจอเล็กจัด */}
+                        {chat.activeAiAgent ? (
+                            <>
+                                <span className="text-lg">{chat.activeAiAgent.emoji}</span>
+                                <span className="text-sm font-semibold hidden sm:inline">{chat.activeAiAgent.name}</span>
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-solid fa-robot"></i>
+                                <span className="text-sm font-semibold hidden sm:inline">Select AI</span>
+                            </>
+                        )}
+                        <i className={`fa-solid fa-chevron-down text-xs ml-1 transition-transform ${showAiModelSelect ? 'rotate-180' : ''}`}></i>
                     </button>
 
-                    {/* --- AI Prompt --- */}
-                    <div className="relative">
-                        <button 
-                            onClick={() => setShowAiPrompts(!showAiPrompts)}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all shadow-lg border border-white/10 whitespace-nowrap
-                                ${showAiPrompts 
-                                    ? 'bg-white-600 text-white shadow-white-500/30' 
-                                    : 'bg-[rgba(32,41,59,0.25)] border-[rgba(254,253,253,0.5)] hover:bg-white/10 hover:scale-105 text-white/80'
-                                }`}
-                        >
-                            <i className="fa-solid fa-wand-magic-sparkles"></i>
-                            <span className="text-sm font-semibold hidden sm:inline">Prompt</span> {/* ซ่อน text ถ้าจอเล็กจัด */}
-                            <i className={`fa-solid fa-chevron-down text-xs ml-1 transition-transform ${showAiPrompts ? 'rotate-180' : ''}`}></i>
-                        </button>
-
-                    {/* --- Dropdown Menu --- */}
-                    {showAiPrompts && (
-                        <div className="absolute right-0 top-full mt-2 w-72 bg-[#1e1e2e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in-up">
+                    {/* --- Dropdown List --- */}
+                    {showAiModelSelect && (
+                        <div className="absolute right-0 top-full mt-2 w-60 bg-[#1e1e2e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in-up">
                             <div className="p-2 bg-white/5 border-b border-white/5">
-                                <span className="text-[10px] text-white/50 uppercase font-bold tracking-wider ml-2">Select a response</span>
+                                <span className="text-[10px] text-white/50 uppercase font-bold tracking-wider ml-2">Available Models</span>
                             </div>
+                            
                             <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
-                                {AI_PROMPTS.map((prompt, index) => (
+                                {availableAgents.map((agent) => (
                                     <button
-                                        key={index}
-                                        onClick={() => handleSelectPrompt(prompt)}
-                                        className="w-full text-left px-4 py-3 text-white/80 text-sm hover:bg-white/10 hover:text-white transition-colors border-b border-white/5 last:border-0"
+                                        key={agent.id}
+                                        onClick={() => {
+                                            onSelectAiAgent(chat.id, agent); 
+                                            setShowAiModelSelect(false);
+                                        }}
+                                        className={`w-full text-left px-4 py-3 text-sm hover:bg-white/10 transition-colors border-b border-white/5 flex items-center gap-3
+                                            ${chat.activeAiAgent?.id === agent.id ? 'bg-white/10 text-white' : 'text-white/70'}
+                                        `}
                                     >
-                                        {prompt}
+                                        <span className="text-xl">{agent.emoji}</span>
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{agent.name}</span>
+                                            <span className="text-[10px] text-white/40">{agent.role}</span>
+                                        </div>
+                                        {chat.activeAiAgent?.id === agent.id && <i className="fa-solid fa-check ml-auto text-green-400"></i>}
                                     </button>
                                 ))}
                             </div>
+
+                            {chat.isAiMode && (
+                                <button
+                                    onClick={() => {
+                                        onSelectAiAgent(chat.id, null);
+                                        setShowAiModelSelect(false);
+                                    }}
+                                    className="w-full text-left px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 text-sm transition-colors font-semibold border-t border-white/10 flex items-center gap-2"
+                                >
+                                    <i className="fa-solid fa-power-off"></i>
+                                    Stop AI Auto-Reply
+                                </button>
+                            )}
                         </div>
                     )}
-                    </div>
                 </div>
-
             </div>
 
             {/* Chat Content */}
@@ -214,24 +246,29 @@ export default function ChatMessage({ chat, onToggleAiMode }) {
                     {chat.message}
                 </div>
 
-                {/* --- AI Status --- */}
-                {chat.isAiMode && (
+                {/* --- แสดงสถานะ AI ใน Chat Area --- */}
+                {chat.isAiMode && chat.activeAiAgent && (
                     <div className="flex justify-center my-4 animate-fade-in">
-                        <span className="bg-green-500/10 text-green-400 border border-green-500/20 px-4 py-1 rounded-full text-xs flex items-center gap-2">
-                            <i className="fa-solid fa-robot fa-spin"></i>
-                            AI กำลังดูแลแชทนี้...
+                        <span className="bg-green-500/10 text-green-400 border border-green-500/20 px-4 py-1 rounded-full text-xs flex items-center gap-2 shadow-lg backdrop-blur-md">
+                            <span className="text-sm">{chat.activeAiAgent.emoji}</span>
+                            <span className="font-semibold">{chat.activeAiAgent.name}</span>
+                            <span>is replying...</span>
+                            <span className="flex gap-1 ml-1">
+                                <span className="w-1 h-1 bg-green-400 rounded-full animate-bounce"></span>
+                                <span className="w-1 h-1 bg-green-400 rounded-full animate-bounce delay-75"></span>
+                                <span className="w-1 h-1 bg-green-400 rounded-full animate-bounce delay-150"></span>
+                            </span>
                         </span>
                     </div>
                 )}
             </div>
-
             {/* Input Area */}
             <div className="mt-4 bg-[rgba(32,41,59,0.25)] relative group p-4 rounded-2xl shadow-2xs">
                 <div className="input-field max-h-[300px]">
                     <textarea
                         ref={textareaRef}
                         style={{ height }}
-                        disabled={chat.isAiMode} // ล็อคช่องพิมพ์เมื่อ AI ทำงาน
+                        disabled={chat.isAiMode} 
                         className="w-full border rounded p-2 resize-none max-h-[300px] bg-transparent text-white border-none outline-none disabled:cursor-not-allowed"
                         placeholder={chat.isAiMode ? "AI is replying automatically..." : "Type a message..."}
                     />
@@ -240,9 +277,37 @@ export default function ChatMessage({ chat, onToggleAiMode }) {
 
                 <div className="function-field flex justify-between mt-2 border-t border-white/10 pt-2">
                     <div className="left-funtion flex gap-1">
-                        <button data-tooltip-id="attach-tooltip" data-tooltip-content="Ai prompt" className="text-white/70 hover:text-white text-[18px] p-2 transition rounded-lg hover:bg-white/10">
-                            <i className="fa-solid fa-wand-magic-sparkles"></i>
-                        </button>
+                        <div className="relative" ref={dropdownRef}> 
+                            <button 
+                                onClick={() => setShowAiPrompts(!showAiPrompts)}
+                                data-tooltip-id="attach-tooltip" 
+                                data-tooltip-content="AI Prompt" 
+                                className={`text-[18px] p-2 transition rounded-lg hover:bg-white/10
+                                    ${showAiPrompts ? 'text-purple-400 bg-white/10' : 'text-white/70 hover:text-white'}
+                                `}
+                            >
+                                <i className="fa-solid fa-wand-magic-sparkles"></i>
+                            </button>
+
+                            {showAiPrompts && (
+                                <div className="absolute bottom-full left-0 mb-3 w-64 bg-[#1e1e2e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in-up origin-bottom-left">
+                                    <div className="p-2 bg-white/5 border-b border-white/5">
+                                        <span className="text-[10px] text-white/50 uppercase font-bold tracking-wider ml-2">Select prompt</span>
+                                    </div>
+                                    <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
+                                        {AI_PROMPTS.map((prompt, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => handleSelectPrompt(prompt)}
+                                                className="w-full text-left px-4 py-3 text-white/80 text-sm hover:bg-white/10 hover:text-white transition-colors border-b border-white/5 last:border-0"
+                                            >
+                                                {prompt}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         <div className="relative">
                             <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="text-white/70 hover:text-white text-[18px] p-2 transition rounded-lg hover:bg-white/10">
                                 <i className="fa-solid fa-icons"></i>

@@ -15,6 +15,11 @@ import ChangeStatus from "@/app/components/Changestatus";
 
 const ALL_AVAILABLE_TAGS = ["VIP"];
 const ALL_AVAILABLE_STATUS = ["New Chat", "Open", "Pending", "Closed"];
+const AVAILABLE_AI_AGENTS = [
+    { id: 'receptionist', name: 'Receptionist', emoji: '🛎️', role: 'Front Desk' },
+    { id: 'sales', name: 'Sales Agent', emoji: '😝', role: 'Sales' },
+    { id: 'support', name: 'Support Agent', emoji: '❤️', role: 'Support' },
+];
 
 const processInitialData = (data) => {
     return data.map(chat => ({
@@ -183,12 +188,16 @@ export default function ChatPage() {
         return chat.status === activeFilter; 
     });
 
-    const handleToggleAiMode = (chatId) => {
+    const handleSelectAiAgent = (chatId, agent) => {
         if (!chatId) return;
         setChats(currentChats =>
             currentChats.map(chat => {
                 if (chat.id === chatId) {
-                    return { ...chat, isAiMode: !chat.isAiMode };
+                    return { 
+                        ...chat, 
+                        activeAiAgent: agent, 
+                        isAiMode: !!agent     
+                    };
                 }
                 return chat;
             })
@@ -209,7 +218,8 @@ export default function ChatPage() {
 
                 <ChatMessage 
                     chat={selectedChat}
-                    onToggleAiMode={handleToggleAiMode} 
+                    availableAgents={AVAILABLE_AI_AGENTS}
+                    onSelectAiAgent={handleSelectAiAgent}
                 />
                 
                 {isAddTagModalOpen && (

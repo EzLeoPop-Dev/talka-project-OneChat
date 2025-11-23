@@ -23,8 +23,22 @@ export default function ChatList({ chats, onSelectChat, selectedId }) {
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg shrink-0">
-                                        {chat.avatar}
+                                    
+                                    
+                                    <div className="relative w-12 h-12 shrink-0">
+                                        <div className="w-full h-full bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg">
+                                            {chat.avatar}
+                                        </div>
+
+                                        {chat.channel && (
+                                            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] shadow-sm
+                                                ${chat.channel === 'Facebook' ? 'bg-[#1877F2]' : 
+                                                    chat.channel === 'Line' ? 'bg-[#06C755]' : 'bg-gray-500'}
+                                            `}>
+                                                {chat.channel === 'Facebook' && <i className="fa-brands fa-facebook-f"></i>}
+                                                {chat.channel === 'Line' && <i className="fa-brands fa-line"></i>}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex-1 min-w-0">
@@ -42,31 +56,20 @@ export default function ChatList({ chats, onSelectChat, selectedId }) {
                                                 {chat.message}
                                             </p>
 
-                                            {/* --- ส่วนแสดงสถานะ AI Auto --- */}
+                                            {/* AI Auto Status */}
                                             {chat.isAiMode && (
-                                                <span className="bg-green-400 text-white border border-green-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1 animate-pulse">
-                                                    <i className="fa-solid fa-robot"></i>
+                                                <span className="bg-green-500/10 text-green-400 border border-green-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1 animate-pulse">
+                                                    {chat.activeAiAgent ? (
+                                                        <span className="text-xs">{chat.activeAiAgent.emoji}</span>
+                                                    ) : (
+                                                        <i className="fa-solid fa-robot"></i>
+                                                    )}
                                                     <span>Auto</span>
                                                 </span>
                                             )}
                                             
-                                            {/* Channel Badge */}
-                                            {chat.channel && (
-                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 flex items-center
-                                                    ${chat.channel === 'Facebook' 
-                                                        ? 'text-blue-400 border-blue-400/30 bg-blue-500/10' 
-                                                        : chat.channel === 'Line' 
-                                                            ? 'text-green-400 border-green-400/30 bg-green-500/10' 
-                                                            : 'border-white/20 bg-white/10 text-white/70'
-                                                    }
-                                                `}>
-                                                    {chat.channel === 'Facebook' && <i className="fa-brands fa-facebook-f mr-1"></i>}
-                                                    {chat.channel === 'Line' && <i className="fa-brands fa-line mr-1"></i>}
-                                                    <span className="hidden sm:inline ml-1">{chat.channel}</span> 
-                                                </span>
-                                            )}
 
-                                            {/* Status Logic */}
+                                            {/* Status */}
                                             {chat.status && (
                                                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border shrink-0
                                                     ${chat.status === 'Closed' 
