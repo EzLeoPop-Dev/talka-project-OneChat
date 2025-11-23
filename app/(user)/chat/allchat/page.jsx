@@ -12,10 +12,13 @@ import ContactDetails from "@/app/components/ChatContactDetail";
 import AddNote from "@/app/components/AddNote";
 import AiSuppBtn from "@/app/components/AiSuppBtn";
 import ChangeStatus from "@/app/components/Changestatus"; 
+import AiAssistantPanel from "@/app/components/AiAssistantPanel";
+
+import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
 
 const ALL_AVAILABLE_TAGS = ["VIP"];
 const ALL_AVAILABLE_STATUS = ["New Chat", "Open", "Pending", "Closed"];
-const AVAILABLE_AI_AGENTS = [
+const DEFAULT_AI_AGENTS = [
     { id: 'receptionist', name: 'Receptionist', emoji: '🛎️', role: 'Front Desk' },
     { id: 'sales', name: 'Sales Agent', emoji: '😝', role: 'Sales' },
     { id: 'support', name: 'Support Agent', emoji: '❤️', role: 'Support' },
@@ -41,10 +44,31 @@ export default function ChatPage() {
     const [isContactDetailsOpen, setIsContactDetailsOpen] = useState(false);
     const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
     const [isChangeStatusOpen, setIsChangeStatusOpen] = useState(false);
+    const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
 
     const [activeFilter, setActiveFilter] = useState("All");
     
     const [isLoaded, setIsLoaded] = useState(false); 
+
+    const [activePrompts, setActivePrompts] = useState([]);
+    const [availableAgents, setAvailableAgents] = useState([]);
+
+    useEffect(() => {
+        const savedPrompts = localStorage.getItem("onechat_prompts");
+        let allPrompts = [];
+
+        if (savedPrompts) {
+            allPrompts = JSON.parse(savedPrompts);
+        } else {
+            allPrompts = DEFAULT_AI_PROMPTS;
+            localStorage.setItem("onechat_prompts", JSON.stringify(DEFAULT_AI_PROMPTS));
+        }
+
+        // 3. กรองเอาเฉพาะตัวที่ Active = true
+        const filtered = allPrompts.filter(p => p.active === true);
+        setActivePrompts(filtered);
+
+    }, []);
 
     {/* Load Data */}
     useEffect(() => {
@@ -65,6 +89,19 @@ export default function ChatPage() {
             localStorage.setItem("onechat_data", JSON.stringify(chats));
         }
     }, [chats, isLoaded]);
+
+    useEffect(() => {
+        const savedAgents = localStorage.getItem("onechat_ai_agents");
+        
+        if (savedAgents) {
+            // ถ้ามีข้อมูลที่เคยเซฟไว้ (เช่น สร้างบอทใหม่) ให้ใช้ข้อมูลนั้น
+            setAvailableAgents(JSON.parse(savedAgents));
+        } else {
+            // ถ้าไม่มี (เปิดครั้งแรก) ให้ใช้ข้อมูล Default และเซฟลงเครื่อง
+            setAvailableAgents(DEFAULT_AI_AGENTS);
+            localStorage.setItem("onechat_ai_agents", JSON.stringify(DEFAULT_AI_AGENTS));
+        }
+    }, []);
 
     const handleFilterChange = (filterValue) => {
         setActiveFilter(filterValue);
@@ -117,6 +154,17 @@ export default function ChatPage() {
         }
     };
     const handleCloseChangeStatus = () => setIsChangeStatusOpen(false);
+
+    const handleToggleAiAssistant = () => {
+        setIsAiAssistantOpen(!isAiAssistantOpen);
+        
+        // (Optional) ถ้าเปิด AI Chat อยากให้ปิด Panel อื่นๆ ไหม?
+        if (!isAiAssistantOpen) {
+             // setIsAddTagModalOpen(false); 
+             // setIsContactDetailsOpen(false); 
+             // ฯลฯ
+        }
+    };
 
     const handleToggleTag = (tagName) => {
         if (!selectedChat) return;
@@ -205,7 +253,7 @@ export default function ChatPage() {
     };
 
     return (
-        <div className="container mx-auto">
+        <div className="container mx-auto ">
             
             <ChatFitter onFilterChange={handleFilterChange} />
 
@@ -218,8 +266,10 @@ export default function ChatPage() {
 
                 <ChatMessage 
                     chat={selectedChat}
-                    availableAgents={AVAILABLE_AI_AGENTS}
+                    // 4. ส่ง availableAgents (State) ไปแทนค่า Hardcode
+                    availableAgents={availableAgents} 
                     onSelectAiAgent={handleSelectAiAgent}
+                    aiPrompts={activePrompts} 
                 />
                 
                 {isAddTagModalOpen && (
@@ -266,7 +316,18 @@ export default function ChatPage() {
                     />
                 )}
 
-                <AiSuppBtn />
+                {isAiAssistantOpen && (
+                <AiAssistantPanel 
+                    onClose={() => setIsAiAssistantOpen(false)}
+                    // 5. ส่ง availableAgents (State) ไปให้ Panel
+                    availableAgents={availableAgents} 
+                />
+            )}
+
+            <AiSuppBtn 
+                onClick={() => setIsAiAssistantOpen(!isAiAssistantOpen)} 
+                isOpen={isAiAssistantOpen} 
+            />
             </div>
         </div>
     );

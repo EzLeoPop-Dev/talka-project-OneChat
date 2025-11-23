@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { Tooltip } from 'react-tooltip';
 import Picker from "emoji-picker-react";
 
-export default function ChatMessage({ chat, availableAgents, onSelectAiAgent }) { 
+export default function ChatMessage({ chat, availableAgents, onSelectAiAgent, aiPrompts = [] }) { 
     if (!chat) {
         return (
             <div className="flex-1 flex justify-center items-center text-white/60 text-lg">
@@ -25,19 +25,11 @@ export default function ChatMessage({ chat, availableAgents, onSelectAiAgent }) 
     const fileInputRef = useRef(null);
     const [files, setFiles] = useState([]);
 
-    // ตัวอย่างข้อความ Prompt
-    const AI_PROMPTS = [
-        "สวัสดี",
-        "มีอะไรให้ช่วยไหม?",
-    ];
+    
 
-    const handleSelectPrompt = (text) => {
-        if (textareaRef.current) {
-            textareaRef.current.value = text;
-            textareaRef.current.focus(); 
-            textareaRef.current.style.height = 'auto'; 
-            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-        }
+    const handleSelectPrompt = (promptObject) => {
+        // ✅ แก้ไขตรงนี้: ลบ Code ที่ใส่ข้อความลง textarea ออก
+        // เหลือไว้แค่สั่งปิด Dropdown เพื่อให้ดูเหมือนว่า "เลือกแล้ว"
         setShowAiPrompts(false);
     };
 
@@ -289,21 +281,38 @@ export default function ChatMessage({ chat, availableAgents, onSelectAiAgent }) 
                                 <i className="fa-solid fa-wand-magic-sparkles"></i>
                             </button>
 
+                            {/* --- Dropdown List --- */}
                             {showAiPrompts && (
-                                <div className="absolute bottom-full left-0 mb-3 w-64 bg-[#1e1e2e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in-up origin-bottom-left">
+                                <div className="absolute bottom-full left-0 mb-3 w-72 bg-[#1e1e2e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in-up origin-bottom-left">
                                     <div className="p-2 bg-white/5 border-b border-white/5">
                                         <span className="text-[10px] text-white/50 uppercase font-bold tracking-wider ml-2">Select prompt</span>
                                     </div>
                                     <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
-                                        {AI_PROMPTS.map((prompt, index) => (
-                                            <button
-                                                key={index}
-                                                onClick={() => handleSelectPrompt(prompt)}
-                                                className="w-full text-left px-4 py-3 text-white/80 text-sm hover:bg-white/10 hover:text-white transition-colors border-b border-white/5 last:border-0"
-                                            >
-                                                {prompt}
-                                            </button>
-                                        ))}
+                                        
+                                        {/* 2. ใช้ aiPrompts ที่รับมา map แสดงผล */}
+                                        {aiPrompts.length > 0 ? (
+                                            aiPrompts.map((prompt) => (
+                                                <button
+                                                    key={prompt.id}
+                                                    onClick={() => handleSelectPrompt(prompt)}
+                                                    className="w-full text-left px-4 py-3 hover:bg-white/10 transition-colors border-b border-white/5 last:border-0 group"
+                                                >
+                                                    {/* แสดงชื่อตัวหนา */}
+                                                    <div className="text-white/90 text-sm font-medium group-hover:text-white">
+                                                        {prompt.name}
+                                                    </div>
+                                                    {/* แสดง Action ตัวเล็กจางๆ */}
+                                                    <div className="text-white/50 text-xs truncate group-hover:text-white/70">
+                                                        {prompt.action}
+                                                    </div>
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="p-4 text-center text-white/40 text-xs italic">
+                                                No active prompts.
+                                            </div>
+                                        )}
+
                                     </div>
                                 </div>
                             )}
