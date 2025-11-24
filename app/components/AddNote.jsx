@@ -31,7 +31,7 @@ const formatDate = (isoString) => {
 };
 
 return (
-    <div className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(50,61,80,0.5)] border border-[rgba(254,253,253,0.3)] backdrop-blur-2xl rounded-3xl shadow-2xl p-6 flex flex-col self-start overflow-hidden">
+    <div className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 flex flex-col self-start overflow-hidden">
 
     <h2 className="text-white text-2xl font-semibold mb-4 shrink-0">Add Note</h2>
 
@@ -63,7 +63,7 @@ return (
 
         <button
             onClick={handleSave}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-xl transition-all mt-4 mb-6 shadow-lg"
+            className="w-full bg-white/20 hover:bg-white/30 text-white font-bold py-3 rounded-xl transition-all mt-4 mb-6 shadow-lg"
         >
             Save Note
         </button>
@@ -110,7 +110,6 @@ return (
 
     </div>
 
-      {/* ปุ่ม Done อยู่ด้านล่างสุด */}
     <button
         onClick={onClose}
         className="w-full bg-white/20 hover:bg-white/30 text-white font-bold py-3 rounded-xl transition-all mt-4 shrink-0"
@@ -118,5 +117,5 @@ return (
         Done
     </button>
     </div>
-  );
+    );
 }

@@ -1,44 +1,32 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bot, Plus, Edit, Trash2, X, BookOpenText } from "lucide-react";
+import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
 
 export default function AiPromptsPage() {
-  const [prompts, setPrompts] = useState([
-    {
-      id: 1,
-      name: "Change tone",
-      action:
-        "Adjust the tone to sound more professional, friendly, empathetic, or straightforward.",
-      active: true,
-      isDefault: true,
-    },
-    {
-      id: 2,
-      name: "Translate",
-      action: "Translate the message into your selected language.",
-      active: true,
-      isDefault: true,
-    },
-    {
-      id: 3,
-      name: "Fix spelling and grammar",
-      action: "Automatically correct grammar, spelling, and punctuation.",
-      active: true,
-      isDefault: true,
-    },
-    {
-      id: 4,
-      name: "Simplify language",
-      action: "Make the message easier to read and understand.",
-      active: true,
-      isDefault: true,
-    },
-  ]);
+  const [prompts, setPrompts] = useState([]);
 
   const [newPrompt, setNewPrompt] = useState({ name: "", action: "" });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPromptId, setEditingPromptId] = useState(null);
   const [deletePrompt, setDeletePrompt] = useState(null);
+
+  // 3. useEffect: โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+  useEffect(() => {
+    const savedPrompts = localStorage.getItem("onechat_prompts");
+    if (savedPrompts) {
+        setPrompts(JSON.parse(savedPrompts));
+    } else {
+        setPrompts(DEFAULT_AI_PROMPTS);
+    }
+  }, []);
+  
+  // 4. useEffect: บันทึกข้อมูลทุกครั้งที่ prompts เปลี่ยนแปลง (Add/Edit/Delete/Toggle)
+  useEffect(() => {
+    if (prompts.length > 0) {
+        localStorage.setItem("onechat_prompts", JSON.stringify(prompts));
+    }
+  }, [prompts]);
 
   // เปิด modal สำหรับ add หรือ edit
   const openAddModal = () => {

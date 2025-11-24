@@ -12,17 +12,10 @@ import ContactDetails from "@/app/components/ChatContactDetail";
 import AddNote from "@/app/components/AddNote";
 import AiSuppBtn from "@/app/components/AiSuppBtn";
 import ChangeStatus from "@/app/components/Changestatus"; 
-import AiAssistantPanel from "@/app/components/AiAssistantPanel";
-
-import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
 
 const ALL_AVAILABLE_TAGS = ["VIP"];
 const ALL_AVAILABLE_STATUS = ["New Chat", "Open", "Pending", "Closed"];
-const DEFAULT_AI_AGENTS = [
-    { id: 'receptionist', name: 'Receptionist', emoji: '🛎️', role: 'Front Desk' },
-    { id: 'sales', name: 'Sales Agent', emoji: '😝', role: 'Sales' },
-    { id: 'support', name: 'Support Agent', emoji: '❤️', role: 'Support' },
-];
+const CHANNEL_FILTER = "Facebook";
 
 const processInitialData = (data) => {
     return data.map(chat => ({
@@ -31,7 +24,7 @@ const processInitialData = (data) => {
         country: chat.country || null,
         tags: chat.isVip ? ["VIP"] : [],
         notes: chat.notes || [],
-        status: chat.status || "New Chat" 
+        status: chat.status || "New Chat" // กำหนดค่าเริ่มต้นถ้าไม่มี
     }));
 };
 
@@ -44,31 +37,10 @@ export default function ChatPage() {
     const [isContactDetailsOpen, setIsContactDetailsOpen] = useState(false);
     const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
     const [isChangeStatusOpen, setIsChangeStatusOpen] = useState(false);
-    const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
 
     const [activeFilter, setActiveFilter] = useState("All");
-    
+
     const [isLoaded, setIsLoaded] = useState(false); 
-
-    const [activePrompts, setActivePrompts] = useState([]);
-    const [availableAgents, setAvailableAgents] = useState([]);
-
-    useEffect(() => {
-        const savedPrompts = localStorage.getItem("onechat_prompts");
-        let allPrompts = [];
-
-        if (savedPrompts) {
-            allPrompts = JSON.parse(savedPrompts);
-        } else {
-            allPrompts = DEFAULT_AI_PROMPTS;
-            localStorage.setItem("onechat_prompts", JSON.stringify(DEFAULT_AI_PROMPTS));
-        }
-
-        // 3. กรองเอาเฉพาะตัวที่ Active = true
-        const filtered = allPrompts.filter(p => p.active === true);
-        setActivePrompts(filtered);
-
-    }, []);
 
     {/* Load Data */}
     useEffect(() => {
@@ -90,26 +62,16 @@ export default function ChatPage() {
         }
     }, [chats, isLoaded]);
 
-    useEffect(() => {
-        const savedAgents = localStorage.getItem("onechat_ai_agents");
-        
-        if (savedAgents) {
-            setAvailableAgents(JSON.parse(savedAgents));
-        } else {
-            setAvailableAgents(DEFAULT_AI_AGENTS);
-            localStorage.setItem("onechat_ai_agents", JSON.stringify(DEFAULT_AI_AGENTS));
-        }
-    }, []);
-
     const handleFilterChange = (filterValue) => {
         setActiveFilter(filterValue);
     };
 
+    // --- Panel Open/Close Functions ---
     const handleOpenTagModal = () => {
         if (selectedChatId) {
             setIsContactDetailsOpen(false); 
             setIsAddNoteOpen(false); 
-            setIsChangeStatusOpen(false);
+            setIsChangeStatusOpen(false); 
             setIsAddTagModalOpen(true);
         } else {
             alert("Please select a chat first.");
@@ -121,7 +83,7 @@ export default function ChatPage() {
         if (selectedChatId) {
             setIsAddTagModalOpen(false); 
             setIsAddNoteOpen(false); 
-            setIsChangeStatusOpen(false);
+            setIsChangeStatusOpen(false); 
             setIsContactDetailsOpen(true);
         } else {
             alert("Please select a chat first.");
@@ -133,7 +95,7 @@ export default function ChatPage() {
         if (selectedChatId) {
             setIsAddTagModalOpen(false); 
             setIsContactDetailsOpen(false); 
-            setIsChangeStatusOpen(false);
+            setIsChangeStatusOpen(false); 
             setIsAddNoteOpen(true);
         } else {
             alert("Please select a chat first.");
@@ -216,104 +178,90 @@ export default function ChatPage() {
         );
     };
 
-    const filteredChats = chats.filter(chat => {
+    const channelFilteredChats = chats.filter(chat => chat.channel === CHANNEL_FILTER);
+
+    const finalFilteredChats = channelFilteredChats.filter(chat => {
         if (activeFilter === "All") {
             return true; 
         }
         return chat.status === activeFilter; 
     });
 
-    const handleSelectAiAgent = (chatId, agent) => {
+    const handleToggleAiMode = (chatId) => {
         if (!chatId) return;
         setChats(currentChats =>
             currentChats.map(chat => {
                 if (chat.id === chatId) {
-                    return { 
-                        ...chat, 
-                        activeAiAgent: agent, 
-                        isAiMode: !!agent     
-                    };
+                    return { ...chat, isAiMode: !chat.isAiMode };
                 }
                 return chat;
             })
         );
     };
-
+    
     return (
-        <div className="container mx-auto ">
-            
-            <ChatFitter onFilterChange={handleFilterChange} />
-
-            <div className="flex ">
-                <ChatList 
-                    chats={filteredChats} 
-                    onSelectChat={(chat) => setSelectedChatId(chat.id)}
-                    selectedId={selectedChatId} 
-                />
-
-                <ChatMessage 
-                    chat={selectedChat}
-                    availableAgents={availableAgents} 
-                    onSelectAiAgent={handleSelectAiAgent}
-                    aiPrompts={activePrompts} 
-                />
+            <div className="container mx-auto">
                 
-                {isAddTagModalOpen && (
-                    <AddTag 
-                        onClose={handleCloseTagModal}
-                        availableTags={ALL_AVAILABLE_TAGS}
-                        currentTargets={selectedChat ? selectedChat.tags : []}
-                        onToggleTag={handleToggleTag}
+                <ChatFitter onFilterChange={handleFilterChange} />
+    
+                <div className="flex ">
+                    <ChatList 
+                        chats={finalFilteredChats} 
+                        onSelectChat={(chat) => setSelectedChatId(chat.id)}
+                        selectedId={selectedChatId} 
                     />
-                )}
-
-                {isContactDetailsOpen && (
-                    <ContactDetails
-                        onClose={handleCloseContactDetails}
-                        contact={selectedChat}
-                        onUpdateContact={handleUpdateContactInfo} 
+    
+                    <ChatMessage 
+                        chat={selectedChat}
+                        onToggleAiMode={handleToggleAiMode}
                     />
-                )}
-
-                {isAddNoteOpen && (
-                    <AddNote
-                        onClose={handleCloseAddNote}
-                        onSaveNote={handleAddNote}
-                        currentNotes={selectedChat ? selectedChat.notes : []}
-                        onDeleteNote={handleDeleteNote}
-                    />
-                )}
-
-                {isChangeStatusOpen && (
-                    <ChangeStatus
-                        onClose={handleCloseChangeStatus}
-                        availableStatus={ALL_AVAILABLE_STATUS}
-                        currentTargets={selectedChat?.status ? [selectedChat.status] : []} 
-                        onToggleStatus={handleUpdateStatus}
-                    />
-                )}
-                
-                {selectedChatId && (
-                    <ControlPanel 
-                        onOpenAddTagModal={handleOpenTagModal} 
-                        onOpenContactDetails={handleOpenContactDetails} 
-                        onOpenAddNote={handleOpenAddNote} 
-                        onOpenChangeStatus={handleOpenChangeStatus}
-                    />
-                )}
-
-                {isAiAssistantOpen && (
-                <AiAssistantPanel 
-                    onClose={() => setIsAiAssistantOpen(false)}
-                    availableAgents={availableAgents} 
-                />
-                )}
-
-                <AiSuppBtn 
-                    onClick={() => setIsAiAssistantOpen(!isAiAssistantOpen)} 
-                    isOpen={isAiAssistantOpen} 
-                />
+                    
+                    {isAddTagModalOpen && (
+                        <AddTag 
+                            onClose={handleCloseTagModal}
+                            availableTags={ALL_AVAILABLE_TAGS}
+                            currentTargets={selectedChat ? selectedChat.tags : []}
+                            onToggleTag={handleToggleTag}
+                        />
+                    )}
+    
+                    {isContactDetailsOpen && (
+                        <ContactDetails
+                            onClose={handleCloseContactDetails}
+                            contact={selectedChat}
+                            onUpdateContact={handleUpdateContactInfo} 
+                        />
+                    )}
+    
+                    {isAddNoteOpen && (
+                        <AddNote
+                            onClose={handleCloseAddNote}
+                            onSaveNote={handleAddNote}
+                            currentNotes={selectedChat ? selectedChat.notes : []}
+                            onDeleteNote={handleDeleteNote}
+                        />
+                    )}
+    
+                    {isChangeStatusOpen && (
+                        <ChangeStatus
+                            onClose={handleCloseChangeStatus}
+                            availableStatus={ALL_AVAILABLE_STATUS}
+                            currentTargets={selectedChat?.status ? [selectedChat.status] : []} 
+                            onToggleStatus={handleUpdateStatus}
+                        />
+                    )}
+                    
+                    {selectedChatId && (
+                        <ControlPanel 
+                            onOpenAddTagModal={handleOpenTagModal} 
+                            onOpenContactDetails={handleOpenContactDetails} 
+                            onOpenAddNote={handleOpenAddNote} 
+                            onOpenChangeStatus={handleOpenChangeStatus}
+                        />
+                    )}
+    
+                    <AiSuppBtn />
+                </div>
             </div>
-        </div>
-    );
-}
+        );
+    }
