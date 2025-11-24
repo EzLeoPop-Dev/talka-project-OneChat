@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
     Grid3x3,
     MessageCircle,
@@ -12,16 +12,49 @@ import {
     Shield,
     ChevronDown,
     Megaphone,
-    Building2
+    Building2,
+    LogOut
 } from "lucide-react";
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const [openDropdown, setOpenDropdown] = useState(null);
+    const router = useRouter();
 
+    const [openDropdown, setOpenDropdown] = useState(null);
     const [isOpenWorkspace, setIsOpenWorkspace] = useState(false);
     const [selectedWorkspace, setSelectedWorkspace] = useState("Work Space");
     const workspaces = ["Work Space", "Development", "Marketing", "Support Team"];
+
+    // 🧠 ดึงชื่อผู้ใช้และ role จาก currentUser (ไม่ใช้ selectedRole แล้ว)
+    const [userName, setUserName] = useState("Loading...");
+    const [userRole, setUserRole] = useState("Employee");
+
+    const [dark, setDark] = useState(true);
+    const [lang, setLang] = useState("en");
+
+    useEffect(() => {
+        try {
+            const storedUser = localStorage.getItem("currentUser");
+            if (storedUser) {
+                const user = JSON.parse(storedUser);
+                setUserName(user.username || "Unknown User");
+                setUserRole(user.role || "Employee");
+            } else {
+                setUserName("Guest");
+                setUserRole("Employee");
+            }
+        } catch (error) {
+            console.error("Error reading user from localStorage:", error);
+            setUserName("Guest");
+            setUserRole("Employee");
+        }
+    }, []);
+
+    // 🚪 ปุ่ม Logout
+    const handleLogout = () => {
+        localStorage.removeItem("currentUser");
+        router.push("/auth/login");
+    };
 
     return (
         <div className="flex p-3">
@@ -29,8 +62,9 @@ export default function Sidebar() {
             <div
                 className="relative w-[250px] h-[98vh] rounded-3xl overflow-hidden flex flex-col justify-between"
                 style={{
-                    background:
-                        "linear-gradient(180deg, rgba(190, 126, 199, 0.5), rgba(139, 90, 158, 0.5))",
+                    background: dark
+                        ? "linear-gradient(180deg, rgba(190, 126, 199, 0.5), rgba(139, 90, 158, 0.5))"
+                        : "linear-gradient(180deg, rgba(240,240,245,0.5), rgba(200,180,230,0.5))",
                     boxShadow: "0 64px 64px -32px rgba(41, 15, 0, 0.56)",
                 }}
             >
@@ -42,8 +76,7 @@ export default function Sidebar() {
                     className="absolute inset-0 rounded-3xl pointer-events-none"
                     style={{
                         background: "radial-gradient(circle at 50% 0%, #B86E9F, #662525)",
-                        WebkitMask:
-                            "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                        WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
                         WebkitMaskComposite: "xor",
                         maskComposite: "exclude",
                         padding: "1px",
@@ -61,18 +94,20 @@ export default function Sidebar() {
                         </div>
                     </div>
 
-                    {/* User Profile */}
+                    {/* ✅ User Profile */}
                     <div className="flex items-center gap-3 mb-8">
-                        <div className="w-12 h-12 rounded-full bg-gray-300 overflow-hidden">
-                            <img
-                                src="/api/placeholder/48/48"
-                                alt="Andrew Smith"
-                                className="w-full h-full object-cover"
-                            />
+                        <div
+                            className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                            style={{
+                                backgroundColor: stringToColor(userName),
+                            }}
+                        >
+                            {getInitials(userName)}
                         </div>
+
                         <div>
-                            <p className="text-xs text-white/60 uppercase tracking-wide">Employee</p>
-                            <p className="text-white font-medium">Andrew Smith</p>
+                            <p className="text-xs text-white/60 uppercase tracking-wide">{userRole}</p>
+                            <p className="text-white font-medium">{userName}</p>
                         </div>
                     </div>
 
@@ -80,19 +115,13 @@ export default function Sidebar() {
                     <div className="mb-4">
                         <p className="text-xs text-white/50 uppercase tracking-wider mb-3">Main</p>
                         <nav className="space-y-1">
-                            {/* Overlay */}
-                            <Link
+                            <SidebarLink
                                 href={"/overlay"}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${pathname.startsWith("/overlay")
-                                    ? "bg-white/20 text-white"
-                                    : "text-white/80 hover:bg-white/10 hover:text-white"
-                                    }`}
-                            >
-                                <Grid3x3 size={20} />
-                                <span className="text-sm font-medium">Overlay</span>
-                            </Link>
+                                icon={<Grid3x3 size={20} />}
+                                label="Overlay"
+                                pathname={pathname}
+                            />
 
-                            {/* All Chat Dropdown */}
                             <DropdownMenu
                                 title="All Chat"
                                 icon={<MessageCircle size={20} />}
@@ -108,14 +137,25 @@ export default function Sidebar() {
                                 pathname={pathname}
                             />
 
-                            {/* Contact */}
-                            <SidebarLink href="/contact" icon={<Contact size={20} />} label="Contact" pathname={pathname} />
-                            {/* AI Support */}
-                            <SidebarLink href="/ai-support" icon={<Headphones size={20} />} label="AI Support" pathname={pathname} />
-                            {/* Dashboard */}
-                            <SidebarLink href="/dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" pathname={pathname} />
+                            <SidebarLink
+                                href="/contact"
+                                icon={<Contact size={20} />}
+                                label="Contact"
+                                pathname={pathname}
+                            />
+                            <SidebarLink
+                                href="/ai-support"
+                                icon={<Headphones size={20} />}
+                                label="AI Support"
+                                pathname={pathname}
+                            />
+                            <SidebarLink
+                                href="/dashboard"
+                                icon={<LayoutDashboard size={20} />}
+                                label="Dashboard"
+                                pathname={pathname}
+                            />
 
-                            {/* Report Dropdown */}
                             <DropdownMenu
                                 title="Report"
                                 icon={<Megaphone size={20} />}
@@ -124,14 +164,16 @@ export default function Sidebar() {
                                     setOpenDropdown(openDropdown === "Report" ? null : "Report")
                                 }
                                 links={[
-                                    { href: "/report/allchat", label: "All Chat" },
-                                    { href: "/report/facebook", label: "Facebook" },
-                                    { href: "/report/line", label: "Line" },
+                                    { href: "/Report/contacts", label: "Contact Report" },
+                                    { href: "/Report/conversation", label: "Conversation Report" },
+                                    { href: "/Report/message", label: "Message Report" },
+                                    { href: "/Report/responses", label: "Responses Report" },
+                                    { href: "/Report/users", label: "Users Report" },
+                                    { href: "/Report/#", label: "Ai Token Report" },
                                 ]}
                                 pathname={pathname}
                             />
 
-                            {/* Admin Dropdown */}
                             <DropdownMenu
                                 title="Admin Panel"
                                 icon={<Shield size={20} />}
@@ -140,11 +182,12 @@ export default function Sidebar() {
                                     setOpenDropdown(openDropdown === "Admin" ? null : "Admin")
                                 }
                                 links={[
-                                    { href: "/admin/info", label: "General Info" },
+                                    { href: "/admin/generalinfo", label: "General Info" },
+                                    { href: "/admin/channel", label: "Connect Platform" },
                                     { href: "/admin/usersetting", label: "User Setting" },
                                     { href: "/admin/teamsetting", label: "Team Setting" },
-                                    { href: "/admin/tagsetting", label: "Tag Setting" },
-                                    { href: "/admin/ai-prompt", label: "AI Prompt" },
+                                    { href: "/admin/tag", label: "Tag Setting" },
+                                    { href: "/admin/aiprompt", label: "AI Prompt" },
                                 ]}
                                 pathname={pathname}
                             />
@@ -152,12 +195,12 @@ export default function Sidebar() {
                     </div>
                 </div>
 
-                {/* ---- Workspace Selector---- */}
-                <div className="relative z-20 p-3">
+                {/* ---- Workspace Selector + Logout ---- */}
+                <div className="relative z-20 p-3 space-y-3">
                     <div className="relative">
                         <button
                             onClick={() => setIsOpenWorkspace(!isOpenWorkspace)}
-                            className="w-full flex items-center justify-between gap-3 bg-white/90 text-black px-4 py-3 rounded-2xl shadow-md transition-all hover:bg-white"
+                            className="w-full flex items-center justify-between gap-3 border border-[rgba(254,253,253,0.5)] backdrop-blur-xl text-white px-4 py-3 rounded-2xl shadow-md transition-all hover:bg-[rgba(32,41,59,0.25)]"
                         >
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 flex items-center justify-center bg-red-600 rounded-xl">
@@ -167,11 +210,12 @@ export default function Sidebar() {
                             </div>
                             <ChevronDown
                                 size={18}
-                                className={`transition-transform duration-300 ${isOpenWorkspace ? "rotate-180" : ""}`}
+                                className={`transition-transform duration-300 ${
+                                    isOpenWorkspace ? "rotate-180" : ""
+                                }`}
                             />
                         </button>
 
-                        {/* Dropdown เปิดขึ้นบน */}
                         <div
                             className={`absolute bottom-full mb-2 w-full bg-white/80 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden border border-white/40 transition-all duration-300 ${
                                 isOpenWorkspace ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
@@ -195,13 +239,22 @@ export default function Sidebar() {
                             ))}
                         </div>
                     </div>
+
+                    {/* Logout */}
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-2 bg-red-500/80 hover:bg-red-600 text-white px-4 py-3 rounded-2xl shadow-md transition-all"
+                    >
+                        <LogOut size={18} />
+                        <span className="font-medium text-sm">Logout</span>
+                    </button>
                 </div>
             </div>
         </div>
     );
 }
 
-// Function for setting and Link
+// 🔹 SidebarLink
 function SidebarLink({ href, icon, label, pathname }) {
     return (
         <Link
@@ -218,20 +271,25 @@ function SidebarLink({ href, icon, label, pathname }) {
     );
 }
 
+// 🔹 DropdownMenu
 function DropdownMenu({ title, icon, links, isOpen, onToggle, pathname }) {
     return (
         <div>
             <button
                 onClick={onToggle}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${
-                    isOpen ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"
+                    isOpen
+                        ? "bg-white/20 text-white"
+                        : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
             >
                 {icon}
                 <span className="text-sm font-medium">{title}</span>
                 <ChevronDown
                     size={16}
-                    className={`ml-auto transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                    className={`ml-auto transition-transform duration-300 ${
+                        isOpen ? "rotate-180" : ""
+                    }`}
                 />
             </button>
             <div
@@ -257,4 +315,22 @@ function DropdownMenu({ title, icon, links, isOpen, onToggle, pathname }) {
             </div>
         </div>
     );
+}
+
+// 🔤 ฟังก์ชันสร้างตัวย่อชื่อ
+function getInitials(name) {
+    if (!name) return "?";
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+// 🎨 ฟังก์ชันสุ่มสีพื้นหลังจากชื่อ
+function stringToColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const color = Math.floor(Math.abs(Math.sin(hash) * 16777215) % 16777215).toString(16);
+    return `#${"0".repeat(6 - color.length) + color}`;
 }
