@@ -1,4 +1,5 @@
 import "./assets/css/globals.css"
+import "./assets/css/other.css"
 import PageTransition from "./components/PageTransition.jsx"
 
 export const metadata = {
