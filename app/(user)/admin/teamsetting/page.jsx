@@ -62,25 +62,31 @@ function TeamModal({
         <div className="mb-5">
           <label className="block text-sm mb-2">Team Members</label>
           <div className="bg-[#1c1d25] border border-white/30 rounded-lg p-3 h-[150px] overflow-y-auto">
-            {userOptions.map((user) => (
-              <label
-                key={user}
-                className="flex items-center gap-2 mb-2 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={teamMembers.includes(user)}
-                  onChange={() => {
-                    if (teamMembers.includes(user)) {
-                      setTeamMembers(teamMembers.filter((u) => u !== user));
-                    } else {
-                      setTeamMembers([...teamMembers, user]);
-                    }
-                  }}
-                />
-                <span>{user}</span>
-              </label>
-            ))}
+            {userOptions.length > 0 ? (
+              userOptions.map((user) => (
+                <label
+                  key={user}
+                  className="flex items-center gap-2 mb-2 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={teamMembers.includes(user)}
+                    onChange={() => {
+                      if (teamMembers.includes(user)) {
+                        setTeamMembers(teamMembers.filter((u) => u !== user));
+                      } else {
+                        setTeamMembers([...teamMembers, user]);
+                      }
+                    }}
+                  />
+                  <span>{user}</span>
+                </label>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm text-center mt-4">
+                No users found. Please add users in User Settings.
+              </p>
+            )}
           </div>
         </div>
         <div className="flex justify-end gap-3 mt-8">
@@ -150,7 +156,7 @@ function ConfirmDeleteModal({ isOpen, teamName, onClose, onConfirm }) {
 }
 
 // Component หลัก
-export default function Page() {
+export default function TeamSettingPage() {
   const [teams, setTeams] = useState([]);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -163,7 +169,18 @@ export default function Page() {
   const [teamDesc, setTeamDesc] = useState("");
   const [teamMembers, setTeamMembers] = useState([]);
 
-  const userOptions = ["John", "Jane", "Mike", "Sarah", "Tom", "Lily"];
+  // ✅ เพิ่ม State สำหรับเก็บตัวเลือก user ที่โหลดมาจาก localStorage
+  const [userOptions, setUserOptions] = useState([]);
+
+  // โหลด userOptions จาก localStorage ("app_users")
+  useEffect(() => {
+    const storedUsers = localStorage.getItem("app_users");
+    if (storedUsers) {
+      const parsedUsers = JSON.parse(storedUsers);
+      // แปลง object user ให้เป็น array ของชื่อ (name) เพื่อใช้ใน option
+      setUserOptions(parsedUsers.map((u) => u.name));
+    }
+  }, [isAddOpen, isEditOpen]); // โหลดใหม่ทุกครั้งที่เปิด Modal เพื่อให้ข้อมูลล่าสุดเสมอ
 
   // โหลดทีมจาก localStorage
   useEffect(() => {
@@ -276,7 +293,7 @@ export default function Page() {
         setTeamDesc={setTeamDesc}
         teamMembers={teamMembers}
         setTeamMembers={setTeamMembers}
-        userOptions={userOptions}
+        userOptions={userOptions} // ส่ง options ที่โหลดจาก localStorage
       />
 
       <TeamModal
@@ -293,7 +310,7 @@ export default function Page() {
         setTeamDesc={setTeamDesc}
         teamMembers={teamMembers}
         setTeamMembers={setTeamMembers}
-        userOptions={userOptions}
+        userOptions={userOptions} // ส่ง options ที่โหลดจาก localStorage
       />
 
       {/* Modal Confirm Delete */}

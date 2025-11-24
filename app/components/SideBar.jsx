@@ -25,9 +25,12 @@ export default function Sidebar() {
     const [selectedWorkspace, setSelectedWorkspace] = useState("Work Space");
     const workspaces = ["Work Space", "Development", "Marketing", "Support Team"];
 
-    // 🧠 ดึงชื่อผู้ใช้จาก localStorage
+    // 🧠 ดึงชื่อผู้ใช้และ role จาก currentUser (ไม่ใช้ selectedRole แล้ว)
     const [userName, setUserName] = useState("Loading...");
     const [userRole, setUserRole] = useState("Employee");
+
+    const [dark, setDark] = useState(true);
+    const [lang, setLang] = useState("en");
 
     useEffect(() => {
         try {
@@ -38,9 +41,12 @@ export default function Sidebar() {
                 setUserRole(user.role || "Employee");
             } else {
                 setUserName("Guest");
+                setUserRole("Employee");
             }
         } catch (error) {
             console.error("Error reading user from localStorage:", error);
+            setUserName("Guest");
+            setUserRole("Employee");
         }
     }, []);
 
@@ -56,8 +62,9 @@ export default function Sidebar() {
             <div
                 className="relative w-[250px] h-[98vh] rounded-3xl overflow-hidden flex flex-col justify-between"
                 style={{
-                    background:
-                        "linear-gradient(180deg, rgba(190, 126, 199, 0.5), rgba(139, 90, 158, 0.5))",
+                    background: dark
+                        ? "linear-gradient(180deg, rgba(190, 126, 199, 0.5), rgba(139, 90, 158, 0.5))"
+                        : "linear-gradient(180deg, rgba(240,240,245,0.5), rgba(200,180,230,0.5))",
                     boxShadow: "0 64px 64px -32px rgba(41, 15, 0, 0.56)",
                 }}
             >
@@ -69,8 +76,7 @@ export default function Sidebar() {
                     className="absolute inset-0 rounded-3xl pointer-events-none"
                     style={{
                         background: "radial-gradient(circle at 50% 0%, #B86E9F, #662525)",
-                        WebkitMask:
-                            "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                        WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
                         WebkitMaskComposite: "xor",
                         maskComposite: "exclude",
                         padding: "1px",
@@ -90,7 +96,6 @@ export default function Sidebar() {
 
                     {/* ✅ User Profile */}
                     <div className="flex items-center gap-3 mb-8">
-                        {/* Avatar จากตัวอักษร */}
                         <div
                             className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
                             style={{
@@ -110,27 +115,19 @@ export default function Sidebar() {
                     <div className="mb-4">
                         <p className="text-xs text-white/50 uppercase tracking-wider mb-3">Main</p>
                         <nav className="space-y-1">
-                            {/* Overlay */}
-                            <Link
+                            <SidebarLink
                                 href={"/overlay"}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${pathname.startsWith("/overlay")
-                                        ? "bg-white/20 text-white"
-                                        : "text-white/80 hover:bg-white/10 hover:text-white"
-                                    }`}
-                            >
-                                <Grid3x3 size={20} />
-                                <span className="text-sm font-medium">Overlay</span>
-                            </Link>
+                                icon={<Grid3x3 size={20} />}
+                                label="Overlay"
+                                pathname={pathname}
+                            />
 
-                            {/* All Chat Dropdown */}
                             <DropdownMenu
                                 title="All Chat"
                                 icon={<MessageCircle size={20} />}
                                 isOpen={openDropdown === "all-chat"}
                                 onToggle={() =>
-                                    setOpenDropdown(
-                                        openDropdown === "all-chat" ? null : "all-chat"
-                                    )
+                                    setOpenDropdown(openDropdown === "all-chat" ? null : "all-chat")
                                 }
                                 links={[
                                     { href: "/chat/allchat", label: "All Chat" },
@@ -140,23 +137,18 @@ export default function Sidebar() {
                                 pathname={pathname}
                             />
 
-                            {/* Contact */}
                             <SidebarLink
                                 href="/contact"
                                 icon={<Contact size={20} />}
                                 label="Contact"
                                 pathname={pathname}
                             />
-
-                            {/* AI Support */}
                             <SidebarLink
                                 href="/ai-support"
                                 icon={<Headphones size={20} />}
                                 label="AI Support"
                                 pathname={pathname}
                             />
-
-                            {/* Dashboard */}
                             <SidebarLink
                                 href="/dashboard"
                                 icon={<LayoutDashboard size={20} />}
@@ -164,15 +156,12 @@ export default function Sidebar() {
                                 pathname={pathname}
                             />
 
-                            {/* Report Dropdown */}
                             <DropdownMenu
                                 title="Report"
                                 icon={<Megaphone size={20} />}
                                 isOpen={openDropdown === "Report"}
                                 onToggle={() =>
-                                    setOpenDropdown(
-                                        openDropdown === "Report" ? null : "Report"
-                                    )
+                                    setOpenDropdown(openDropdown === "Report" ? null : "Report")
                                 }
                                 links={[
                                     { href: "/Report/contacts", label: "Contact Report" },
@@ -180,20 +169,17 @@ export default function Sidebar() {
                                     { href: "/Report/message", label: "Message Report" },
                                     { href: "/Report/responses", label: "Responses Report" },
                                     { href: "/Report/users", label: "Users Report" },
-                                    { href: "/Report/#", label: "Ai Token Report" }
+                                    { href: "/Report/#", label: "Ai Token Report" },
                                 ]}
                                 pathname={pathname}
                             />
 
-                            {/* Admin Dropdown */}
                             <DropdownMenu
                                 title="Admin Panel"
                                 icon={<Shield size={20} />}
                                 isOpen={openDropdown === "Admin"}
                                 onToggle={() =>
-                                    setOpenDropdown(
-                                        openDropdown === "Admin" ? null : "Admin"
-                                    )
+                                    setOpenDropdown(openDropdown === "Admin" ? null : "Admin")
                                 }
                                 links={[
                                     { href: "/admin/generalinfo", label: "General Info" },
@@ -211,7 +197,6 @@ export default function Sidebar() {
 
                 {/* ---- Workspace Selector + Logout ---- */}
                 <div className="relative z-20 p-3 space-y-3">
-                    {/* Workspace Selector */}
                     <div className="relative">
                         <button
                             onClick={() => setIsOpenWorkspace(!isOpenWorkspace)}
@@ -221,23 +206,20 @@ export default function Sidebar() {
                                 <div className="w-9 h-9 flex items-center justify-center bg-red-600 rounded-xl">
                                     <Building2 size={20} color="white" />
                                 </div>
-                                <span className="font-medium text-sm">
-                                    {selectedWorkspace}
-                                </span>
+                                <span className="font-medium text-sm">{selectedWorkspace}</span>
                             </div>
                             <ChevronDown
                                 size={18}
-                                className={`transition-transform duration-300 ${isOpenWorkspace ? "rotate-180" : ""
-                                    }`}
+                                className={`transition-transform duration-300 ${
+                                    isOpenWorkspace ? "rotate-180" : ""
+                                }`}
                             />
                         </button>
 
-                        {/* Dropdown เปิดขึ้นบน */}
                         <div
-                            className={`absolute bottom-full mb-2 w-full bg-white/80 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden border border-white/40 transition-all duration-300 ${isOpenWorkspace
-                                    ? "max-h-60 opacity-100"
-                                    : "max-h-0 opacity-0"
-                                }`}
+                            className={`absolute bottom-full mb-2 w-full bg-white/80 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden border border-white/40 transition-all duration-300 ${
+                                isOpenWorkspace ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
+                            }`}
                         >
                             {workspaces.map((ws) => (
                                 <button
@@ -246,10 +228,11 @@ export default function Sidebar() {
                                         setSelectedWorkspace(ws);
                                         setIsOpenWorkspace(false);
                                     }}
-                                    className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${selectedWorkspace === ws
+                                    className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
+                                        selectedWorkspace === ws
                                             ? "bg-purple-200/60 text-purple-900"
                                             : "text-gray-700 hover:bg-white/60"
-                                        }`}
+                                    }`}
                                 >
                                     {ws}
                                 </button>
@@ -257,7 +240,7 @@ export default function Sidebar() {
                         </div>
                     </div>
 
-                    {/* 🚪 ปุ่ม Logout */}
+                    {/* Logout */}
                     <button
                         onClick={handleLogout}
                         className="w-full flex items-center justify-center gap-2 bg-red-500/80 hover:bg-red-600 text-white px-4 py-3 rounded-2xl shadow-md transition-all"
@@ -271,15 +254,16 @@ export default function Sidebar() {
     );
 }
 
-// 🔹 ฟังก์ชันย่อย: SidebarLink
+// 🔹 SidebarLink
 function SidebarLink({ href, icon, label, pathname }) {
     return (
         <Link
             href={href}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${pathname.startsWith(href)
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${
+                pathname.startsWith(href)
                     ? "bg-white/20 text-white"
                     : "text-white/80 hover:bg-white/10 hover:text-white"
-                }`}
+            }`}
         >
             {icon}
             <span className="text-sm font-medium">{label}</span>
@@ -287,38 +271,42 @@ function SidebarLink({ href, icon, label, pathname }) {
     );
 }
 
-// 🔹 ฟังก์ชันย่อย: DropdownMenu
+// 🔹 DropdownMenu
 function DropdownMenu({ title, icon, links, isOpen, onToggle, pathname }) {
     return (
         <div>
             <button
                 onClick={onToggle}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${isOpen
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${
+                    isOpen
                         ? "bg-white/20 text-white"
                         : "text-white/80 hover:bg-white/10 hover:text-white"
-                    }`}
+                }`}
             >
                 {icon}
                 <span className="text-sm font-medium">{title}</span>
                 <ChevronDown
                     size={16}
-                    className={`ml-auto transition-transform duration-300 ${isOpen ? "rotate-180" : ""
-                        }`}
+                    className={`ml-auto transition-transform duration-300 ${
+                        isOpen ? "rotate-180" : ""
+                    }`}
                 />
             </button>
             <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-80 opacity-100 mt-1" : "max-h-0 opacity-0"
-                    }`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    isOpen ? "max-h-80 opacity-100 mt-1" : "max-h-0 opacity-0"
+                }`}
             >
                 <div className="ml-4 flex flex-col space-y-1">
                     {links.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors duration-300 ${pathname === link.href
+                            className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors duration-300 ${
+                                pathname === link.href
                                     ? "bg-white/20 text-white"
                                     : "text-white/70 hover:bg-white/10 hover:text-white"
-                                }`}
+                            }`}
                         >
                             {link.label}
                         </Link>

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Lock, Eye, EyeOff } from "lucide-react";
-import { motion } from "framer-motion";
+import { User, Lock, Eye, EyeOff, Check, CheckCircle, AlertCircle, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,6 +18,34 @@ export default function RegisterPage() {
   const [errorPass, setErrorPass] = useState("");
   const [errorConfirm, setErrorConfirm] = useState("");
 
+  const [popup, setPopup] = useState({
+    show: false,
+    message: "",
+    success: false,
+  });
+
+  const passwordChecks = {
+    length: password.length >= 8,
+    number: /[0-9]/.test(password),
+    special: /[^A-Za-z0-9]/.test(password),
+  };
+
+  const isPasswordValid = Object.values(passwordChecks).every(Boolean);
+  const passedConditions = Object.values(passwordChecks).filter(Boolean).length;
+
+  let strength = "";
+  let strengthColor = "";
+  if (passedConditions <= 1) {
+    strength = "Weak";
+    strengthColor = "bg-red-500";
+  } else if (passedConditions <= 2) {
+    strength = "Medium";
+    strengthColor = "bg-orange-500";
+  } else {
+    strength = "Strong";
+    strengthColor = "bg-green-500";
+  }
+
   const handleRegister = (e) => {
     e.preventDefault();
     let hasError = false;
@@ -29,6 +57,9 @@ export default function RegisterPage() {
 
     if (!password.trim()) {
       setErrorPass("โปรดกรอกรหัสผ่าน");
+      hasError = true;
+    } else if (!isPasswordValid) {
+      setErrorPass("รหัสผ่านยังไม่ตรงตามข้อกำหนด");
       hasError = true;
     } else setErrorPass("");
 
@@ -51,13 +82,31 @@ export default function RegisterPage() {
     users.push({ username, password });
     localStorage.setItem("users", JSON.stringify(users));
 
-    alert("สมัครสมาชิกสำเร็จ!");
-    router.push("/Creatworkspace/step1");
+    localStorage.setItem(
+      "currentUser",
+      JSON.stringify({ username, password, role: "Owner" })
+    );
+
+    localStorage.setItem("justRegistered", "true");
+
+    setPopup({
+      show: true,
+      message: "สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ",
+      success: true,
+    });
+
+    setTimeout(() => {
+      setPopup((p) => ({ ...p, show: false }));
+      router.push("/Creatworkspace/workspace");
+    }, 2000);
+  };
+
+  const closePopup = () => {
+    setPopup((p) => ({ ...p, show: false }));
   };
 
   return (
     <div className="relative flex justify-center items-center min-h-screen">
-      {/* Background Step 1 */}
       <motion.div
         className="absolute inset-0 z-0"
         animate={{
@@ -68,46 +117,38 @@ export default function RegisterPage() {
         }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       />
-      <motion.div
-        className="absolute w-[600px] h-[600px] bg-[rgba(184,110,159,0.69)] rounded-full filter blur-3xl opacity-40"
-        initial={{ x: -480, y: -50 }}
-        animate={{ x: [-480, 480, -480] }}
-        transition={{ duration: 12, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute w-[500px] h-[500px] bg-[rgba(110,184,159,0.69)] rounded-full filter blur-3xl opacity-40"
-        initial={{ x: 480, y: 100 }}
-        animate={{ x: [480, -480, 480] }}
-        transition={{ duration: 14, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
-      />
 
-      {/* Original Register Content */}
-      <div className="flex w-[1200px] h-[750px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
-        {/* ข้อความฝั่งซ้าย */}
+      <div className="flex w-[1280px] h-[800px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
         <div className="flex flex-col justify-center pl-16 w-1/2 text-white relative z-10 font-inter">
-          <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">JOIN US</h1>
-          <h2 className="text-[32px] font-light mb-4 text-[#E8E3F2]">At Talka</h2>
+          <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">
+            JOIN US
+          </h1>
+          <h2 className="text-[32px] font-light mb-4 text-[#E8E3F2]">
+            At Talka
+          </h2>
           <p className="text-[18px] font-light text-[#B9B3C9] leading-[140%]">
             สมัครง่ายเพียงไม่กี่ขั้นตอน <br />
             เริ่มต้นแชทกับลูกค้าของคุณได้ทันที!
           </p>
         </div>
 
-        {/* ฟองน้ำตกแต่ง */}
-        <div className="absolute w-64 h-64 bg-[linear-gradient(180deg,rgba(127,24,220,1)_20%,rgba(22,3,38,1))] rounded-full opacity-40 top-[-60px] left-[-60px]" />
-        <div className="absolute w-80 h-80 bg-[linear-gradient(120deg,rgba(127,24,220,1)_30%,rgba(22,3,38,1)_70%)] rounded-full opacity-40 bottom-[-60px] right-[-60px]" />
-
-        {/* กล่อง form */}
         <div className="flex justify-center items-center w-1/2 z-20">
-          <div className="w-[460px] bg-linear-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
-            <h1 className="text-[28px] font-semibold text-gray-800 mb-1">REGISTER</h1>
-            <p className="text-gray-500 mb-6 text-sm">สมัครสมาชิกเพื่อใช้งาน</p>
+          <div className="w-[460px] bg-gradient-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
+            <h1 className="text-[28px] font-semibold text-gray-800 mb-1">
+              REGISTER
+            </h1>
+            <p className="text-gray-500 mb-2 text-sm">สมัครสมาชิกเพื่อใช้งาน</p>
 
-            <form className="w-full space-y-5 relative" onSubmit={handleRegister}>
-              {/* Username */}
+            <form className="w-full space-y-5" onSubmit={handleRegister}>
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                <div className={`flex items-center border rounded-full px-3 py-2.5 ${errorUser ? "border-red-500" : "border-gray-300"} focus-within:ring-1 focus-within:ring-purple-400`}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Username
+                </label>
+                <div
+                  className={`flex items-center border rounded-full px-3 py-2.5 ${
+                    errorUser ? "border-red-500" : "border-gray-300"
+                  } focus-within:ring-1 focus-within:ring-purple-400`}
+                >
                   <User className="text-purple-600 mr-2" size={18} />
                   <input
                     type="text"
@@ -117,13 +158,22 @@ export default function RegisterPage() {
                     onChange={(e) => setUsername(e.target.value)}
                   />
                 </div>
-                {errorUser && <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorUser}</p>}
+                {errorUser && (
+                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">
+                    {errorUser}
+                  </p>
+                )}
               </div>
 
-              {/* Password */}
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <div className={`flex items-center border rounded-full px-3 py-2.5 ${errorPass ? "border-red-500" : "border-gray-300"} focus-within:ring-1 focus-within:ring-purple-400`}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <div
+                  className={`flex items-center border rounded-full px-3 py-2.5 ${
+                    errorPass ? "border-red-500" : "border-gray-300"
+                  } focus-within:ring-1 focus-within:ring-purple-400`}
+                >
                   <Lock className="text-purple-600 mr-2" size={18} />
                   <input
                     type={showPassword ? "text" : "password"}
@@ -133,17 +183,66 @@ export default function RegisterPage() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <span className="w-px h-5 bg-gray-300 mx-2"></span>
-                  <button type="button" className="text-gray-500 hover:text-gray-700" onClick={() => setShowPassword(!showPassword)}>
+                  <button
+                    type="button"
+                    className="text-gray-500 hover:text-gray-700"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                {errorPass && <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorPass}</p>}
+
+                <AnimatePresence>
+                  {password.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden mt-2 pl-2 text-xs space-y-1 text-gray-500"
+                    >
+                      <Condition
+                        text="มีตัวเลข อย่างน้อย 1 ตัว"
+                        valid={passwordChecks.number}
+                      />
+                      <Condition
+                        text="มีอักขระพิเศษ อย่างน้อย 1 ตัว"
+                        valid={passwordChecks.special}
+                      />
+                      <Condition
+                        text="มีความยาว อย่างน้อย 8 ตัวอักษร"
+                        valid={passwordChecks.length}
+                      />
+
+                      <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${strengthColor}`}
+                          style={{ width: `${(passedConditions / 3) * 100}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-right text-[10px] font-semibold mt-1">
+                        {strength}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {errorPass && (
+                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">
+                    {errorPass}
+                  </p>
+                )}
               </div>
 
-              {/* Confirm Password */}
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-                <div className={`flex items-center border rounded-full px-3 py-2.5 ${errorConfirm ? "border-red-500" : "border-gray-300"} focus-within:ring-1 focus-within:ring-purple-400`}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm Password
+                </label>
+                <div
+                  className={`flex items-center border rounded-full px-3 py-2.5 ${
+                    errorConfirm ? "border-red-500" : "border-gray-300"
+                  } focus-within:ring-1 focus-within:ring-purple-400`}
+                >
                   <Lock className="text-purple-600 mr-2" size={18} />
                   <input
                     type="password"
@@ -153,43 +252,141 @@ export default function RegisterPage() {
                     onChange={(e) => setConfirm(e.target.value)}
                   />
                 </div>
-                {errorConfirm && <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorConfirm}</p>}
+                {errorConfirm && (
+                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">
+                    {errorConfirm}
+                  </p>
+                )}
               </div>
 
-              <button
-                type="submit"
-                style={{
-                  background: "#5d3d99",
-                  backgroundImage: "linear-gradient(140deg, rgba(93, 61, 153, 1) 0%, rgba(201, 117, 173, 1) 100%)",
-                }}
-                className="w-full text-white py-2.5 rounded-full hover:opacity-90 transition shadow-md mt-5"
-              >
-                สมัครสมาชิก
-              </button>
-
-              <Link href="/auth/login">
-                <button type="button" className="w-full bg-white text-purple-700 py-2.5 rounded-full hover:bg-gray-200  transition shadow-sm">
-                  เข้าสู่ระบบ
+              <div className="pt-2 space-y-2">
+                <button
+                  type="submit"
+                  style={{
+                    background: "#5d3d99",
+                    backgroundImage:
+                      "linear-gradient(140deg, rgba(93, 61, 153, 1) 0%, rgba(201, 117, 173, 1) 100%)",
+                  }}
+                  className={`w-full text-white py-2.5 rounded-full transition shadow-md ${
+                    isPasswordValid
+                      ? "hover:opacity-90"
+                      : "opacity-60 cursor-not-allowed"
+                  }`}
+                  disabled={!isPasswordValid}
+                >
+                  สมัครสมาชิก
                 </button>
-              </Link>
 
-              <div className="flex flex-col items-center mt-4">
-                <div className="flex items-center w-full mb-4">
-                  <div className="grow h-px bg-gray-300" />
-                  <span className="px-2 text-gray-500 text-sm">หรือ</span>
-                  <div className="grow h-px bg-gray-300" />
-                </div>
-
-                <div className="flex justify-center gap-6">
-                  <button type="button" onClick={() => alert("Register with Google")} className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200">
-                    <img src="/google.png" alt="Google Login" className="w-8 h-8 object-contain" />
+                <Link href="/auth/login">
+                  <button className="w-full bg-white text-purple-700 py-2.5 rounded-full hover:bg-gray-200 transition shadow-sm">
+                    เข้าสู่ระบบ
                   </button>
+                </Link>
+                <div className="flex flex-col items-center mt-4">
+                  <div className="flex items-center w-full mb-4">
+                    <div className="grow h-px bg-gray-300" />
+                    <span className="px-2 text-gray-500 text-sm">หรือ</span>
+                    <div className="grow h-px bg-gray-300" />
+                  </div>
+                  <div className="flex justify-center gap-6">
+                    <button
+                      type="button"
+                      onClick={() => alert("Login with Google")}
+                      className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200"
+                    >
+                      <img
+                        src="/google.png"
+                        className="w-8 h-8 object-contain"
+                        alt="Google login"
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
             </form>
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {popup.show && (
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              className={`relative w-[400px] min-h-[280px] bg-white/90 backdrop-blur-xl border border-white/60 
+              shadow-2xl rounded-3xl p-8 flex flex-col justify-center items-center gap-6 text-center
+              ${popup.success ? "shadow-purple-500/20" : "shadow-red-500/20"}`}
+              initial={{ scale: 0.8, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <button
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors hover:rotate-90 duration-300"
+                onClick={closePopup}
+              >
+                <X size={20} />
+              </button>
+
+              <motion.div
+                initial={{ scale: 0, rotate: -45 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 15,
+                  delay: 0.1,
+                }}
+                className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg mb-2
+                ${
+                  popup.success
+                    ? "bg-green-100 text-green-600"
+                    : "bg-red-100 text-red-500"
+                }`}
+              >
+                {popup.success ? (
+                  <CheckCircle size={48} strokeWidth={2.5} />
+                ) : (
+                  <AlertCircle size={48} strokeWidth={2.5} />
+                )}
+              </motion.div>
+
+              <div className="space-y-2 z-10">
+                <h2 className="text-2xl font-bold tracking-tight text-gray-800">
+                  {popup.success ? "Success!" : "Failed"}
+                </h2>
+                <p className="text-gray-500 font-medium text-base px-4">
+                  {popup.message}
+                </p>
+              </div>
+
+            
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+function Condition({ text, valid }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -2 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -2 }}
+      transition={{ duration: 0.2 }}
+      className={`flex items-center gap-2 ${
+        valid ? "text-green-600" : "text-gray-400"
+      }`}
+    >
+      <Check size={14} className={`${valid ? "opacity-100" : "opacity-40"}`} />
+      <span>{text}</span>
+    </motion.div>
   );
 }

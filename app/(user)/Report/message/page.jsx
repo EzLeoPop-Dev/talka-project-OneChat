@@ -13,7 +13,7 @@ import {
 import { Info, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { calenderData } from "../../../data/calenderData";
 
-// react-date-range
+
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";

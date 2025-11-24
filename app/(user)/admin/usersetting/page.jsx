@@ -1,13 +1,11 @@
 "use client";
 import { CircleUser, Ban, Edit, Info, X, AlertTriangle } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function Page() {
-  const [users, setUsers] = useState([
-    { id: 1, name: "John", email: "john@email.com", permission: "Manager" },
-    { id: 2, name: "Jane", email: "jane@email.com", permission: "Manager" },
-    { id: 3, name: "Mike", email: "mike@email.com", permission: "Manager" },
-  ]);
+export default function UserSettingPage() {
+  // State เริ่มต้นเป็น array ว่างก่อน แล้วค่อยโหลด
+  const [users, setUsers] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false); // Modal สำหรับ Add/Edit
   const [mode, setMode] = useState("add");
@@ -18,6 +16,29 @@ export default function Page() {
   // Modal สำหรับ confirm delete
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+
+  // --- 1. โหลดข้อมูล Users จาก LocalStorage เมื่อเข้าหน้าเว็บ ---
+  useEffect(() => {
+    const storedUsers = localStorage.getItem("app_users");
+    if (storedUsers) {
+      setUsers(JSON.parse(storedUsers));
+    } else {
+      // ข้อมูลเริ่มต้นถ้ายังไม่มีในเครื่อง
+      setUsers([
+        { id: 1, name: "John", email: "john@email.com", permission: "Manager" },
+        { id: 2, name: "Jane", email: "jane@email.com", permission: "Manager" },
+        { id: 3, name: "Mike", email: "mike@email.com", permission: "Manager" },
+      ]);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // --- 2. บันทึกข้อมูลลง LocalStorage เมื่อ users มีการเปลี่ยนแปลง ---
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem("app_users", JSON.stringify(users));
+    }
+  }, [users, isLoaded]);
 
   // เปิด modal Add
   const openAddModal = () => {
@@ -54,7 +75,7 @@ export default function Page() {
     if (!email.trim()) return alert("Please enter an email.");
     const newUser = {
       id: Date.now(),
-      name: email.split("@")[0],
+      name: email.split("@")[0], // ใช้ส่วนหน้า @ เป็นชื่อ (หรือปรับตามต้องการ)
       email,
       permission: role,
     };
