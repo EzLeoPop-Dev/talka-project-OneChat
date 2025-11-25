@@ -18,8 +18,8 @@ import {
     Facebook,
     MessageSquare,
     Upload,
-    Monitor, 
-    Sun, 
+    Monitor,
+    Sun,
     Moon
 } from "lucide-react";
 import Image from "next/image";
@@ -305,7 +305,7 @@ export default function Sidebar() {
                             />
 
                             <DropdownMenu
-                                title="All Chat"
+                                title="Chat"
                                 icon={<MessageCircle size={20} />}
                                 isOpen={openDropdown === "all-chat"}
                                 onToggle={() =>
@@ -320,6 +320,15 @@ export default function Sidebar() {
                             />
 
                             <SidebarLink
+                                href="/dashboard"
+                                icon={<LayoutDashboard size={20} />}
+                                label="Dashboard"
+                                pathname={pathname}
+                            />
+
+                            <p className="text-xs text-white/50 uppercase tracking-wider my-3">Admin Zone</p>
+
+                            <SidebarLink
                                 href="/contact"
                                 icon={<Contact size={20} />}
                                 label="Contact"
@@ -329,14 +338,7 @@ export default function Sidebar() {
                             <SidebarLink
                                 href="/ai-support"
                                 icon={<Headphones size={20} />}
-                                label="AI Support"
-                                pathname={pathname}
-                            />
-
-                            <SidebarLink
-                                href="/dashboard"
-                                icon={<LayoutDashboard size={20} />}
-                                label="Dashboard"
+                                label="AI Agent"
                                 pathname={pathname}
                             />
 

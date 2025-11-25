@@ -21,7 +21,7 @@ export default function TemplatesPage({
           </button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              AI Support Templates
+              AI Agent Templates
             </h1>
             <p className="text-sm text-white/60 mt-1">
               Use a template tailored for business goals like support or sales,

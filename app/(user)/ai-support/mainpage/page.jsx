@@ -21,9 +21,9 @@ export default function AiSupport({onNext}) {
             <div className="flex items-center gap-3">
               <SmilePlus className="text-white" size={48} />
               <div>
-                <h1 className="text-xl font-semibold text-white">AI Support</h1>
+                <h1 className="text-xl font-semibold text-white">AI Agent</h1>
                 <p className="text-sm text-white/70">
-                  Handle more conversations with less effort using AI Support.
+                  Handle more conversations with less effort using AI Agent.
                 </p>
               </div>
             </div>

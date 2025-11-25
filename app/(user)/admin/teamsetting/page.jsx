@@ -15,6 +15,8 @@ function TeamModal({
   teamMembers,
   setTeamMembers,
   userOptions,
+  teamTasks,
+  setTeamTasks,
 }) {
   if (!isOpen) return null;
 
@@ -62,33 +64,58 @@ function TeamModal({
         <div className="mb-5">
           <label className="block text-sm mb-2">Team Members</label>
           <div className="bg-[#1c1d25] border border-white/30 rounded-lg p-3 h-[150px] overflow-y-auto">
-            {userOptions.length > 0 ? (
-              userOptions.map((user) => (
-                <label
-                  key={user}
-                  className="flex items-center gap-2 mb-2 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={teamMembers.includes(user)}
-                    onChange={() => {
-                      if (teamMembers.includes(user)) {
-                        setTeamMembers(teamMembers.filter((u) => u !== user));
-                      } else {
-                        setTeamMembers([...teamMembers, user]);
-                      }
-                    }}
-                  />
-                  <span>{user}</span>
-                </label>
-              ))
-            ) : (
-              <p className="text-gray-500 text-sm text-center mt-4">
-                No users found. Please add users in User Settings.
-              </p>
-            )}
+            {userOptions.map((user) => (
+              <label
+                key={user}
+                className="flex items-center gap-2 mb-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={teamMembers.includes(user)}
+                  onChange={() => {
+                    if (teamMembers.includes(user)) {
+                      setTeamMembers(teamMembers.filter((u) => u !== user));
+                    } else {
+                      setTeamMembers([...teamMembers, user]);
+                    }
+                  }}
+                />
+                <span>{user}</span>
+              </label>
+            ))}
           </div>
         </div>
+
+        {/* Select Channels */}
+        <div className="mb-5">
+          <label className="block text-sm mb-2">Select Channels</label>
+
+          <div className="bg-[#1c1d25] border border-white/30 rounded-lg p-3 space-y-2">
+            {[
+              { id: "facebook", label: "Facebook" },
+              { id: "line", label: "LINE" },
+            ].map((ch) => (
+              <label
+                key={ch.id}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={teamTasks.includes(ch.id)}
+                  onChange={() => {
+                    if (teamTasks.includes(ch.id)) {
+                      setTeamTasks(teamTasks.filter((t) => t !== ch.id));
+                    } else {
+                      setTeamTasks([...teamTasks, ch.id]);
+                    }
+                  }}
+                />
+                <span>{ch.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
         <div className="flex justify-end gap-3 mt-8">
           <button
             onClick={onClose}
@@ -156,7 +183,7 @@ function ConfirmDeleteModal({ isOpen, teamName, onClose, onConfirm }) {
 }
 
 // Component หลัก
-export default function TeamSettingPage() {
+export default function Page() {
   const [teams, setTeams] = useState([]);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -169,23 +196,23 @@ export default function TeamSettingPage() {
   const [teamDesc, setTeamDesc] = useState("");
   const [teamMembers, setTeamMembers] = useState([]);
 
-  // ✅ เพิ่ม State สำหรับเก็บตัวเลือก user ที่โหลดมาจาก localStorage
-  const [userOptions, setUserOptions] = useState([]);
+  // สำหรับ tasks (level: team)
+  const [teamTasks, setTeamTasks] = useState([]);
+  const [newTask, setNewTask] = useState("");
 
-  // โหลด userOptions จาก localStorage ("app_users")
-  useEffect(() => {
-    const storedUsers = localStorage.getItem("app_users");
-    if (storedUsers) {
-      const parsedUsers = JSON.parse(storedUsers);
-      // แปลง object user ให้เป็น array ของชื่อ (name) เพื่อใช้ใน option
-      setUserOptions(parsedUsers.map((u) => u.name));
-    }
-  }, [isAddOpen, isEditOpen]); // โหลดใหม่ทุกครั้งที่เปิด Modal เพื่อให้ข้อมูลล่าสุดเสมอ
+  const userOptions = ["John", "Jane", "Mike", "Sarah", "Tom", "Lily"];
 
   // โหลดทีมจาก localStorage
   useEffect(() => {
     const storedTeams = localStorage.getItem("teams");
-    if (storedTeams) setTeams(JSON.parse(storedTeams));
+    if (storedTeams) {
+      try {
+        const parsed = JSON.parse(storedTeams);
+        setTeams(parsed);
+      } catch (e) {
+        console.error("Failed to parse teams from localStorage", e);
+      }
+    }
   }, []);
 
   // บันทึกทีมลง localStorage
@@ -197,6 +224,8 @@ export default function TeamSettingPage() {
     setTeamName("");
     setTeamDesc("");
     setTeamMembers([]);
+    setTeamTasks([]);
+    setNewTask("");
   };
 
   const validateTeam = (isEdit = false) => {
@@ -220,21 +249,23 @@ export default function TeamSettingPage() {
       return false;
     }
 
+    // tasks ไม่จำเป็นต้องมีอย่างน้อย 1 งาน — แต่ถ้าต้องการบังคับ ให้เพิ่ม
     return true;
   };
 
   const handleAddTeam = () => {
     if (!validateTeam()) return;
 
-    const newTeam = {
-      id: crypto.randomUUID(),
+    const newTeamObj = {
+      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
       name: teamName.trim(),
       desc: teamDesc.trim(),
       members: teamMembers,
+      channels: teamTasks,
       createdAt: new Date().toISOString(),
     };
 
-    setTeams((prev) => [...prev, newTeam]);
+    setTeams((prev) => [...prev, newTeamObj]);
     resetForm();
     setIsAddOpen(false);
   };
@@ -242,6 +273,7 @@ export default function TeamSettingPage() {
   const handleDelete = (id) => {
     setTeams((prev) => prev.filter((team) => team.id !== id));
     setIsDeleteOpen(false);
+    setDeleteTeam(null);
   };
 
   const handleOpenDelete = (team) => {
@@ -252,8 +284,9 @@ export default function TeamSettingPage() {
   const handleOpenEdit = (team) => {
     setEditTeam(team);
     setTeamName(team.name);
-    setTeamDesc(team.desc);
-    setTeamMembers(team.members);
+    setTeamDesc(team.desc || "");
+    setTeamMembers(team.members || []);
+    setTeamTasks(team.channels || []);
     setIsEditOpen(true);
   };
 
@@ -268,6 +301,7 @@ export default function TeamSettingPage() {
               name: teamName.trim(),
               desc: teamDesc.trim(),
               members: teamMembers,
+              channels: teamTasks,
             }
           : t
       )
@@ -278,14 +312,16 @@ export default function TeamSettingPage() {
     setIsEditOpen(false);
   };
 
-  // Layout
   return (
     <>
       {/* Add / Edit Modal */}
       <TeamModal
         isOpen={isAddOpen}
         title="Add Team"
-        onClose={() => setIsAddOpen(false)}
+        onClose={() => {
+          setIsAddOpen(false);
+          resetForm();
+        }}
         onConfirm={handleAddTeam}
         teamName={teamName}
         setTeamName={setTeamName}
@@ -293,7 +329,11 @@ export default function TeamSettingPage() {
         setTeamDesc={setTeamDesc}
         teamMembers={teamMembers}
         setTeamMembers={setTeamMembers}
-        userOptions={userOptions} // ส่ง options ที่โหลดจาก localStorage
+        userOptions={userOptions}
+        teamTasks={teamTasks}
+        setTeamTasks={setTeamTasks}
+        newTask={newTask}
+        setNewTask={setNewTask}
       />
 
       <TeamModal
@@ -302,6 +342,7 @@ export default function TeamSettingPage() {
         onClose={() => {
           setIsEditOpen(false);
           setEditTeam(null);
+          resetForm();
         }}
         onConfirm={handleSaveEdit}
         teamName={teamName}
@@ -310,7 +351,11 @@ export default function TeamSettingPage() {
         setTeamDesc={setTeamDesc}
         teamMembers={teamMembers}
         setTeamMembers={setTeamMembers}
-        userOptions={userOptions} // ส่ง options ที่โหลดจาก localStorage
+        userOptions={userOptions}
+        teamTasks={teamTasks}
+        setTeamTasks={setTeamTasks}
+        newTask={newTask}
+        setNewTask={setNewTask}
       />
 
       {/* Modal Confirm Delete */}
@@ -318,7 +363,7 @@ export default function TeamSettingPage() {
         isOpen={isDeleteOpen}
         teamName={deleteTeam?.name}
         onClose={() => setIsDeleteOpen(false)}
-        onConfirm={() => handleDelete(deleteTeam.id)}
+        onConfirm={() => handleDelete(deleteTeam?.id)}
       />
 
       {/* Main UI */}
@@ -388,19 +433,43 @@ export default function TeamSettingPage() {
                       <p className="text-sm text-gray-400 mb-2">
                         {team.desc || "No description"}
                       </p>
-                      <p className="text-xs text-gray-300">
+
+                      <p className="text-xs text-gray-300 mb-2">
                         Members:{" "}
-                        {team.members.length <= 3 ? (
+                        {team.members && team.members.length <= 3 ? (
                           team.members.join(", ")
-                        ) : (
+                        ) : team.members && team.members.length > 3 ? (
                           <>
                             {team.members.slice(0, 3).join(", ")}{" "}
                             <span className="text-gray-400">
                               +{team.members.length - 3} more
                             </span>
                           </>
+                        ) : (
+                          "—"
                         )}
                       </p>
+
+                      {/* แสดง Channel สั้น ๆ */}
+                      <div className="text-xs text-gray-200">
+                        Channels:{" "}
+                        {team.channels && team.channels.length > 0 ? (
+                          team.channels.length <= 3 ? (
+                            team.channels.join(", ")
+                          ) : (
+                            <>
+                              {team.channels.slice(0, 3).join(", ")}{" "}
+                              <span className="text-gray-400">
+                                +{team.channels.length - 3} more
+                              </span>
+                            </>
+                          )
+                        ) : (
+                          <span className="text-gray-400">
+                            No channel selected
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex gap-3">

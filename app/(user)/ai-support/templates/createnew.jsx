@@ -77,22 +77,24 @@ export default function CearteNew({ onBack }) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   return (
-    <div className="w-full h-[94vh] text-white p-6 flex gap-6 overflow-hidden bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 justify-between">
+    <div className="w-full h-[94vh] text-white p-6 flex gap-6 overflow-hidden bg-[rgba(32,41,59,0.25)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 justify-between">
       {/* LEFT PANEL */}
-      <div className="w-2/3 h-full flex flex-col overflow-hidden">
-        <button
-          onClick={onBack}
-          className="text-white/70 hover:text-white transition-colors cursor-pointer mb-4 duration-300 flex items-center"
-        >
-          <ChevronLeft size={52} />
-          <p className="text-white text-xl font-semibold">Create AI Agent</p>
-        </button>
+      <div className="w-2/3 h-full flex flex-col gap-3 mb-4">
+        <div className="flex items-center gap-3 justify-between">
+          <button
+            onClick={onBack}
+            className="flex items-center text-white/70 hover:text-white transition-colors cursor-pointer duration-300"
+          >
+            <ChevronLeft size={32} className="text-white/70 hover:text-white" />
+            <p className="text-white text-xl font-semibold">Create AI Agent</p>
+          </button>
+        </div>
 
         {/* Scrollable LEFT content */}
         <div className="overflow-y-auto pr-3 flex-1">
           {/* ------------------- EDIT MODE ------------------- */}
 
-          <div className="w-200 bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl shadow-xl animate-fadeIn">
+          <div className="w-200 bg-white/5 border border-[rgba(254,253,253,0.5)] rounded-3xl p-6 backdrop-blur-xl shadow-xl animate-fadeIn">
             {/* HEADER: emoji + name + save */}
             <div className="flex items-center gap-3 mb-4 justify-between">
               <div className="text-xl font-semibold">

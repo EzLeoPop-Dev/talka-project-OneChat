@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import ChannelCatalog from "./catalog/page";
+import ChannelCatalog from "./app/(user)/admin/channel/catalog/catalog/page";
 import ConnectFacebook from "./facebook/page";
 import ConnectLine from "./line/line";
 import ConnectLineStep1 from "./line/ConnectLineStep1";

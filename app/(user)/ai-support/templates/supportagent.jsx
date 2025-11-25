@@ -57,7 +57,7 @@ function InputItem({ label, type = "text", placeholder }) {
 
 /*--------------------MAIN COMPONENT--------------------*/
 
-export default function SupportAgent({ onBack }) {
+export default function SupportAgent({ onBack, onUseSup }) {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("chat");
 
@@ -79,13 +79,24 @@ export default function SupportAgent({ onBack }) {
     <div className="w-full h-[94vh] text-white p-6 flex gap-6 overflow-hidden bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 justify-between">
       {/* LEFT PANEL */}
       <div className="w-2/3 h-full flex flex-col overflow-hidden">
-        <button
-          onClick={onBack}
-          className="text-white/70 hover:text-white transition-colors cursor-pointer mb-4 duration-300 flex items-center"
-        >
-          <ChevronLeft size={52} />
-          <p className="text-white text-xl font-semibold">Create AI Agent</p>
-        </button>
+        <div className="flex items-center gap-3 justify-between">
+          <button
+            onClick={onBack}
+            className="text-white/70 hover:text-white transition-colors cursor-pointer mb-4 duration-300 flex items-center"
+          >
+            <ChevronLeft size={52} />
+            <p className="text-white text-xl font-semibold">Create AI Agent</p>
+          </button>
+
+          <button
+            onClick={onUseSup}
+            className="text-white/70 hover:text-white transition-colors duration-300 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg w-fit"
+          >
+            <p className="text-white text-base font-medium cursor-pointer">
+              UseTemplate
+            </p>
+          </button>
+        </div>
 
         {/* Scrollable LEFT content */}
         <div className="overflow-y-auto pr-3 flex-1">
@@ -110,10 +121,12 @@ export default function SupportAgent({ onBack }) {
 
                 <ul className="text-sm text-white/80 leading-relaxed space-y-2 list-disc pl-4">
                   <li>
-                    Answers product questions using your AI knowledge sources and smoothly escalates to a human when needed.
+                    Answers product questions using your AI knowledge sources
+                    and smoothly escalates to a human when needed.
                   </li>
                   <li>
-                    Best suited for teams that want to ensure customers always get timely and accurate support.
+                    Best suited for teams that want to ensure customers always
+                    get timely and accurate support.
                   </li>
                 </ul>
 
@@ -125,10 +138,11 @@ export default function SupportAgent({ onBack }) {
                     <li>
                       Add FAQs and help articles to your AI knowledge sources.
                     </li>
+                    <li>Assign a support team or agent for escalations.</li>
                     <li>
-                      Assign a support team or agent for escalations.
+                      Test common conversation flows to make sure replies are
+                      accurate and helpful.
                     </li>
-                    <li>Test common conversation flows to make sure replies are accurate and helpful.</li>
                   </ul>
                 </div>
 
@@ -154,7 +168,8 @@ export default function SupportAgent({ onBack }) {
                     respond more accurately?
                   </p>
                   <p className="text-white/70 text-sm">
-                    Add and enable knowledge sources to give your AI Agent the context it needs for accurate, company-specific responses.
+                    Add and enable knowledge sources to give your AI Agent the
+                    context it needs for accurate, company-specific responses.
                   </p>
                 </div>
 
@@ -166,7 +181,8 @@ export default function SupportAgent({ onBack }) {
                     Train your AI Agent
                   </h3>
                   <p className="text-white/60 text-sm mb-4">
-                    To improve accuracy, we recommend training your AI Agent with company-specific documents and link.
+                    To improve accuracy, we recommend training your AI Agent
+                    with company-specific documents and link.
                   </p>
                   <button className="px-5 py-2 bg-white text-black rounded-xl font-semibold hover:bg-gray-200 transition cursor-pointer flex items-center gap-2 mx-auto">
                     <i className="fa-solid fa-plus"></i> Add knowledge source
@@ -333,7 +349,8 @@ export default function SupportAgent({ onBack }) {
                 Test your AI Agent
               </p>
               <p>
-                To begin testing, give your AI Agent a name and some instructions to see how it will respond in a real conversation.
+                To begin testing, give your AI Agent a name and some
+                instructions to see how it will respond in a real conversation.
               </p>
             </div>
           )}

@@ -24,7 +24,7 @@ const processInitialData = (data) => {
         country: chat.country || null,
         tags: chat.isVip ? ["VIP"] : [],
         notes: chat.notes || [],
-        status: chat.status || "New Chat" // กำหนดค่าเริ่มต้นถ้าไม่มี
+        status: chat.status || "New Chat" 
     }));
 };
 
