@@ -1,10 +1,22 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-export default function ContactDetail({ contact, onClose, onSave, onDelete, AVAILABLE_TAGS }) {
+export default function ContactDetail({ contact, onClose, onSave, onDelete, AVAILABLE_TAGS, AVAILABLE_COMPANIES = [] }) {
     const [formData, setFormData] = useState(contact);
     
     const [safeTags, setSafeTags] = useState([]);
+    const [showCompanyList, setShowCompanyList] = useState(false);
+    const companyWrapperRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (companyWrapperRef.current && !companyWrapperRef.current.contains(event.target)) {
+                setShowCompanyList(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     useEffect(() => {
         setFormData(contact);
@@ -83,6 +95,48 @@ export default function ContactDetail({ contact, onClose, onSave, onDelete, AVAI
 
                 <h3 className="text-lg font-semibold mb-3">Contact fields</h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
+
+                    <div className="relative" ref={companyWrapperRef}>
+                        <label className="block text-sm font-medium text-gray-300 mb-1">Company</label>
+                        <div className="relative mt-1">
+                            <input 
+                                type="text"
+                                name="company"
+                                value={formData.company || ""}
+                                onChange={handleChange}
+                                onClick={() => setShowCompanyList(true)}
+                                className="w-full text-white outline-0 bg-gray-700 rounded-lg py-2 px-4 border border-gray-600 pr-10"
+                                placeholder="Select or type new company"
+                                autoComplete="off"
+                            />
+                            <div 
+                                className="absolute inset-y-0 right-0 flex items-center px-3 cursor-pointer text-gray-400 hover:text-white"
+                                onClick={() => setShowCompanyList(!showCompanyList)}
+                            >
+                                <i className={`fa-solid fa-chevron-down transition-transform ${showCompanyList ? 'rotate-180' : ''}`}></i>
+                            </div>
+                        </div>
+
+                        {showCompanyList && (
+                            <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                                {AVAILABLE_COMPANIES.length > 0 ? (
+                                    AVAILABLE_COMPANIES.map((comp, index) => (
+                                        <div 
+                                            key={index}
+                                            className="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm"
+                                            onClick={() => handleCompanySelect(comp)}
+                                        >
+                                            {comp}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="px-4 py-2 text-gray-400 text-sm italic">
+                                        No existing companies
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-1">Phone Number</label>

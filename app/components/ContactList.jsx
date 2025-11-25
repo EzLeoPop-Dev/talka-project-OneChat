@@ -5,18 +5,15 @@ import ContactDetail from '@/app/components/ContactDetail';
 import FilterPopup from '@/app/components/FilterPopup';
 import AddContactModal from '@/app/components/AddContact';
 
-
-const AVAILABLE_TAGS = [...new Set(mockContacts.map(c => c.tags).filter(Boolean))];
-const AVAILABLE_CHANNELS = [...new Set(mockContacts.map(c => c.channel).filter(Boolean))];
 const AVAILABLE_STATUSES = ["Open", "Closed"];
-
 
 export default function ContactList() {
     const [contacts, setContacts] = useState(mockContacts); 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedContact, setSelectedContact] = useState(null);
-
+    const [selectedIds, setSelectedIds] = useState([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [filters, setFilters] = useState({
@@ -25,6 +22,22 @@ export default function ContactList() {
         status: null
     });
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    const [filterCompany, setFilterCompany] = useState(null);
+    const [isCompanyFilterOpen, setIsCompanyFilterOpen] = useState(false);
+
+    const availableCompanies = useMemo(() => {
+        return [...new Set(contacts.map(c => c.company).filter(Boolean))];
+    }, [contacts]);
+
+    const availableTags = useMemo(() => {
+        return [...new Set(contacts.map(c => c.tags).filter(Boolean))];
+    }, [contacts]);
+
+    const availableChannels = useMemo(() => {
+        return [...new Set(contacts.map(c => c.channel).filter(Boolean))];
+    }, [contacts]);
+    // -----------------------------------------------------------------------
 
     const handleRowClick = (contact) => {
         setSelectedContact(contact);
@@ -53,7 +66,6 @@ export default function ContactList() {
         }
 
         handleCloseModal(); 
-        console.log("Saved:", contactToSave); 
     };
 
     const handleDeleteContact = (contactId) => {
@@ -64,7 +76,25 @@ export default function ContactList() {
         if (mockIndex !== -1) {
             mockContacts.splice(mockIndex, 1);
         }
-        console.log("Deleted:", contactId);
+    };
+
+    const handleDeleteClick = () => {
+        setIsDeleteModalOpen(true); 
+    };
+
+    const confirmDelete = () => {
+        const newContacts = contacts.filter(c => !selectedIds.includes(c.id));
+        setContacts(newContacts);
+
+        selectedIds.forEach(id => {
+            const mockIndex = mockContacts.findIndex(c => c.id === id);
+            if (mockIndex !== -1) {
+                mockContacts.splice(mockIndex, 1);
+            }
+        });
+
+        setSelectedIds([]);
+        setIsDeleteModalOpen(false); 
     };
 
     const handleAddContact = (newContactData) => {
@@ -79,27 +109,43 @@ export default function ContactList() {
         };
 
         setContacts(prevContacts => [newContact, ...prevContacts]);
-
         mockContacts.unshift(newContact);
-
         setIsAddModalOpen(false);
-        console.log("Added:", newContact);
     };
 
 
     const filteredContacts = useMemo(() => {
         return contacts.filter(contact => {
             const nameMatch = contact.name.toLowerCase().includes(searchTerm.toLowerCase());
-
             const channelMatch = !filters.channel || contact.channel === filters.channel;
-            
             const tagMatch = !filters.tag || contact.tags === filters.tag;
-
             const statusMatch = !filters.status || contact.status === filters.status;
+            const companyMatch = !filterCompany || contact.company === filterCompany;
 
-            return nameMatch && channelMatch && tagMatch && statusMatch;
+            return nameMatch && channelMatch && tagMatch && statusMatch && companyMatch;
         });
-    }, [contacts, searchTerm, filters]); 
+    }, [contacts, searchTerm, filters, filterCompany]); 
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allIds = filteredContacts.map(c => c.id);
+            setSelectedIds(allIds);
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleSelectOne = (e, id) => {
+        e.stopPropagation(); 
+        
+        if (selectedIds.includes(id)) {
+            setSelectedIds(prev => prev.filter(itemId => itemId !== id));
+        } else {
+            setSelectedIds(prev => [...prev, id]);
+        }
+    };
+
+    const CHECKBOX_CLASS = "appearance-none h-4 w-4 border border-gray-400 rounded-sm bg-transparent checked:bg-white checked:border-white focus:outline-none focus:ring-0 cursor-pointer relative checked:after:content-[''] checked:after:absolute checked:after:left-[0.3rem] checked:after:top-[0.0rem] checked:after:w-[0.25rem] checked:after:h-[0.55rem] checked:after:border-b-[0.15rem] checked:after:border-r-[0.15rem] checked:after:border-black checked:after:rotate-45";
 
 
     return (
@@ -122,6 +168,17 @@ export default function ContactList() {
                     </div>
 
                     <div className="flex items-center gap-4 w-full md:w-auto">
+                        
+                        {selectedIds.length > 0 && (
+                            <button 
+                                onClick={handleDeleteClick} 
+                                className="shrink-0 flex items-center justify-center text-white bg-red-500/80 hover:bg-red-600 shadow-2xl rounded-2xl py-2 px-4 cursor-pointer w-full md:w-auto md:mr-3 transition-all duration-300"
+                            >
+                                <i className="fa-solid fa-trash mr-2"></i>
+                                <span>Delete ({selectedIds.length})</span>
+                            </button>
+                        )}
+
                         <div 
                             className="addcontact shrink-0 flex items-center justify-center text-white bg-[rgba(88,40,201,0.4)] shadow-2xl rounded-2xl py-2 px-4 cursor-pointer hover:bg-[rgba(88,40,201,0.6)] w-full md:w-auto md:mr-3"
                             onClick={() => setIsAddModalOpen(true)}
@@ -130,10 +187,61 @@ export default function ContactList() {
                             <button>Add Contact</button> 
                         </div>
 
+                        <div className="relative">
+                            <button 
+                                onClick={() => setIsCompanyFilterOpen(!isCompanyFilterOpen)}
+                                className={`shrink-0 flex items-center justify-center text-white shadow-2xl rounded-2xl py-2 px-4 cursor-pointer md:mr-3 w-full md:w-auto
+                                    ${isCompanyFilterOpen || filterCompany ? 'bg-[rgba(88,40,201,0.6)]' : 'bg-[rgba(32,41,59,0.25)] hover:bg-[rgba(32,41,59,0.5)]'}`}
+                            >
+                                <i className="fa-solid fa-building"></i>
+                                <p className="pl-2">{filterCompany || "Company"}</p>
+                                {filterCompany && (
+                                    <i 
+                                        className="fa-solid fa-times ml-2 text-xs opacity-70 hover:opacity-100"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setFilterCompany(null);
+                                        }}
+                                    ></i>
+                                )}
+                            </button>
+
+                            {isCompanyFilterOpen && (
+                                <div className="absolute z-50 top-12 left-0 w-48 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl p-2 max-h-60 overflow-y-auto">
+                                    <div 
+                                        className={`p-2 rounded-lg cursor-pointer hover:bg-gray-800 text-white ${!filterCompany ? 'bg-gray-800 font-bold' : ''}`}
+                                        onClick={() => {
+                                            setFilterCompany(null);
+                                            setIsCompanyFilterOpen(false);
+                                        }}
+                                    >
+                                        All Companies
+                                    </div>
+
+                                    {availableCompanies.map((comp) => (
+                                        <div 
+                                            key={comp}
+                                            className={`p-2 rounded-lg cursor-pointer hover:bg-gray-800 text-white ${filterCompany === comp ? 'bg-gray-800 font-bold text-purple-400' : ''}`}
+                                            onClick={() => {
+                                                setFilterCompany(comp);
+                                                setIsCompanyFilterOpen(false);
+                                            }}
+                                        >
+                                            {comp}
+                                        </div>
+                                    ))}
+                                    {availableCompanies.length === 0 && (
+                                        <div className="p-2 text-gray-400 text-sm text-center">No companies found</div>
+                                    )}
+
+                                </div>
+                            )}
+                        </div>
+
                         <div className="relative"> 
                             <button 
                                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                className={`shrink-0 flex items-center justify-center text-white shadow-2xl rounded-2xl py-2 px-4 cursor-pointer  ${isFilterOpen ? 'bg-[rgba(88,40,201,0.6)]' : 'bg-[rgba(32,41,59,0.25)] hover:bg-[rgba(32,41,59,0.5)]'}`}
+                                className={`shrink-0 flex items-center justify-center bg-[rgba(32,41,59,0.25)] text-white shadow-2xl rounded-2xl py-2 px-4 cursor-pointer  ${isFilterOpen ? 'bg-[rgba(88,40,201,0.6)]' : 'bg-[rgba(32,41,59,0.25)] hover:bg-[rgba(32,41,59,0.5)]'}`}
                             >
                                 <i className="fa-solid fa-filter"></i>
                                 <p className="pl-2">Filter</p>
@@ -144,24 +252,30 @@ export default function ContactList() {
                                 onClose={() => setIsFilterOpen(false)}
                                 currentFilters={filters}
                                 onApplyFilters={(newFilters) => setFilters(newFilters)}
-
-                                AVAILABLE_CHANNELS={AVAILABLE_CHANNELS}
-                                AVAILABLE_TAGS={AVAILABLE_TAGS}
+                                AVAILABLE_CHANNELS={availableChannels}
+                                AVAILABLE_TAGS={availableTags}
                                 AVAILABLE_STATUSES={AVAILABLE_STATUSES}
                             />
                         </div>
                     </div>
                 </div>
                 
+                
                 <div className="flex-1 overflow-y-auto overflow-x-auto">
-                    <div className="min-w-[960px]">
-
-                        <div className="grid grid-cols-[auto_2fr_repeat(6,1fr)] gap-x-4 items-center py-3 border-b border-gray-500/30 text-gray-300 font-semibold text-sm px-4 ">
-                            <input type="checkbox" className="bg-black border-gray-500/50 rounded" />
+                    <div className="min-w-[1060px]">
+                         {/* ... ส่วน Table Header ... */}
+                         <div className="grid grid-cols-[auto_2fr_repeat(7,1fr)] gap-x-4 items-center py-3 border-b border-gray-500/30 text-gray-300 font-semibold text-sm px-4 ">
+                            <input 
+                                type="checkbox" 
+                                className={CHECKBOX_CLASS} 
+                                onChange={handleSelectAll}
+                                checked={filteredContacts.length > 0 && selectedIds.length === filteredContacts.length}
+                            />
                             <span>Name</span>
                             <span>Channel</span>
                             <span>Email</span>
                             <span>Phone</span>
+                            <span>Company</span>
                             <span>Country</span>
                             <span>Tags</span>
                             <span>Status</span>
@@ -172,12 +286,14 @@ export default function ContactList() {
                                 <div 
                                     key={contact.id} 
                                     onClick={() => handleRowClick(contact)}
-                                    className="grid grid-cols-[auto_2fr_repeat(6,1fr)] gap-x-4 items-center py-3 border-b border-gray-500/20 hover:bg-white/10 cursor-pointer px-4"
+                                    className="grid grid-cols-[auto_2fr_repeat(7,1fr)] gap-x-4 items-center py-3 border-b border-gray-500/20 hover:bg-white/10 cursor-pointer px-4"
                                 >
                                     <input 
                                         type="checkbox" 
-                                        className=" border-gray-500/50 rounded focus:ring-0 focus:ring-offset-0 "
-                                        onClick={e => e.stopPropagation()} 
+                                        className={CHECKBOX_CLASS}
+                                        onClick={(e) => e.stopPropagation()} 
+                                        onChange={(e) => handleSelectOne(e, contact.id)} 
+                                        checked={selectedIds.includes(contact.id)} 
                                     />
                                     
                                     <div className="flex items-center">
@@ -205,6 +321,10 @@ export default function ContactList() {
                                         )}
                                     </span>
 
+                                    <span className={!contact.company ? "text-gray-400" : ""}>
+                                        {contact.company || "N/A"}
+                                    </span>
+
                                     <span className={!contact.country ? "text-gray-400" : ""}>
                                         {contact.country || "N/A"}
                                     </span>
@@ -226,9 +346,44 @@ export default function ContactList() {
                         </div>
                     </div> 
                 </div> 
-
             </div>
 
+            {isDeleteModalOpen && (
+                <div 
+                    className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                    onClick={() => setIsDeleteModalOpen(false)}
+                >
+                    <div 
+                        className="bg-gray-800 border border-gray-600 rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center transform transition-all scale-100"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i className="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
+                        </div>
+                        
+                        <h3 className="text-xl font-bold text-white mb-2">Confirm Deletion</h3>
+                        <p className="text-gray-300 mb-6">
+                            Are you sure you want to delete <span className="font-bold text-white">{selectedIds.length}</span> selected contacts? 
+                            <br />This action cannot be undone.
+                        </p>
+
+                        <div className="flex gap-3 justify-center">
+                            <button 
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                className="px-5 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-medium transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={confirmDelete}
+                                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg shadow-red-600/30 transition-all transform hover:scale-105"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             
             {isModalOpen && selectedContact && (
                 <ContactDetail
@@ -236,7 +391,8 @@ export default function ContactList() {
                     onClose={handleCloseModal}
                     onSave={handleSaveChanges}
                     onDelete={handleDeleteContact} 
-                    AVAILABLE_TAGS={AVAILABLE_TAGS}
+                    AVAILABLE_TAGS={availableTags}
+                    AVAILABLE_COMPANIES={availableCompanies} 
                 />
             )}
 
@@ -244,11 +400,11 @@ export default function ContactList() {
                 <AddContactModal
                     onClose={() => setIsAddModalOpen(false)}
                     onAdd={handleAddContact}
-                    AVAILABLE_TAGS={AVAILABLE_TAGS}
-                    AVAILABLE_CHANNELS={AVAILABLE_CHANNELS} 
+                    AVAILABLE_TAGS={availableTags}
+                    AVAILABLE_CHANNELS={availableChannels}
+                    AVAILABLE_COMPANIES={availableCompanies}
                 />
             )}
         </div> 
     );
 }
-
