@@ -1,19 +1,28 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react'; 
-import { mockContacts } from '@/app/data/mockContacts'; 
+import { unifiedMockData } from '@/app/data/mockData'; 
 import ContactDetail from '@/app/components/ContactDetail'; 
 import FilterPopup from '@/app/components/FilterPopup';
 import AddContactModal from '@/app/components/AddContact';
+import { DEFAULT_TAGS } from "@/app/data/defaultTags";
+
+
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const AVAILABLE_STATUSES = ["Open", "Closed"];
 
 export default function ContactList() {
-    const [contacts, setContacts] = useState(mockContacts); 
+    // 1. เริ่มต้น State ด้วยข้อมูล Mock ก่อน (เพื่อไม่ให้หน้าขาวตอนโหลด)
+    const [contacts, setContacts] = useState([]); 
+    const [isLoaded, setIsLoaded] = useState(false); // เช็คว่าโหลดเสร็จหรือยัง
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedContact, setSelectedContact] = useState(null);
     const [selectedIds, setSelectedIds] = useState([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [availableTags, setAvailableTags] = useState([]);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [filters, setFilters] = useState({
@@ -22,48 +31,54 @@ export default function ContactList() {
         status: null
     });
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-
     const [filterCompany, setFilterCompany] = useState(null);
     const [isCompanyFilterOpen, setIsCompanyFilterOpen] = useState(false);
 
-    const availableCompanies = useMemo(() => {
-        return [...new Set(contacts.map(c => c.company).filter(Boolean))];
-    }, [contacts]);
+    // --- 2. useEffect: โหลดข้อมูลจาก LocalStorage ตอนเข้าเว็บ ---
+    useEffect(() => {
+        const savedData = localStorage.getItem('onechat_data'); // ✅ ใช้ Key เดียวกับหน้า Chat
+        if (savedData) {
+            setContacts(JSON.parse(savedData));
+        } else {
+            // ถ้าไม่มีข้อมูลเลย ให้ใช้ Mock Data เริ่มต้น
+            setContacts(unifiedMockData);
+            localStorage.setItem('onechat_data', JSON.stringify(unifiedMockData));
+        }
+        setIsLoaded(true);
+    }, []);
 
-    const availableTags = useMemo(() => {
-        return [...new Set(contacts.map(c => c.tags).filter(Boolean))];
-    }, [contacts]);
+    // --- 3. Save Data (แก้ชื่อ Key เป็น 'onechat_data') ---
+    useEffect(() => {
+        if (isLoaded) {
+            localStorage.setItem('onechat_data', JSON.stringify(contacts)); // ✅ ใช้ Key เดียวกัน
+        }
+    }, [contacts, isLoaded]);
 
-    const availableChannels = useMemo(() => {
-        return [...new Set(contacts.map(c => c.channel).filter(Boolean))];
-    }, [contacts]);
-    // -----------------------------------------------------------------------
+    useEffect(() => {
+        const savedTags = localStorage.getItem("onechat_tags");
+        if (savedTags) {
+            setAvailableTags(JSON.parse(savedTags));
+        } else {
+            setAvailableTags(DEFAULT_TAGS);
+            // (Optional) ถ้ายังไม่มีก็เซฟ Default ลงไป
+            localStorage.setItem("onechat_tags", JSON.stringify(DEFAULT_TAGS)); 
+        }
+    }, []);
 
-    const handleRowClick = (contact) => {
-        setSelectedContact(contact);
-        setIsModalOpen(true);
-    };
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setSelectedContact(null);
-    };
+    const availableCompanies = useMemo(() => [...new Set(contacts.map(c => c.company).filter(Boolean))], [contacts]);
+    const availableChannels = useMemo(() => [...new Set(contacts.map(c => c.channel).filter(Boolean))], [contacts]);
+
+    const handleRowClick = (contact) => { setSelectedContact(contact); setIsModalOpen(true); };
+    const handleCloseModal = () => { setIsModalOpen(false); setSelectedContact(null); };
+
+    // --- แก้ไข Function ให้ยุ่งแค่กับ State (ไม่ต้องแก้ไฟล์ Mock) ---
     const handleSaveChanges = (updatedContact) => {
         const contactToSave = { ...updatedContact };
-        Object.keys(contactToSave).forEach(key => {
-            if (contactToSave[key] === "") {
-                contactToSave[key] = null;
-            }
-        });
-
-        const newContacts = contacts.map(c => 
-            c.id === contactToSave.id ? contactToSave : c
-        );
+        Object.keys(contactToSave).forEach(key => { if (contactToSave[key] === "") contactToSave[key] = null; });
+        
+        // อัปเดต State (เดี๋ยว useEffect จะ save ลง LS ให้เอง)
+        const newContacts = contacts.map(c => c.id === contactToSave.id ? contactToSave : c);
         setContacts(newContacts);
-
-        const mockIndex = mockContacts.findIndex(c => c.id === contactToSave.id);
-        if (mockIndex !== -1) {
-            mockContacts[mockIndex] = contactToSave;
-        }
 
         handleCloseModal(); 
     };
@@ -71,82 +86,101 @@ export default function ContactList() {
     const handleDeleteContact = (contactId) => {
         const newContacts = contacts.filter(c => c.id !== contactId);
         setContacts(newContacts);
-        
-        const mockIndex = mockContacts.findIndex(c => c.id === contactId);
-        if (mockIndex !== -1) {
-            mockContacts.splice(mockIndex, 1);
-        }
     };
 
-    const handleDeleteClick = () => {
-        setIsDeleteModalOpen(true); 
-    };
+    const handleDeleteClick = () => { setIsDeleteModalOpen(true); };
 
     const confirmDelete = () => {
         const newContacts = contacts.filter(c => !selectedIds.includes(c.id));
         setContacts(newContacts);
-
-        selectedIds.forEach(id => {
-            const mockIndex = mockContacts.findIndex(c => c.id === id);
-            if (mockIndex !== -1) {
-                mockContacts.splice(mockIndex, 1);
-            }
-        });
-
         setSelectedIds([]);
-        setIsDeleteModalOpen(false); 
+        setIsDeleteModalOpen(false);
     };
 
     const handleAddContact = (newContactData) => {
         const newId = Date.now();
         const nameQuery = newContactData.name ? newContactData.name.replace(' ', '+') : 'New+User';
         const imgUrl = `https://ui-avatars.com/api/?name=${nameQuery}&background=random`;
-
-        const newContact = {
-            ...newContactData,
-            id: newId,
-            imgUrl: imgUrl,
-        };
-
+        
+        const newContact = { ...newContactData, id: newId, imgUrl: imgUrl };
+        
+        // เพิ่มเข้า State ด้านบนสุด
         setContacts(prevContacts => [newContact, ...prevContacts]);
-        mockContacts.unshift(newContact);
         setIsAddModalOpen(false);
     };
-
+    // -------------------------------------------------------------
 
     const filteredContacts = useMemo(() => {
         return contacts.filter(contact => {
             const nameMatch = contact.name.toLowerCase().includes(searchTerm.toLowerCase());
             const channelMatch = !filters.channel || contact.channel === filters.channel;
-            const tagMatch = !filters.tag || contact.tags === filters.tag;
+            const tagMatch = !filters.tag || (() => {
+                if (Array.isArray(contact.tags)) {
+                    return contact.tags.includes(filters.tag);
+                }
+                return contact.tags === filters.tag;
+            })();
             const statusMatch = !filters.status || contact.status === filters.status;
             const companyMatch = !filterCompany || contact.company === filterCompany;
-
             return nameMatch && channelMatch && tagMatch && statusMatch && companyMatch;
         });
-    }, [contacts, searchTerm, filters, filterCompany]); 
+    }, [contacts, searchTerm, filters, filterCompany]);
 
     const handleSelectAll = (e) => {
-        if (e.target.checked) {
-            const allIds = filteredContacts.map(c => c.id);
-            setSelectedIds(allIds);
-        } else {
-            setSelectedIds([]);
-        }
+        if (e.target.checked) { setSelectedIds(filteredContacts.map(c => c.id)); } else { setSelectedIds([]); }
     };
-
     const handleSelectOne = (e, id) => {
         e.stopPropagation(); 
+        if (selectedIds.includes(id)) { setSelectedIds(prev => prev.filter(itemId => itemId !== id)); } else { setSelectedIds(prev => [...prev, id]); }
+    };
+
+    const handleExportPDF = () => {
+        const doc = new jsPDF();
+        doc.text("Contact List Report", 14, 15);
+        doc.setFontSize(10);
+        doc.text(`Generated on: ${new Date().toLocaleDateString()} - Total: ${filteredContacts.length} contacts`, 14, 22);
+
+        const tableColumn = ["Name", "Company", "Channel", "Phone", "Email", "Country", "Tags", "Status"];
         
-        if (selectedIds.includes(id)) {
-            setSelectedIds(prev => prev.filter(itemId => itemId !== id));
-        } else {
-            setSelectedIds(prev => [...prev, id]);
-        }
+        const tableRows = filteredContacts.map(c => [
+            c.name,
+            c.company || "-",
+            c.channel || "-",
+            c.phone ? `${c.phonePrefix}${c.phone}` : "-",
+            c.email || "-",
+            c.country || "-",
+            c.tags || "-",
+            c.status || "-"
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 25,
+            theme: 'grid',
+            styles: { fontSize: 7 },
+            headStyles: { fillColor: [88, 40, 201] },
+            columnStyles: { 0: { cellWidth: 25 }, 4: { cellWidth: 35 } }
+        });
+
+        doc.save("contacts.pdf");
     };
 
     const CHECKBOX_CLASS = "appearance-none h-4 w-4 border border-gray-400 rounded-sm bg-transparent checked:bg-white checked:border-white focus:outline-none focus:ring-0 cursor-pointer relative checked:after:content-[''] checked:after:absolute checked:after:left-[0.3rem] checked:after:top-[0.0rem] checked:after:w-[0.25rem] checked:after:h-[0.55rem] checked:after:border-b-[0.15rem] checked:after:border-r-[0.15rem] checked:after:border-black checked:after:rotate-45";
 
+    useEffect(() => {
+        const savedTags = localStorage.getItem("onechat_tags");
+        if (savedTags) {
+            const tagsData = JSON.parse(savedTags);
+            // ❌ ของเดิม: setAvailableTags(tagsData.map(t => t.name));
+            // ✅ แก้เป็น: เก็บทั้ง Object เลยครับ
+            setAvailableTags(tagsData); 
+        } else {
+            // ❌ ของเดิม: setAvailableTags(DEFAULT_TAGS.map(t => t.name));
+            // ✅ แก้เป็น:
+            setAvailableTags(DEFAULT_TAGS);
+        }
+    }, []);
 
     return (
         <div className="w-full h-[95vh] p-2 md:p-4"> 
@@ -167,243 +201,154 @@ export default function ContactList() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-4 w-full md:w-auto">
+                    {/* แก้ไข Dropdown บัค (ใช้ flex-wrap แทน overflow) */}
+                    <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto flex-wrap justify-start md:justify-end"> 
                         
                         {selectedIds.length > 0 && (
-                            <button 
-                                onClick={handleDeleteClick} 
-                                className="shrink-0 flex items-center justify-center text-white bg-red-500/80 hover:bg-red-600 shadow-2xl rounded-2xl py-2 px-4 cursor-pointer w-full md:w-auto md:mr-3 transition-all duration-300"
-                            >
-                                <i className="fa-solid fa-trash mr-2"></i>
-                                <span>Delete ({selectedIds.length})</span>
+                            <button onClick={handleDeleteClick} className="shrink-0 flex items-center justify-center text-white bg-red-500/80 hover:bg-red-600 shadow-2xl rounded-2xl py-2 px-4 cursor-pointer md:mr-3 transition-all duration-300">
+                                <i className="fa-solid fa-trash mr-2"></i><span>Delete ({selectedIds.length})</span>
                             </button>
                         )}
 
                         <div 
-                            className="addcontact shrink-0 flex items-center justify-center text-white bg-[rgba(88,40,201,0.4)] shadow-2xl rounded-2xl py-2 px-4 cursor-pointer hover:bg-[rgba(88,40,201,0.6)] w-full md:w-auto md:mr-3"
+                            className="addcontact shrink-0 flex items-center justify-center text-white bg-[rgba(88,40,201,0.4)] shadow-2xl rounded-2xl py-2 px-4 cursor-pointer hover:bg-[rgba(88,40,201,0.6)] md:mr-3"
                             onClick={() => setIsAddModalOpen(true)}
                         >
                             <i className="fa-solid fa-plus mr-3"></i>
                             <button>Add Contact</button> 
                         </div>
 
-                        <div className="relative">
-                            <button 
-                                onClick={() => setIsCompanyFilterOpen(!isCompanyFilterOpen)}
-                                className={`shrink-0 flex items-center justify-center text-white shadow-2xl rounded-2xl py-2 px-4 cursor-pointer md:mr-3 w-full md:w-auto
-                                    ${isCompanyFilterOpen || filterCompany ? 'bg-[rgba(88,40,201,0.6)]' : 'bg-[rgba(32,41,59,0.25)] hover:bg-[rgba(32,41,59,0.5)]'}`}
-                            >
-                                <i className="fa-solid fa-building"></i>
-                                <p className="pl-2">{filterCompany || "Company"}</p>
-                                {filterCompany && (
-                                    <i 
-                                        className="fa-solid fa-times ml-2 text-xs opacity-70 hover:opacity-100"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setFilterCompany(null);
-                                        }}
-                                    ></i>
-                                )}
-                            </button>
+                        <div 
+                            className="shrink-0 flex items-center justify-center text-white bg-green-600/80 hover:bg-green-700 shadow-2xl rounded-2xl py-2 px-4 cursor-pointer md:mr-3"
+                            onClick={handleExportPDF}
+                        >
+                            <i className="fa-solid fa-file-pdf mr-2"></i>
+                            <button>PDF</button> 
+                        </div>
 
+                        <div className="relative">
+                            <button onClick={() => setIsCompanyFilterOpen(!isCompanyFilterOpen)} className={`shrink-0 flex items-center justify-center text-white shadow-2xl rounded-2xl py-2 px-4 cursor-pointer md:mr-3 w-full md:w-auto ${isCompanyFilterOpen || filterCompany ? 'bg-[rgba(88,40,201,0.6)]' : 'bg-[rgba(32,41,59,0.25)] hover:bg-[rgba(32,41,59,0.5)]'}`}>
+                                <i className="fa-solid fa-building"></i><p className="pl-2">{filterCompany || "Company"}</p>
+                                {filterCompany && <i className="fa-solid fa-times ml-2 text-xs opacity-70 hover:opacity-100" onClick={(e) => { e.stopPropagation(); setFilterCompany(null); }}></i>}
+                            </button>
                             {isCompanyFilterOpen && (
                                 <div className="absolute z-50 top-12 left-0 w-48 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl p-2 max-h-60 overflow-y-auto">
-                                    <div 
-                                        className={`p-2 rounded-lg cursor-pointer hover:bg-gray-800 text-white ${!filterCompany ? 'bg-gray-800 font-bold' : ''}`}
-                                        onClick={() => {
-                                            setFilterCompany(null);
-                                            setIsCompanyFilterOpen(false);
-                                        }}
-                                    >
-                                        All Companies
-                                    </div>
-
+                                    <div className={`p-2 rounded-lg cursor-pointer hover:bg-gray-800 text-white ${!filterCompany ? 'bg-gray-800 font-bold' : ''}`} onClick={() => { setFilterCompany(null); setIsCompanyFilterOpen(false); }}>All Companies</div>
                                     {availableCompanies.map((comp) => (
-                                        <div 
-                                            key={comp}
-                                            className={`p-2 rounded-lg cursor-pointer hover:bg-gray-800 text-white ${filterCompany === comp ? 'bg-gray-800 font-bold text-purple-400' : ''}`}
-                                            onClick={() => {
-                                                setFilterCompany(comp);
-                                                setIsCompanyFilterOpen(false);
-                                            }}
-                                        >
-                                            {comp}
-                                        </div>
+                                        <div key={comp} className={`p-2 rounded-lg cursor-pointer hover:bg-gray-800 text-white ${filterCompany === comp ? 'bg-gray-800 font-bold text-purple-400' : ''}`} onClick={() => { setFilterCompany(comp); setIsCompanyFilterOpen(false); }}>{comp}</div>
                                     ))}
-                                    {availableCompanies.length === 0 && (
-                                        <div className="p-2 text-gray-400 text-sm text-center">No companies found</div>
-                                    )}
-
+                                    {availableCompanies.length === 0 && <div className="p-2 text-gray-400 text-sm text-center">No companies found</div>}
                                 </div>
                             )}
                         </div>
 
                         <div className="relative"> 
-                            <button 
-                                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                className={`shrink-0 flex items-center justify-center bg-[rgba(32,41,59,0.25)] text-white shadow-2xl rounded-2xl py-2 px-4 cursor-pointer  ${isFilterOpen ? 'bg-[rgba(88,40,201,0.6)]' : 'bg-[rgba(32,41,59,0.25)] hover:bg-[rgba(32,41,59,0.5)]'}`}
-                            >
-                                <i className="fa-solid fa-filter"></i>
-                                <p className="pl-2">Filter</p>
+                            <button onClick={() => setIsFilterOpen(!isFilterOpen)} className={`shrink-0 flex items-center justify-center bg-[rgba(32,41,59,0.25)] text-white shadow-2xl rounded-2xl py-2 px-4 cursor-pointer  ${isFilterOpen ? 'bg-[rgba(88,40,201,0.6)]' : 'bg-[rgba(32,41,59,0.25)] hover:bg-[rgba(32,41,59,0.5)]'}`}>
+                                <i className="fa-solid fa-filter"></i><p className="pl-2">Filter</p>
                             </button>
-                            
                             <FilterPopup 
-                                isOpen={isFilterOpen}
-                                onClose={() => setIsFilterOpen(false)}
-                                currentFilters={filters}
-                                onApplyFilters={(newFilters) => setFilters(newFilters)}
-                                AVAILABLE_CHANNELS={availableChannels}
+                                isOpen={isFilterOpen} 
+                                onClose={() => setIsFilterOpen(false)} 
+                                currentFilters={filters} 
+                                onApplyFilters={(newFilters) => setFilters(newFilters)} 
+                                AVAILABLE_CHANNELS={availableChannels} 
                                 AVAILABLE_TAGS={availableTags}
-                                AVAILABLE_STATUSES={AVAILABLE_STATUSES}
-                            />
+                                AVAILABLE_STATUSES={AVAILABLE_STATUSES} />
                         </div>
+
                     </div>
                 </div>
                 
-                
                 <div className="flex-1 overflow-y-auto overflow-x-auto">
                     <div className="min-w-[1060px]">
-                         {/* ... ส่วน Table Header ... */}
-                         <div className="grid grid-cols-[auto_2fr_repeat(7,1fr)] gap-x-4 items-center py-3 border-b border-gray-500/30 text-gray-300 font-semibold text-sm px-4 ">
-                            <input 
-                                type="checkbox" 
-                                className={CHECKBOX_CLASS} 
-                                onChange={handleSelectAll}
-                                checked={filteredContacts.length > 0 && selectedIds.length === filteredContacts.length}
-                            />
-                            <span>Name</span>
-                            <span>Channel</span>
-                            <span>Email</span>
-                            <span>Phone</span>
-                            <span>Company</span>
-                            <span>Country</span>
-                            <span>Tags</span>
-                            <span>Status</span>
+                        <div className="grid grid-cols-[auto_2fr_repeat(7,1fr)] gap-x-4 items-center py-3 border-b border-gray-500/30 text-gray-300 font-semibold text-sm px-4 ">
+                            <input type="checkbox" className={CHECKBOX_CLASS} onChange={handleSelectAll} checked={filteredContacts.length > 0 && selectedIds.length === filteredContacts.length}/>
+                            <span>Name</span><span>Channel</span><span>Email</span><span>Phone</span><span>Company</span><span>Country</span><span>Tags</span><span>Status</span>
                         </div>
-
                         <div className="text-white text-sm">
                             {filteredContacts.map((contact) => (
-                                <div 
-                                    key={contact.id} 
-                                    onClick={() => handleRowClick(contact)}
-                                    className="grid grid-cols-[auto_2fr_repeat(7,1fr)] gap-x-4 items-center py-3 border-b border-gray-500/20 hover:bg-white/10 cursor-pointer px-4"
-                                >
-                                    <input 
-                                        type="checkbox" 
-                                        className={CHECKBOX_CLASS}
-                                        onClick={(e) => e.stopPropagation()} 
-                                        onChange={(e) => handleSelectOne(e, contact.id)} 
-                                        checked={selectedIds.includes(contact.id)} 
-                                    />
-                                    
-                                    <div className="flex items-center">
-                                        <img src={contact.imgUrl} alt={contact.name} className="w-8 h-8 rounded-full mr-3" />
-                                        <span>{contact.name}</span>
-                                    </div>
-                                    
+                                <div key={contact.id} onClick={() => handleRowClick(contact)} className="grid grid-cols-[auto_2fr_repeat(7,1fr)] gap-x-4 items-center py-3 border-b border-gray-500/20 hover:bg-white/10 cursor-pointer px-4">
+                                    <input type="checkbox" className={CHECKBOX_CLASS} onClick={(e) => e.stopPropagation()} onChange={(e) => handleSelectOne(e, contact.id)} checked={selectedIds.includes(contact.id)} />
+                                    <div className="flex items-center"><img src={contact.imgUrl} alt={contact.name} className="w-8 h-8 rounded-full mr-3" /><span>{contact.name}</span></div>
                                     <div className="flex items-center">
                                         {contact.channel === 'Facebook' && <i className="fa-brands fa-facebook mr-2 text-blue-500"></i>}
-                                        {contact.channel === 'Instagram' && <i className="fa-brands fa-instagram mr-2 text-pink-500"></i>}
                                         {contact.channel === 'Line' && <i className="fa-brands fa-line mr-2 text-green-500"></i>}
                                         <span className={!contact.channel ? "text-gray-400" : ""}>{contact.channel || "N/A"}</span>
                                     </div>
-
                                     <span className={!contact.email ? "text-gray-400" : ""}>{contact.email || "N/A"}</span>
-                                    
-                                    <span className={!contact.phone ? "text-gray-400" : ""}>
-                                        {contact.phone ? (
-                                            <>
-                                                {contact.phonePrefix && `${contact.phonePrefix}`}
-                                                {contact.phone}
-                                            </>
-                                        ) : (
-                                            "N/A"
-                                        )}
-                                    </span>
-
-                                    <span className={!contact.company ? "text-gray-400" : ""}>
-                                        {contact.company || "N/A"}
-                                    </span>
-
-                                    <span className={!contact.country ? "text-gray-400" : ""}>
-                                        {contact.country || "N/A"}
-                                    </span>
-
+                                    <span className={!contact.phone ? "text-gray-400" : ""}>{contact.phone ? <>{contact.phonePrefix && `${contact.phonePrefix}`}{contact.phone}</> : "N/A"}</span>
+                                    <span className={!contact.company ? "text-gray-400" : ""}>{contact.company || "N/A"}</span>
+                                    <span className={!contact.country ? "text-gray-400" : ""}>{contact.country || "N/A"}</span>
                                     <div className="flex items-center">
-                                        {contact.tags === 'VIP' ? (
-                                            <>
-                                                <i className="fa-solid fa-crown mr-2 text-yellow-400"></i>
-                                                <span>{contact.tags}</span>
-                                            </>
-                                        ) : (
-                                            <span className={!contact.tags ? "text-gray-400" : ""}>{contact.tags || "N/A"}</span>
-                                        )}
-                                    </div>
+                                        {(() => {
+                                            // 1. ดึงชื่อ Tag ออกมา (รองรับทั้ง Array และ String)
+                                            let tagName = contact.tags;
+        
+                                            // ถ้าเป็น Array (เช่น ["VIP"]) ให้เอาตัวแรกออกมาใช้
+                                            if (Array.isArray(contact.tags)) {
+                                                tagName = contact.tags.length > 0 ? contact.tags[0] : null;
+                                            }
 
+                                            // 2. เอาชื่อไปค้นหาข้อมูลสี/อีโมจิ ใน availableTags
+                                            const tagData = availableTags.find(t => t.name === tagName);
+        
+                                            if (tagData) {
+                                                return (
+                                                    <span 
+                                                        className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm border border-white/10 flex items-center gap-1 w-fit"
+                                                        style={{ backgroundColor: tagData.color || '#666' }}
+                                                    >
+                                                        {tagData.emoji} {tagData.name}
+                                                    </span>
+                                                );
+                                            }
+        
+                                            // Fallback: ถ้าหาไม่เจอ หรือไม่มี Tag
+                                            return <span className="text-gray-400">{tagName || "N/A"}</span>;
+                                        })()}
+                                    </div>
                                     <span className={!contact.status ? "text-gray-400" : ""}>{contact.status || "N/A"}</span>
                                 </div>
                             ))}
                         </div>
                     </div> 
                 </div> 
+
             </div>
 
+            {/* Modal Components */}
             {isDeleteModalOpen && (
-                <div 
-                    className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-                    onClick={() => setIsDeleteModalOpen(false)}
-                >
-                    <div 
-                        className="bg-gray-800 border border-gray-600 rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center transform transition-all scale-100"
-                        onClick={e => e.stopPropagation()}
-                    >
-                        <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i className="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
-                        </div>
-                        
+                <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setIsDeleteModalOpen(false)}>
+                    <div className="bg-gray-800 border border-gray-600 rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center transform transition-all scale-100" onClick={e => e.stopPropagation()}>
+                        <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4"><i className="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i></div>
                         <h3 className="text-xl font-bold text-white mb-2">Confirm Deletion</h3>
-                        <p className="text-gray-300 mb-6">
-                            Are you sure you want to delete <span className="font-bold text-white">{selectedIds.length}</span> selected contacts? 
-                            <br />This action cannot be undone.
-                        </p>
-
+                        <p className="text-gray-300 mb-6">Are you sure you want to delete <span className="font-bold text-white">{selectedIds.length}</span> selected contacts? <br />This action cannot be undone.</p>
                         <div className="flex gap-3 justify-center">
-                            <button 
-                                onClick={() => setIsDeleteModalOpen(false)}
-                                className="px-5 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-medium transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                onClick={confirmDelete}
-                                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg shadow-red-600/30 transition-all transform hover:scale-105"
-                            >
-                                Delete
-                            </button>
+                            <button onClick={() => setIsDeleteModalOpen(false)} className="px-5 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-medium transition-colors">Cancel</button>
+                            <button onClick={confirmDelete} className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg shadow-red-600/30 transition-all transform hover:scale-105">Delete</button>
                         </div>
                     </div>
                 </div>
             )}
             
-            {isModalOpen && selectedContact && (
-                <ContactDetail
-                    contact={selectedContact}
-                    onClose={handleCloseModal}
-                    onSave={handleSaveChanges}
+            {isModalOpen && selectedContact && ( 
+                <ContactDetail 
+                    contact={selectedContact} 
+                    onClose={handleCloseModal} 
+                    onSave={handleSaveChanges} 
                     onDelete={handleDeleteContact} 
                     AVAILABLE_TAGS={availableTags}
                     AVAILABLE_COMPANIES={availableCompanies} 
-                />
+                /> 
             )}
-
-            {isAddModalOpen && (
-                <AddContactModal
-                    onClose={() => setIsAddModalOpen(false)}
-                    onAdd={handleAddContact}
-                    AVAILABLE_TAGS={availableTags}
-                    AVAILABLE_CHANNELS={availableChannels}
-                    AVAILABLE_COMPANIES={availableCompanies}
-                />
+            {isAddModalOpen && ( 
+                <AddContactModal 
+                    onClose={() => setIsAddModalOpen(false)} 
+                    onAdd={handleAddContact} 
+                    AVAILABLE_TAGS={availableTags} 
+                    AVAILABLE_CHANNELS={availableChannels} 
+                    AVAILABLE_COMPANIES={availableCompanies} 
+                /> 
             )}
         </div> 
     );
