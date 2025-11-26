@@ -4,6 +4,8 @@
 // 1. Imports
 // -----------------------------------------------------------------------------
 import { useState, useEffect, useMemo } from "react"; 
+import { useSearchParams } from "next/navigation";
+
 
 // Components
 import ChatList from "@/app/components/ChatList.jsx";
@@ -52,7 +54,8 @@ const processInitialData = (data) => {
 // -----------------------------------------------------------------------------
 // 3. Main Component
 // -----------------------------------------------------------------------------
-export default function LineChatPage() {
+export default function FacebookChatPage() {
+    const searchParams = useSearchParams();
     
     // --- States ---
     const [chats, setChats] = useState(() => processInitialData(unifiedMockData));
@@ -110,7 +113,11 @@ export default function LineChatPage() {
     }, []);
 
     useEffect(() => {
-        if (isLoaded) localStorage.setItem("onechat_data", JSON.stringify(chats));
+        if (isLoaded) {
+            localStorage.setItem("onechat_data", JSON.stringify(chats));
+            
+            window.dispatchEvent(new Event("chat-data-updated"));
+        }
     }, [chats, isLoaded]);
 
     // Load Agents
@@ -144,6 +151,42 @@ export default function LineChatPage() {
         if (isLoaded && activityLogs.length > 0) 
             localStorage.setItem("onechat_activity_logs", JSON.stringify(activityLogs));
     }, [activityLogs, isLoaded]);
+
+    useEffect(() => {
+        if (isLoaded) {
+            const urlId = searchParams.get('id');
+            if (urlId) {
+                const idNum = parseInt(urlId);
+                const targetChat = chats.find(c => c.id === idNum);
+            
+                if (targetChat) {
+                    setSelectedChatId(idNum);
+
+                    if (targetChat.status === 'New Chat') {
+                        setChats(prev => prev.map(c => 
+                            c.id === idNum ? { ...c, status: 'Open', unreadCount: 0 } : c
+                        ));
+                    }
+                }
+            }
+        }
+    }, [searchParams, isLoaded, chats]);
+
+    useEffect(() => {
+        if (isLoaded && selectedChatId) {
+            const currentChat = chats.find(c => c.id === selectedChatId);
+            
+            if (currentChat && currentChat.status === "New Chat") {
+                setChats(prevChats => 
+                    prevChats.map(chat => 
+                        chat.id === selectedChatId 
+                            ? { ...chat, status: "Open", unreadCount: 0 } 
+                            : chat
+                    )
+                );
+            }
+        }
+    }, [selectedChatId, isLoaded, chats]);
 
 
     // -------------------------------------------------------------------------
@@ -261,7 +304,7 @@ export default function LineChatPage() {
     // -------------------------------------------------------------------------
     const availableCompanies = useMemo(() => [...new Set(chats.map(c => c.company).filter(Boolean))], [chats]);
 
-    // 1. Filter by Channel (Line)
+    // 1. Filter by Channel (Facebook)
     const channelFilteredChats = chats.filter(chat => chat.channel === CHANNEL_FILTER);
 
     // 2. Filter by Status & Company

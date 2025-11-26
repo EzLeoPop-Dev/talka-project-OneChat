@@ -64,17 +64,28 @@ export default function ChatList({ chats, onSelectChat, selectedId, availableTag
                                                 <h3 className="text-white font-semibold text-sm truncate">
                                                     {chat.name}
                                                 </h3>
-                                                <span className="text-white/70 text-xs ml-5 shrink-0">
-                                                    {chat.time}
-                                                </span>
+                                                
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-white/70 text-xs shrink-0">
+                                                        {chat.time}
+                                                    </span>
+                                                    
+                                                    {/* New Chat Badge */}
+                                                    {chat.status === 'New Chat' && (
+                                                        <div className="min-w-[35px] h-[18px] bg-red-500 rounded-full flex items-center justify-center px-2 animate-pulse shadow-lg shadow-red-500/40">
+                                                            <span className="text-white text-[9px] font-bold uppercase tracking-wide">
+                                                                NEW
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                             
                                             <div className="flex items-center gap-2">
-                                                <p className="text-white/80 text-sm truncate flex-1">
+                                                <p className={`text-sm truncate flex-1 ${chat.unreadCount > 0 ? 'text-white font-medium' : 'text-white/80'}`}>
                                                     {isMe && <span className="text-white/50 mr-1">You:</span>}
                                                     {displayMessage}
                                                 </p>
-
                                                 {/* AI Auto Status */}
                                                 {chat.isAiMode && (
                                                     <span className="bg-green-500/10 text-green-400 border border-green-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1 animate-pulse">

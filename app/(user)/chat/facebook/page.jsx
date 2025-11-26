@@ -4,6 +4,8 @@
 // 1. Imports
 // -----------------------------------------------------------------------------
 import { useState, useEffect, useMemo } from "react"; 
+import { useSearchParams } from "next/navigation";
+
 
 // Components
 import ChatList from "@/app/components/ChatList.jsx";
@@ -27,7 +29,7 @@ import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
 // -----------------------------------------------------------------------------
 // 2. Constants & Config
 // -----------------------------------------------------------------------------
-const CHANNEL_FILTER = "Facebook"; // ✅ เปลี่ยนเป็น "Line" สำหรับหน้า Line
+const CHANNEL_FILTER = "Facebook"; 
 const ALL_AVAILABLE_STATUS = ["New Chat", "Open", "Pending", "Closed"];
 
 const DEFAULT_AI_AGENTS = [
@@ -53,6 +55,7 @@ const processInitialData = (data) => {
 // 3. Main Component
 // -----------------------------------------------------------------------------
 export default function FacebookChatPage() {
+    const searchParams = useSearchParams();
     
     // --- States ---
     const [chats, setChats] = useState(() => processInitialData(unifiedMockData));
@@ -110,7 +113,11 @@ export default function FacebookChatPage() {
     }, []);
 
     useEffect(() => {
-        if (isLoaded) localStorage.setItem("onechat_data", JSON.stringify(chats));
+        if (isLoaded) {
+            localStorage.setItem("onechat_data", JSON.stringify(chats));
+            
+            window.dispatchEvent(new Event("chat-data-updated"));
+        }
     }, [chats, isLoaded]);
 
     // Load Agents
@@ -144,6 +151,42 @@ export default function FacebookChatPage() {
         if (isLoaded && activityLogs.length > 0) 
             localStorage.setItem("onechat_activity_logs", JSON.stringify(activityLogs));
     }, [activityLogs, isLoaded]);
+
+    useEffect(() => {
+        if (isLoaded) {
+            const urlId = searchParams.get('id');
+            if (urlId) {
+                const idNum = parseInt(urlId);
+                const targetChat = chats.find(c => c.id === idNum);
+            
+                if (targetChat) {
+                    setSelectedChatId(idNum);
+
+                    if (targetChat.status === 'New Chat') {
+                        setChats(prev => prev.map(c => 
+                            c.id === idNum ? { ...c, status: 'Open', unreadCount: 0 } : c
+                        ));
+                    }
+                }
+            }
+        }
+    }, [searchParams, isLoaded, chats]);
+
+    useEffect(() => {
+        if (isLoaded && selectedChatId) {
+            const currentChat = chats.find(c => c.id === selectedChatId);
+            
+            if (currentChat && currentChat.status === "New Chat") {
+                setChats(prevChats => 
+                    prevChats.map(chat => 
+                        chat.id === selectedChatId 
+                            ? { ...chat, status: "Open", unreadCount: 0 } 
+                            : chat
+                    )
+                );
+            }
+        }
+    }, [selectedChatId, isLoaded, chats]);
 
 
     // -------------------------------------------------------------------------
