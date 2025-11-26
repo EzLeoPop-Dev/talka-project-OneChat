@@ -1,7 +1,7 @@
 "use client";
 
 // 1. รับ prop 'onOpenContactDetails' เพิ่ม
-export default function ControlPanel({ onOpenAddTagModal, onOpenContactDetails, onOpenAddNote, onOpenChangeStatus }) {
+export default function ControlPanel({ onOpenAddTagModal, onOpenContactDetails, onOpenAddNote, onOpenChangeStatus, onOpenActivityLog }) {
 
     return (
         <div className="w-[65px] mt-3 ml-3">
@@ -17,7 +17,7 @@ export default function ControlPanel({ onOpenAddTagModal, onOpenContactDetails, 
                         <i className="fa-solid fa-tags text-white/70 group-hover:text-white text-lg transition-colors"></i>
                     </button>
 
-                    {/* ปุ่มที่ 2: User (Profile) */}
+                    {/* ปุ่มที่ 2: Profile */}
                     <button 
                         onClick={onOpenContactDetails} 
                         className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"
@@ -26,7 +26,7 @@ export default function ControlPanel({ onOpenAddTagModal, onOpenContactDetails, 
                         <i className="fa-solid fa-info text-white/70 group-hover:text-white text-lg transition-colors"></i>
                     </button>
 
-                    {/* ปุ่มที่ 3: Book (Notes) */}
+                    {/* ปุ่มที่ 3: Notes */}
                     <button 
                         onClick={onOpenAddNote}
                         className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"
@@ -35,13 +35,22 @@ export default function ControlPanel({ onOpenAddTagModal, onOpenContactDetails, 
                         <i className="fa-solid fa-book text-white/70 group-hover:text-white text-lg transition-colors"></i>
                     </button>
 
-                    {/* ปุ่มที่ 4: Book (Notes) */}
+                    {/* ปุ่มที่ 4: Change Status */}
                     <button 
                         onClick={onOpenChangeStatus}
                         className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"
-                        title="Notes"
+                        title="Change Status"
                     >
                         <i className="fa-solid fa-timeline text-white/70 group-hover:text-white text-lg transition-colors"></i>
+                    </button>
+
+                    {/* ปุ่มที่ 5: Activity Log */}
+                    <button 
+                        onClick={onOpenActivityLog}
+                        className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"
+                        title="Activity Log"
+                    >
+                        <i className="fa-solid fa-clock-rotate-left text-white/70 group-hover:text-white text-lg transition-colors"></i>
                     </button>
                     
                 </div>

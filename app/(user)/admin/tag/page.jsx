@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus, X, BookOpenText, Tag } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
+import { DEFAULT_TAGS } from "@/app/data/defaultTags";
 
 export default function TagsPage() {
   const [tags, setTags] = useState([]);
@@ -59,6 +60,23 @@ export default function TagsPage() {
     setIsEditModalOpen(false);
     setEditTag(null);
   };
+
+  useEffect(() => {
+    const savedTags = localStorage.getItem("onechat_tags");
+    if (savedTags) {
+        setTags(JSON.parse(savedTags));
+    } else {
+        setTags(DEFAULT_TAGS);
+        localStorage.setItem("onechat_tags", JSON.stringify(DEFAULT_TAGS));
+    }
+  }, []);
+
+  // Save Tags to LocalStorage 
+  useEffect(() => {
+    if (tags.length > 0) {
+        localStorage.setItem("onechat_tags", JSON.stringify(tags));
+    }
+  }, [tags]);
 
   return (
     <div className="w-full h-[94vh] p-4">
