@@ -6,16 +6,14 @@ import FilterPopup from '@/app/components/FilterPopup';
 import AddContactModal from '@/app/components/AddContact';
 import { DEFAULT_TAGS } from "@/app/data/defaultTags";
 
-
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const AVAILABLE_STATUSES = ["Open", "Closed"];
 
 export default function ContactList() {
-    // 1. เริ่มต้น State ด้วยข้อมูล Mock ก่อน (เพื่อไม่ให้หน้าขาวตอนโหลด)
     const [contacts, setContacts] = useState([]); 
-    const [isLoaded, setIsLoaded] = useState(false); // เช็คว่าโหลดเสร็จหรือยัง
+    const [isLoaded, setIsLoaded] = useState(false); 
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedContact, setSelectedContact] = useState(null);
@@ -34,34 +32,29 @@ export default function ContactList() {
     const [filterCompany, setFilterCompany] = useState(null);
     const [isCompanyFilterOpen, setIsCompanyFilterOpen] = useState(false);
 
-    // --- 2. useEffect: โหลดข้อมูลจาก LocalStorage ตอนเข้าเว็บ ---
     useEffect(() => {
-        const savedData = localStorage.getItem('onechat_data'); // ✅ ใช้ Key เดียวกับหน้า Chat
+        const savedData = localStorage.getItem('onechat_data'); 
         if (savedData) {
             setContacts(JSON.parse(savedData));
         } else {
-            // ถ้าไม่มีข้อมูลเลย ให้ใช้ Mock Data เริ่มต้น
             setContacts(unifiedMockData);
             localStorage.setItem('onechat_data', JSON.stringify(unifiedMockData));
         }
         setIsLoaded(true);
     }, []);
 
-    // --- 3. Save Data (แก้ชื่อ Key เป็น 'onechat_data') ---
     useEffect(() => {
         if (isLoaded) {
-            localStorage.setItem('onechat_data', JSON.stringify(contacts)); // ✅ ใช้ Key เดียวกัน
+            localStorage.setItem('onechat_data', JSON.stringify(contacts)); 
         }
     }, [contacts, isLoaded]);
 
     useEffect(() => {
         const savedTags = localStorage.getItem("onechat_tags");
         if (savedTags) {
-            setAvailableTags(JSON.parse(savedTags));
+            setAvailableTags(JSON.parse(savedTags)); 
         } else {
             setAvailableTags(DEFAULT_TAGS);
-            // (Optional) ถ้ายังไม่มีก็เซฟ Default ลงไป
-            localStorage.setItem("onechat_tags", JSON.stringify(DEFAULT_TAGS)); 
         }
     }, []);
 
@@ -71,15 +64,11 @@ export default function ContactList() {
     const handleRowClick = (contact) => { setSelectedContact(contact); setIsModalOpen(true); };
     const handleCloseModal = () => { setIsModalOpen(false); setSelectedContact(null); };
 
-    // --- แก้ไข Function ให้ยุ่งแค่กับ State (ไม่ต้องแก้ไฟล์ Mock) ---
     const handleSaveChanges = (updatedContact) => {
         const contactToSave = { ...updatedContact };
         Object.keys(contactToSave).forEach(key => { if (contactToSave[key] === "") contactToSave[key] = null; });
-        
-        // อัปเดต State (เดี๋ยว useEffect จะ save ลง LS ให้เอง)
         const newContacts = contacts.map(c => c.id === contactToSave.id ? contactToSave : c);
         setContacts(newContacts);
-
         handleCloseModal(); 
     };
 
@@ -87,31 +76,24 @@ export default function ContactList() {
         const newContacts = contacts.filter(c => c.id !== contactId);
         setContacts(newContacts);
     };
-
     const handleDeleteClick = () => { setIsDeleteModalOpen(true); };
-
     const confirmDelete = () => {
         const newContacts = contacts.filter(c => !selectedIds.includes(c.id));
         setContacts(newContacts);
         setSelectedIds([]);
         setIsDeleteModalOpen(false);
     };
-
     const handleAddContact = (newContactData) => {
         const newId = Date.now();
         const nameQuery = newContactData.name ? newContactData.name.replace(' ', '+') : 'New+User';
         const imgUrl = `https://ui-avatars.com/api/?name=${nameQuery}&background=random`;
-        
         const newContact = { ...newContactData, id: newId, imgUrl: imgUrl };
-        
-        // เพิ่มเข้า State ด้านบนสุด
         setContacts(prevContacts => [newContact, ...prevContacts]);
         setIsAddModalOpen(false);
     };
-    // -------------------------------------------------------------
 
     const filteredContacts = useMemo(() => {
-        return contacts.filter(contact => {
+        const filtered = contacts.filter(contact => {
             const nameMatch = contact.name.toLowerCase().includes(searchTerm.toLowerCase());
             const channelMatch = !filters.channel || contact.channel === filters.channel;
             const tagMatch = !filters.tag || (() => {
@@ -124,6 +106,21 @@ export default function ContactList() {
             const companyMatch = !filterCompany || contact.company === filterCompany;
             return nameMatch && channelMatch && tagMatch && statusMatch && companyMatch;
         });
+
+        return filtered.sort((a, b) => {
+            const statusOrder = {
+                "New Chat": 1, 
+                "Pending": 2,  
+                "Open": 3,     
+                "Closed": 4    
+            };
+
+            const priorityA = statusOrder[a.status] || 99;
+            const priorityB = statusOrder[b.status] || 99;
+
+            return priorityA - priorityB;
+        });
+
     }, [contacts, searchTerm, filters, filterCompany]);
 
     const handleSelectAll = (e) => {
@@ -168,20 +165,6 @@ export default function ContactList() {
 
     const CHECKBOX_CLASS = "appearance-none h-4 w-4 border border-gray-400 rounded-sm bg-transparent checked:bg-white checked:border-white focus:outline-none focus:ring-0 cursor-pointer relative checked:after:content-[''] checked:after:absolute checked:after:left-[0.3rem] checked:after:top-[0.0rem] checked:after:w-[0.25rem] checked:after:h-[0.55rem] checked:after:border-b-[0.15rem] checked:after:border-r-[0.15rem] checked:after:border-black checked:after:rotate-45";
 
-    useEffect(() => {
-        const savedTags = localStorage.getItem("onechat_tags");
-        if (savedTags) {
-            const tagsData = JSON.parse(savedTags);
-            // ❌ ของเดิม: setAvailableTags(tagsData.map(t => t.name));
-            // ✅ แก้เป็น: เก็บทั้ง Object เลยครับ
-            setAvailableTags(tagsData); 
-        } else {
-            // ❌ ของเดิม: setAvailableTags(DEFAULT_TAGS.map(t => t.name));
-            // ✅ แก้เป็น:
-            setAvailableTags(DEFAULT_TAGS);
-        }
-    }, []);
-
     return (
         <div className="w-full h-[95vh] p-2 md:p-4"> 
             <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
@@ -201,7 +184,6 @@ export default function ContactList() {
                         />
                     </div>
 
-                    {/* แก้ไข Dropdown บัค (ใช้ flex-wrap แทน overflow) */}
                     <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto flex-wrap justify-start md:justify-end"> 
                         
                         {selectedIds.length > 0 && (
@@ -281,17 +263,11 @@ export default function ContactList() {
                                     <span className={!contact.country ? "text-gray-400" : ""}>{contact.country || "N/A"}</span>
                                     <div className="flex items-center">
                                         {(() => {
-                                            // 1. ดึงชื่อ Tag ออกมา (รองรับทั้ง Array และ String)
                                             let tagName = contact.tags;
-        
-                                            // ถ้าเป็น Array (เช่น ["VIP"]) ให้เอาตัวแรกออกมาใช้
                                             if (Array.isArray(contact.tags)) {
                                                 tagName = contact.tags.length > 0 ? contact.tags[0] : null;
                                             }
-
-                                            // 2. เอาชื่อไปค้นหาข้อมูลสี/อีโมจิ ใน availableTags
                                             const tagData = availableTags.find(t => t.name === tagName);
-        
                                             if (tagData) {
                                                 return (
                                                     <span 
@@ -302,8 +278,6 @@ export default function ContactList() {
                                                     </span>
                                                 );
                                             }
-        
-                                            // Fallback: ถ้าหาไม่เจอ หรือไม่มี Tag
                                             return <span className="text-gray-400">{tagName || "N/A"}</span>;
                                         })()}
                                     </div>

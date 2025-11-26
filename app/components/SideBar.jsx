@@ -41,6 +41,7 @@ export default function Sidebar() {
     const [openUserMenu, setOpenUserMenu] = useState(false);
 
     // 🔔 Notification State
+    const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
 
     // ---------------- Background modal state ----------------
@@ -106,26 +107,29 @@ export default function Sidebar() {
     };
 
 
-    const notifications = [
-        {
-            id: 1,
-            name: "Supachai Phon",
-            profile: "/images/profile1.jpg",
-            platform: "Facebook",
-            message: "สวัสดีครับ ขอสอบถามหน่อยครับ",
-            time: "2 นาทีที่แล้ว",
-            icon: "facebook",
-        },
-        {
-            id: 2,
-            name: "Nattawat",
-            profile: "/images/profile2.jpg",
-            platform: "Line",
-            message: "พอจะมีสินค้าพร้อมส่งไหม?",
-            time: "10 นาทีที่แล้ว",
-            icon: "line",
-        },
-    ];
+    const loadNotifications = () => {
+        try {
+            const savedData = localStorage.getItem("onechat_data");
+            if (savedData) {
+                const chats = JSON.parse(savedData);
+                const newChats = chats.filter(chat => chat.status === "New Chat");
+
+                const formattedNotifications = newChats.map(chat => ({
+                    id: chat.id,
+                    name: chat.name,
+                    profile: chat.imgUrl,
+                    platform: chat.channel, 
+                    message: chat.lastMessage || "มีข้อความใหม่",
+                    time: chat.lastMessageTime || "ล่าสุด",
+                    icon: chat.channel?.toLowerCase(),
+                }));
+
+                setNotifications(formattedNotifications);
+            }
+        } catch (error) {
+            console.error("Error loading notifications:", error);
+        }
+    };
 
     useEffect(() => {
         try {
@@ -157,6 +161,15 @@ export default function Sidebar() {
 
         const savedBg = localStorage.getItem("appBackground");
         if (savedBg) setSelectedBg(savedBg);
+
+        loadNotifications();
+
+        const handleChatUpdate = () => loadNotifications();
+        window.addEventListener("chat-data-updated", handleChatUpdate);
+
+        return () => {
+            window.removeEventListener("chat-data-updated", handleChatUpdate);
+        };
     }, []);
 
     const handleLogout = () => {
@@ -212,18 +225,14 @@ export default function Sidebar() {
                             className="relative p-2 rounded-xl hover:bg-white/10 transition text-white"
                             aria-label="Open notifications"
                         >
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="22"
-                                height="22"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
+                            {/* ✅ แสดงจุดแดงเฉพาะเมื่อมี Notification */}
+                            {notifications.length > 0 && (
+                                <div className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] bg-red-500 rounded-full animate-pulse px-1">
+                                    <span className="text-[10px] font-bold text-white">{notifications.length}</span>
+                                </div>
+                            )}
+                            
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                                 <path d="M18.63 13A17.89 17.89 0 0 1 18 8" />
                                 <path d="M6.26 6.26A5.94 5.94 0 0 0 6 8c0 7-3 9-3 9h18" />
@@ -474,10 +483,7 @@ export default function Sidebar() {
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 flex items-center justify-center z-999"
                     >
-                        <div
-                            className="absolute inset-0 bg-black/50 backdrop-blur-md"
-                            onClick={() => setShowNotifications(false)}
-                        ></div>
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-md" onClick={() => setShowNotifications(false)}></div>
 
                         <motion.div
                             initial={{ opacity: 0, scale: 0.7, y: 40 }}
@@ -488,43 +494,50 @@ export default function Sidebar() {
                         >
 
                             <h2 className="text-xl text-white font-semibold mb-4 text-center">
-                                Notifications
+                                Notifications ({notifications.length})
                             </h2>
 
                             <div className="space-y-3">
-                                {notifications.map((n) => (
-                                    <div
-                                        key={n.id}
-                                        className="w-full flex items-center gap-4 p-3 rounded-xl bg-white/10 hover:bg-white/20 transition cursor-pointer"
-                                    >
-                                        <img
-                                            src={n.profile}
-                                            className="w-12 h-12 rounded-full object-cover"
-                                        />
+                                {notifications.length === 0 ? (
+                                    <p className="text-white/50 text-center py-10">ไม่มีการแจ้งเตือนใหม่</p>
+                                ) : (
+                                    notifications.map((n) => (
+                                        <div
+                                            key={n.id}
+                                            className="w-full flex items-center gap-4 p-3 rounded-xl bg-white/10 hover:bg-white/20 transition cursor-pointer"
+                                            onClick={() => {
+                                                router.push(`/chat/allchat?id=${n.id}`);
+                                                setShowNotifications(false);
+                                            }}
+                                        >
+                                        {/* รูปโปรไฟล์ */}
+                                        {n.profile ? (
+                                            <img src={n.profile} className="w-12 h-12 rounded-full object-cover" />
+                                        ) : (
+                                                <div className="w-12 h-12 rounded-full bg-gray-500 flex items-center justify-center text-white font-bold">
+                                                    {n.name.charAt(0)}
+                                                </div>
+                                            )}
 
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-white font-medium">
-                                                    {n.name}
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-white font-medium">{n.name}</p>
+
+                                                    {n.icon === "facebook" && <Facebook size={16} className="text-blue-400" />}
+                                                    {n.icon === "line" && <MessageSquare size={16} className="text-green-400" />}
+                                                    <span className="bg-red-500/20 text-red-300 text-[10px] px-2 py-0.5 rounded-full border border-red-500/30">New</span>
+                                                </div>
+
+                                                <p className="text-white/60 text-sm">
+                                                    {n.platform} • {n.time}
                                                 </p>
-
-                                                {n.icon === "facebook" && (
-                                                    <Facebook size={16} className="text-blue-400" />
-                                                )}
-                                                {n.icon === "line" && (
-                                                    <MessageSquare size={16} className="text-green-400" />
-                                                )}
+                                                <p className="text-white/80 mt-1 text-sm line-clamp-1">
+                                                    {n.message}
+                                                </p>
                                             </div>
-
-                                            <p className="text-white/60 text-sm">
-                                                {n.platform} • {n.time}
-                                            </p>
-                                            <p className="text-white/80 mt-1 text-sm line-clamp-1">
-                                                {n.message}
-                                            </p>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
 
                             <button
