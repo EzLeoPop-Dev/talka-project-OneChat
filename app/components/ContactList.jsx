@@ -50,7 +50,7 @@ export default function ContactList() {
     // --- 3. Save Data (แก้ชื่อ Key เป็น 'onechat_data') ---
     useEffect(() => {
         if (isLoaded) {
-            localStorage.setItem('onechat_data', JSON.stringify(contacts)); // ✅ ใช้ Key เดียวกัน
+            localStorage.setItem('onechat_data', JSON.stringify(contacts)); 
         }
     }, [contacts, isLoaded]);
 
@@ -172,12 +172,11 @@ export default function ContactList() {
         const savedTags = localStorage.getItem("onechat_tags");
         if (savedTags) {
             const tagsData = JSON.parse(savedTags);
-            // ❌ ของเดิม: setAvailableTags(tagsData.map(t => t.name));
-            // ✅ แก้เป็น: เก็บทั้ง Object เลยครับ
+          leTags(tagsData.map(t => t.name));
+          
             setAvailableTags(tagsData); 
         } else {
-            // ❌ ของเดิม: setAvailableTags(DEFAULT_TAGS.map(t => t.name));
-            // ✅ แก้เป็น:
+         
             setAvailableTags(DEFAULT_TAGS);
         }
     }, []);

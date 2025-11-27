@@ -30,8 +30,6 @@ export default function ContactDetails({ onClose, contact, onUpdateContact }) {
     );
   }
 
-  const isVip = contact.tags && contact.tags.includes("VIP");
-
   const handleSave = (field) => {
     if (typeof onUpdateContact !== 'function') {
       console.error("onUpdateContact is not a function. Check page.jsx");
@@ -69,19 +67,13 @@ export default function ContactDetails({ onClose, contact, onUpdateContact }) {
 
       {/* Profile Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-16 h-16 bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-3xl shadow-lg shrink-0">
+        <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-3xl shadow-lg shrink-0 text-white">
           {contact.avatar}
         </div>
         
-        <div>
+        <div className="min-w-0">
           <h3 className="text-white font-semibold text-lg truncate">{contact.name}</h3>
-          {isVip && (
-            <span className="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full">
-              VIP
-            </span>
-          )}
         </div>
-        <i className="fa-brands fa-facebook text-blue-500 ml-auto text-xl"></i>
       </div>
 
       {/* Contact Fields */}

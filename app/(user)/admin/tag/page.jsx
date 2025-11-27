@@ -2,10 +2,15 @@
 import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus, X, BookOpenText, Tag } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
-import { DEFAULT_TAGS } from "@/app/data/defaultTags";
+
+const DEFAULT_TAGS = [
+  { id: 'vip', name: 'VIP', color: '#EAB308', emoji: '👑' },
+];
 
 export default function TagsPage() {
   const [tags, setTags] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editTag, setEditTag] = useState(null);
@@ -19,14 +24,8 @@ export default function TagsPage() {
   });
 
   const colors = [
-    "#FF4D4D",
-    "#FF8C00",
-    "#FFD700",
-    "#32CD32",
-    "#00CED1",
-    "#1E90FF",
-    "#BA55D3",
-    "#FF69B4",
+    "#FF4D4D", "#FF8C00", "#FFD700", "#32CD32",
+    "#00CED1", "#1E90FF", "#BA55D3", "#FF69B4",
   ];
 
   // สร้างแท็กใหม่
@@ -48,9 +47,38 @@ export default function TagsPage() {
     setDeleteTag(null);
   };
 
-  // ยืนยันการลบ
+  //แก้ไขฟังก์ชันนี้: ลบ Tag ออกจากรายการหลัก และไล่ลบออกจากแชททั้งหมดด้วย
   const confirmDeleteTag = () => {
-    setTags(tags.filter((t) => t.id !== deleteTag.id));
+    if (!deleteTag) return;
+
+    // 1. ลบออกจากรายการ Tags หลัก (UI ปัจจุบัน)
+    const updatedTags = tags.filter((t) => t.id !== deleteTag.id);
+    setTags(updatedTags);
+
+    // 2. อัปเดต LocalStorage ของ Tags ทันที (เพื่อให้แน่ใจว่ามันหายไปจริงๆ)
+    localStorage.setItem("onechat_tags", JSON.stringify(updatedTags));
+
+    // 3. เพิ่มส่วนนี้: ไปไล่ลบ Tag นี้ออกจากแชททุกอันในระบบ
+    try {
+        const savedChats = localStorage.getItem("app_board_chats");
+        if (savedChats) {
+            const chats = JSON.parse(savedChats);
+            const updatedChats = chats.map(chat => ({
+                ...chat,
+                // กรองเอาชื่อ Tag ที่กำลังจะลบออกไป
+                tags: (chat.tags || []).filter(tName => tName !== deleteTag.name)
+            }));
+            
+            // บันทึกแชทเวอร์ชันอัปเดตกลับลงไป
+            localStorage.setItem("app_board_chats", JSON.stringify(updatedChats));
+        }
+    } catch (e) {
+        console.error("Error removing tag from chats:", e);
+    }
+
+    // 4. ส่งสัญญาณบอกทุกหน้าว่าข้อมูลเปลี่ยนแล้ว
+    window.dispatchEvent(new Event("storage"));
+
     handleCloseDeleteModal();
   };
 
@@ -61,22 +89,25 @@ export default function TagsPage() {
     setEditTag(null);
   };
 
+  // 1. Load Tags
   useEffect(() => {
     const savedTags = localStorage.getItem("onechat_tags");
     if (savedTags) {
-        setTags(JSON.parse(savedTags));
+      setTags(JSON.parse(savedTags));
     } else {
-        setTags(DEFAULT_TAGS);
-        localStorage.setItem("onechat_tags", JSON.stringify(DEFAULT_TAGS));
+      setTags(DEFAULT_TAGS);
+      localStorage.setItem("onechat_tags", JSON.stringify(DEFAULT_TAGS));
     }
+    setIsLoaded(true); 
   }, []);
 
-  // Save Tags to LocalStorage 
+  // 2. Save Tags (เมื่อมีการเพิ่ม/แก้ไข)
   useEffect(() => {
-    if (tags.length > 0) {
+    if (isLoaded) {
         localStorage.setItem("onechat_tags", JSON.stringify(tags));
+        window.dispatchEvent(new Event("storage"));
     }
-  }, [tags]);
+  }, [tags, isLoaded]);
 
   return (
     <div className="w-full h-[94vh] p-4">
@@ -111,7 +142,7 @@ export default function TagsPage() {
         </button>
 
         {/* Tags Display */}
-        <div className="flex-1 flex flex-col justify-start text-center overflow-y-auto mt-12 px-10 gap-2">
+        <div className="flex-1 flex flex-col justify-start text-center overflow-y-auto mt-12 px-10 gap-2 custom-scrollbar">
           {tags.length === 0 ? (
             <>
               <i className="fa-solid fa-tag text-9xl mx-auto p-4"></i>

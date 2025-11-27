@@ -1,8 +1,8 @@
-// app/components/ChatFitter.jsx
 "use client"
 import { useState, useEffect, useRef } from "react";
 
-export default function ChatFitter({ onFilterChange, availableCompanies = [], onCompanyChange }) {
+//  เพิ่ม prop onSearchChange เข้ามา
+export default function ChatFitter({ onFilterChange, availableCompanies = [], onCompanyChange, onSearchChange }) {
     const [selected, setSelected] = useState("radio1");
     
     // State สำหรับ Dropdown บริษัท
@@ -23,7 +23,6 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
         if (onCompanyChange) onCompanyChange(comp);
     };
 
-    // ปิด Dropdown เมื่อกดข้างนอก
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -44,10 +43,12 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
                         type="text"
                         className="text-white outline-0 bg-transparent w-full min-w-[150px]"
                         placeholder="Search"
+                        //  เพิ่ม onChange เพื่อส่งค่ากลับไปที่ Parent
+                        onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
                     />
                 </div>
 
-                {/* Status Filters */}
+                {/* ... ส่วนอื่นๆ เหมือนเดิม ... */}
                 <div className="flex flex-wrap md:flex-nowrap gap-3 md:gap-5 text-white overflow-x-auto md:overflow-visible flex-1 scrollbar-hide">
                     {[
                         { id: "radio1", label: "All Chat", value: "All" },
@@ -71,7 +72,7 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
                     ))}
                 </div>
 
-                {/* Company Filter */}
+                {/* Company Filter (ส่วนเดิม) */}
                 <div className="relative shrink-0" ref={dropdownRef}>
                     <button 
                         onClick={() => setIsCompanyOpen(!isCompanyOpen)}
@@ -91,7 +92,6 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
                         )}
                     </button>
 
-                    {/* Dropdown List */}
                     {isCompanyOpen && (
                         <div className="absolute right-0 top-full mt-2 w-48 bg-[#1e1e2e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in-up">
                             <div className="p-2 bg-white/5 border-b border-white/5">
