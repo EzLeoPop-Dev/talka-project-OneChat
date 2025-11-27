@@ -10,7 +10,7 @@ export default function UserSettingPage() {
   const [isOpen, setIsOpen] = useState(false); // Modal สำหรับ Add/Edit
   const [mode, setMode] = useState("add");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("Manager");
+  const [role, setRole] = useState("Employer");
   const [editId, setEditId] = useState(null);
 
   // Modal สำหรับ confirm delete
@@ -25,9 +25,24 @@ export default function UserSettingPage() {
     } else {
       // ข้อมูลเริ่มต้นถ้ายังไม่มีในเครื่อง
       setUsers([
-        { id: 1, name: "John", email: "john@email.com", permission: "Manager" },
-        { id: 2, name: "Jane", email: "jane@email.com", permission: "Manager" },
-        { id: 3, name: "Mike", email: "mike@email.com", permission: "Manager" },
+        {
+          id: 1,
+          name: "John",
+          email: "john@email.com",
+          permission: "Employer",
+        },
+        {
+          id: 2,
+          name: "Jane",
+          email: "jane@email.com",
+          permission: "Employer",
+        },
+        {
+          id: 3,
+          name: "Mike",
+          email: "mike@email.com",
+          permission: "Employer",
+        },
       ]);
     }
     setIsLoaded(true);
@@ -44,7 +59,7 @@ export default function UserSettingPage() {
   const openAddModal = () => {
     setMode("add");
     setEmail("");
-    setRole("Manager");
+    setRole("Employer");
     setIsOpen(true);
   };
 
@@ -116,8 +131,8 @@ export default function UserSettingPage() {
               Are you sure you want to remove&nbsp;
               <span className="font-semibold text-white">
                 {deleteTarget?.name}
-              </span>&nbsp;
-              from this workspace? This action cannot be undone.
+              </span>
+              &nbsp; from this workspace? This action cannot be undone.
             </p>
 
             <div className="flex justify-end gap-3">
@@ -185,9 +200,8 @@ export default function UserSettingPage() {
                   onChange={(e) => setRole(e.target.value)}
                   className="w-full bg-[#1c1d25] border border-white/30 rounded-lg px-3 py-2 text-white appearance-none focus:ring-2 focus:ring-white/40 cursor-pointer"
                 >
-                  <option>Manager</option>
-                  <option>Editor</option>
-                  <option>Viewer</option>
+                  <option>Employer</option>
+                  <option>Admin</option>
                 </select>
                 <div className="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
                   ▼
