@@ -1,390 +1,425 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { GlassBackground } from '@/app/components/GlassBackground';
+import TutorialModal from '@/app/components/TutorialModal';
 
-const items = [
+// ... (ข้อมูล tutorials Array เหมือนเดิม ไม่ต้องแก้ไข) ...
+const tutorials = [
     {
-        title: "Getting Started",
-        subtitle: "เริ่มต้นใช้งาน Talka อย่างรวดเร็ว",
-        desc: "เรียนรู้ส่วนสำคัญของระบบ Talka พร้อมคู่มือที่เข้าใจง่าย สำหรับผู้ใช้งานใหม่ที่ต้องการเริ่มต้นสร้าง Chatbot ของตัวเอง",
-        step: "01",
-        icon: "🚀",
-        color: "from-blue-500 to-cyan-400"
+        id: 1,
+        title: "การเชื่อมต่อเเพลตฟอร์ม",
+        image: "/images/chanelPage.png",
+        description: "วิธีการเชื่อมต่อ Platform ต่างๆ เช่น Facebook, LINE เพื่อใช้งานระบบ Chat",
+        steps: [
+            {
+                title: "ไปที่ Menu Conect Platform",
+                description: "ด้านซ้ายมือของหน้าจอ คลิกที่ 'Conect Platform' ใน Admin Panel เพื่อเริ่มต้น",
+                image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop"
+            },
+            {
+                title: "เลือก Platform ที่ต้องการเชื่อมต่อ",
+                description: "คลิกที่ Platform ที่คุณต้องการเชื่อมต่อ เช่น Facebook หรือ LINE",
+                image: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=400&h=300&fit=crop"
+            },
+            {
+                title: "ทำตามขั้นตอนการตั้งค่า",
+                description: "หลังจากที่กดเลือก Platform แล้ว ให้ทำตามขั้นตอนที่แสดงบนหน้าจอเพื่อเชื่อมต่อ",
+                image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop"
+            },
+            {
+                title: "กดปุ่ม Connected Channels",
+                description: "ด้านขวาบนของหน้าจอ คลิกที่ปุ่ม เพื่อดูสถานะการเชื่อมต่อของ Platform ต่างๆ",
+                image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop"
+            },
+        ]
     },
     {
-        title: "Customize Workspace",
-        subtitle: "ปรับธีม พื้นหลัง",
-        desc: "ปรับแต่งพื้นที่ทำงานให้เข้ากับสไตล์ของคุณ เปลี่ยนสีธีม เลือกพื้นหลังที่ชอบ และจัดการเลย์เอาต์ตามความต้องการ",
-        step: "02",
-        icon: "🎨",
-        color: "from-purple-500 to-pink-400"
+        id: 2,
+        title: "การใช้งานระบบ Chat",
+        image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=300&fit=crop",
+        description: "วิธีการใช้งานระบบ Chat และ Feature ต่างๆ ที่ช่วยให้การตอบลูกค้าง่ายขึ้น",
+        steps: [
+            {
+                title: "Chat list",
+                description: "หลังจากที่ลูกค้าส่งข้อความเข้ามา คุณจะเห็นรายชื่อการสนทนาด้านซ้ายมือหัวข้อ Chat List",
+                image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=300&fit=crop"
+            },
+            {
+                title: "การ Filter ข้อความ",
+                description: "ด้านบนของ Chat List คุณสามารถกรองข้อความตามสถานะ เช่น รอตอบ, ตอบแล้ว หรือ แบบ All",
+                image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop"
+            },
+            {
+                title: "ทดสอบและปรับปรุง",
+                description: "ทดสอบข้อความและปรับปรุงตามผลตอบรับจากผู้ใช้",
+                image: "https://images.unsplash.com/photo-1556155092-490a1ba16284?w=400&h=300&fit=crop"
+            }
+        ]
     },
     {
-        title: "Create Flow",
-        subtitle: "ออกแบบ flow ของ chatbot",
-        desc: "สร้าง conversation flow ง่าย ๆ ด้วย drag & drop editor ที่ใช้งานง่าย ไม่ต้องเขียนโค้ด ก็สามารถสร้าง chatbot ที่ซับซ้อนได้",
-        step: "03",
-        icon: "⚡",
-        color: "from-amber-500 to-orange-400"
+        id: 3,
+        title: "การวิเคราะห์ข้อมูล",
+        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
+        description: "ติดตามและวิเคราะห์ประสิทธิภาพของ Chatbot ของคุณ",
+        steps: [
+            {
+                title: "เข้าสู่แดชบอร์ด",
+                description: "คลิกที่เมนู 'รายงาน' เพื่อดูข้อมูลสถิติโดยรวม",
+                image: "https://images.unsplash.com/photo-1543286386-713bdd548da4?w=400&h=300&fit=crop"
+            },
+            {
+                title: "วิเคราะห์การสนทนา",
+                description: "ดูรายละเอียดการสนทนาและหาจุดที่ควรปรับปรุง",
+                image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop"
+            },
+            {
+                title: "ส่งออกรายงาน",
+                description: "ดาวน์โหลดรายงานเพื่อนำเสนอหรือเก็บเป็นข้อมูล",
+                image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop"
+            }
+        ]
     },
     {
-        title: "Connect Channels",
-        subtitle: "เชื่อมต่อ Facebook / LINE / API",
-        desc: "รวมช่องทางการสื่อสารทั้งหมดมาที่เดียว เชื่อมต่อกับ Facebook Messenger, LINE Official Account และ Custom API ได้อย่างง่ายดาย",
-        step: "04",
-        icon: "🔗",
-        color: "from-green-500 to-emerald-400"
+        id: 4,
+        title: "การเชื่อมต่อช่องทาง",
+        image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=300&fit=crop",
+        description: "เชื่อมต่อบอทของคุณกับ Facebook, LINE และช่องทางอื่นๆ",
+        steps: [
+            {
+                title: "เลือกช่องทาง",
+                description: "เลือกช่องทางที่ต้องการเชื่อมต่อจากรายการที่รองรับ",
+                image: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=300&fit=crop"
+            },
+            {
+                title: "ตั้งค่าการเชื่อมต่อ",
+                description: "ป้อน API Key และข้อมูลที่จำเป็นสำหรับการเชื่อมต่อ",
+                image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=400&h=300&fit=crop"
+            },
+            {
+                title: "ทดสอบการทำงาน",
+                description: "ส่งข้อความทดสอบเพื่อยืนยันว่าการเชื่อมต่อสำเร็จ",
+                image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop"
+            }
+        ]
     },
     {
-        title: "Analyze & Publish",
-        subtitle: "ปล่อยใช้งานและวัดผล",
-        desc: "ติดตามผล วิเคราะห์การตอบสนองของผู้ใช้ ดู metrics สำคัญ และปรับปรุง chatbot ของคุณให้มีประสิทธิภาพมากขึ้นเรื่อย ๆ",
-        step: "05",
-        icon: "📊",
-        color: "from-rose-500 to-red-400"
-    },
+        id: 5,
+        title: "การจัดการทีม",
+        image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=300&fit=crop",
+        description: "เพิ่มสมาชิกทีมและจัดการสิทธิ์การเข้าถึง",
+        steps: [
+            {
+                title: "เชิญสมาชิก",
+                description: "ส่งคำเชิญผ่านอีเมลให้สมาชิกทีมใหม่",
+                image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=400&h=300&fit=crop"
+            },
+            {
+                title: "กำหนดบทบาท",
+                description: "ตั้งค่าสิทธิ์การเข้าถึงตามบทบาทของแต่ละคน",
+                image: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&h=300&fit=crop"
+            },
+            {
+                title: "ติดตามกิจกรรม",
+                description: "ดูประวัติการทำงานของสมาชิกในทีม",
+                image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop"
+            }
+        ]
+    }
 ];
 
-export default function TutorialCarousel() {
-    const [index, setIndex] = useState(0);
-    const [direction, setDirection] = useState(0);
-    const [rotation, setRotation] = useState(0);
-    const length = items.length;
-    const radius = 350;
 
-    const prev = () => {
-        setDirection(-1);
-        setRotation(r => r + (360 / length));
-        setIndex((i) => (i - 1 + length) % length);
-    };
+export default function Page() {
 
-    const next = () => {
-        setDirection(1);
-        setRotation(r => r - (360 / length));
-        setIndex((i) => (i + 1) % length);
-    };
-
+    const [userName, setUserName] = useState("");
     useEffect(() => {
-        const timer = setInterval(() => next(), 5000);
-        return () => clearInterval(timer);
-    }, [index]);
+        try {
+            // Simulate user data if missing for demo purposes
+            if (!localStorage.getItem("currentUser")) {
+                localStorage.setItem("currentUser", JSON.stringify({ username: "Demo User" }));
+            }
+            const storedUser = localStorage.getItem("currentUser");
+            if (storedUser) {
+                const user = JSON.parse(storedUser);
+                setUserName(user.username || "Unknown User");
+            } else {
+                setUserName("Guest");
+            }
+        } catch (error) {
+            console.error("Error reading user from localStorage:", error);
+        }
+    }, []);
 
-    const getCardPosition = (cardIndex) => {
-        const relativeIndex = (cardIndex - index + length) % length;
-        const angle = (relativeIndex * (360 / length)) * (Math.PI / 180);
+    const [selectedCard, setSelectedCard] = useState(null);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
-        return {
-            x: Math.sin(angle) * radius,
-            y: Math.cos(angle) * radius * 0.3,
-            z: Math.cos(angle) * radius,
-            scale: relativeIndex === 0 ? 1.15 : 0.75 + Math.cos(angle) * 0.15,
-            opacity: relativeIndex === 0 ? 1 : 0.4 + Math.cos(angle) * 0.3,
-            rotateY: -angle * (180 / Math.PI)
-        };
+    const openModal = (tutorial) => {
+        setSelectedCard(tutorial);
+    };
+
+    const closeModal = () => {
+        setSelectedCard(null);
+    };
+
+    const nextCard = () => {
+        setCurrentIndex((prev) => (prev + 1) % tutorials.length);
+    };
+
+    const prevCard = () => {
+        setCurrentIndex((prev) => (prev - 1 + tutorials.length) % tutorials.length);
+    };
+
+    // ฟังก์ชันสำหรับคำนวณตำแหน่งการ์ดแบบวงกลม (เหมือนเดิม)
+    const getCardPosition = (index) => {
+        const total = tutorials.length;
+        const diff = (index - currentIndex + total) % total;
+        const angle = (diff / total) * Math.PI * 2;
+        const radius = 550; // เพิ่มรัศมีนิดหน่อยให้ดูกว้างขึ้น
+        const x = Math.sin(angle) * radius;
+        const z = Math.cos(angle) * radius - radius;
+        const rotateY = -(angle * 180) / Math.PI;
+        const position = diff <= total / 2 ? diff : diff - total;
+
+        return { x, z, rotateY, position, isCenter: diff === 0 };
+    };
+
+    const textVariants = {
+        hidden: { opacity: 0, y: 30, scale: 0.9 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: { duration: 0.8, ease: "easeOut" }
+        }
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 relative overflow-hidden">
-            {/* Animated background particles */}
-            <div className="absolute inset-0">
-                {[...Array(30)].map((_, i) => (
-                    <motion.div
-                        key={i}
-                        className="absolute w-2 h-2 bg-white/20 rounded-full"
-                        initial={{
-                            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                            y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-                            scale: 0
-                        }}
-                        animate={{
-                            y: [
-                                Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-                                Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000) - 40,
-                                Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-                            ],
-                            x: [
-                                Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                                Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000) + 20,
-                                Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                            ],
-                            scale: [0.5, 1, 0.5],
-                            opacity: [0.2, 0.5, 0.2]
-                        }}
-                        transition={{
-                            duration: 5 + Math.random() * 10,
-                            repeat: Infinity,
-                            delay: Math.random() * 5,
-                            ease: "easeInOut"
-                        }}
-                    />
-                ))}
-            </div>
+        // Container หลัก: เปลี่ยนจากกล่อง fix ความสูง เป็นเต็มจอและใช้สีเข้ม
+        <div className="h-fit w-full overflow-hidden backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl text-white relative flex flex-col items-center py-10">
 
-            {/* Title */}
+            <div className="fixed inset-0 pointer-events-none">
+
+                <div className="absolute inset-0 bg-[radial-linear(ellipse_at_top,var(--tw-gradient-stops))] from-[#1a1c3a] via-[#090a1a] to-[#000000]"></div>
+
+                <div className='absolute inset-0 opacity-40' style={{
+                    backgroundImage: 'radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 5px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px), radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 4px)',
+                    backgroundSize: '550px 550px, 350px 350px, 250px 250px',
+                    backgroundPosition: '0 0, 40px 60px, 130px 270px',
+                    animation: 'starsAnimation 120s linear infinite' // เพิ่ม keyframe ใน global css ถ้าต้องการให้เคลื่อนที่
+                }}></div>
+
+                {/* 3. Central Epic Glow (แสงออร่าหลัง Carousel) */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[150px] mix-blend-screen z-0"></div>
+                <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] mix-blend-screen z-0"></div>
+            </div>
+            {/* ------------------------------------- */}
+
+
             <motion.div
-                className="relative z-10 mb-16 text-center"
-                initial={{ opacity: 0, y: -50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+                initial="hidden"
+                animate="visible"
+                className="text-center mb-10 relative z-10 mt-10"
             >
-                <motion.h1
-                    className="text-5xl font-bold text-white mb-3 drop-shadow-lg"
-                    animate={{
-                        textShadow: [
-                            "0 0 20px rgba(255,255,255,0.5)",
-                            "0 0 40px rgba(255,255,255,0.8)",
-                            "0 0 20px rgba(255,255,255,0.5)",
-                        ]
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                >
-                    Talka Tutorial
-                </motion.h1>
-                <motion.p
-                    className="text-white/80 text-lg"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.8 }}
-                >
-                    เริ่มต้นใช้งานได้ใน 5 ขั้นตอนง่าย ๆ
-                </motion.p>
+                <motion.div variants={textVariants} className="inline-block relative">
+                    {/* เพิ่มไอคอน Sparkles เล็กๆ */}
+                    <Sparkles className="absolute -top-6 -left-8 w-8 h-8 text-purple-400 animate-pulse" />
+                    <h1 className="text-[50px] font-bold leading-tight">
+                        <span className="block bg-clip-text text-transparent bg-linear-to-r from-white via-purple-200 to-blue-200 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+                            Welcome, "{userName}"
+                        </span>
+                        <span className="block text-[28px] font-light text-purple-200/80 mt-2">
+                            เข้าสู่โลกแห่ง Talka
+                        </span>
+                    </h1>
+                    <Sparkles className="absolute -bottom-4 -right-8 w-6 h-6 text-blue-400 animate-pulse delay-75" />
+                    <div className="h-1 w-40 mx-auto mt-6 bg-linear-to-r from-transparent via-purple-500 to-transparent rounded-full opacity-70"></div>
+                </motion.div>
+                <p className='text-lg font-semibold mt-6 text-purple-300 tracking-widest uppercase'>Tutorials</p>
             </motion.div>
 
-            {/* Circular Carousel Container */}
-            <div className="relative w-full max-w-[1100px] h-[600px] flex items-center justify-center perspective-2000">
-                {/* Rotating Circle Path Indicator */}
-                <motion.div
-                    className="absolute w-[700px] h-[420px] border-2 border-white/10 rounded-full"
-                    animate={{ rotate: rotation }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                />
-
-                {/* Cards in circular formation */}
-                <AnimatePresence mode="sync">
-                    {items.map((item, cardIndex) => {
-                        const position = getCardPosition(cardIndex);
-                        const isActive = cardIndex === index;
-
-                        return (
-                            <motion.div
-                                key={cardIndex}
-                                className={`absolute w-80 h-[500px] cursor-pointer ${isActive ? 'z-30' : 'z-10'
-                                    }`}
-                                initial={false}
-                                animate={{
-                                    x: position.x,
-                                    y: position.y,
-                                    z: position.z,
-                                    scale: position.scale,
-                                    opacity: position.opacity,
-                                    rotateY: position.rotateY
-                                }}
-                                transition={{
-                                    duration: 0.8,
-                                    type: "spring",
-                                    stiffness: 80,
-                                    damping: 20
-                                }}
-                                whileHover={!isActive ? {
-                                    scale: position.scale * 1.05,
-                                    opacity: position.opacity + 0.2
-                                } : {}}
-                                onClick={() => {
-                                    if (cardIndex !== index) {
-                                        const diff = (cardIndex - index + length) % length;
-                                        if (diff <= length / 2) {
-                                            for (let i = 0; i < diff; i++) next();
-                                        } else {
-                                            for (let i = 0; i < length - diff; i++) prev();
-                                        }
-                                    }
-                                }}
-                                style={{
-                                    transformStyle: 'preserve-3d',
-                                }}
-                            >
-                                <Card item={item} isActive={isActive} />
-                            </motion.div>
-                        );
-                    })}
-                </AnimatePresence>
-            </div>
-
-            {/* Controls */}
-            <motion.button
-                onClick={prev}
-                className="absolute left-8 top-1/2 -translate-y-1/2 z-40 p-4 rounded-full bg-white/10 text-white backdrop-blur-xl border border-white/20 shadow-2xl"
-                whileHover={{ scale: 1.15, backgroundColor: "rgba(255,255,255,0.2)" }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
-                <ChevronLeft className="w-7 h-7" />
-            </motion.button>
-
-            <motion.button
-                onClick={next}
-                className="absolute right-8 top-1/2 -translate-y-1/2 z-40 p-4 rounded-full bg-white/10 text-white backdrop-blur-xl border border-white/20 shadow-2xl"
-                whileHover={{ scale: 1.15, backgroundColor: "rgba(255,255,255,0.2)" }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
-                <ChevronRight className="w-7 h-7" />
-            </motion.button>
-
-            {/* Animated Indicators */}
-            <div className="relative flex gap-3 mt-12 z-10">
-                {items.map((_, i) => (
-                    <motion.button
-                        key={i}
-                        className={`rounded-full cursor-pointer ${i === index
-                                ? "bg-white shadow-lg"
-                                : "bg-white/40"
-                            }`}
-                        animate={{
-                            width: i === index ? 48 : 12,
-                            height: 12
-                        }}
-                        whileHover={{ backgroundColor: "rgba(255,255,255,0.6)", scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        onClick={() => {
-                            const diff = (i - index + length) % length;
-                            if (diff <= length / 2) {
-                                for (let j = 0; j < diff; j++) next();
-                            } else {
-                                for (let j = 0; j < length - diff; j++) prev();
-                            }
-                        }}
-                    />
-                ))}
-            </div>
-
-            <style jsx>{`
-                .perspective-2000 {
-                    perspective: 2000px;
-                    transform-style: preserve-3d;
-                }
-            `}</style>
-        </div>
-    );
-}
-
-function Card({ item, isActive = false }) {
-    return (
-        <motion.div
-            className={`h-full rounded-3xl shadow-2xl border overflow-hidden bg-gray-100 ${isActive
-                    ? "border-white/40 shadow-white/30"
-                    : "border-white/10"
-                }`}
-            style={{
-                transformStyle: 'preserve-3d',
-            }}
-            animate={isActive ? {
-                boxShadow: [
-                    "0 25px 50px -12px rgba(255,255,255,0.25)",
-                    "0 25px 50px -12px rgba(255,255,255,0.4)",
-                    "0 25px 50px -12px rgba(255,255,255,0.25)",
-                ]
-            } : {}}
-            transition={{ duration: 2, repeat: Infinity }}
-        >
-            {/* Card Header */}
-            <div className="bg-white px-6 py-4 border-b border-gray-200">
-                <h3 className="text-xl font-bold text-gray-800 text-center">
-                    {item.title}
-                </h3>
-            </div>
-
-            {/* Image Placeholder with gradient background */}
-            <div className={`relative h-48 bg-gradient-to-br ${item.color} flex items-center justify-center overflow-hidden`}>
-                <motion.div
-                    className="absolute inset-0 opacity-20"
-                    animate={{
-                        background: [
-                            "radial-gradient(circle at 20% 20%, white 0%, transparent 50%)",
-                            "radial-gradient(circle at 80% 80%, white 0%, transparent 50%)",
-                            "radial-gradient(circle at 20% 20%, white 0%, transparent 50%)",
-                        ]
-                    }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                />
-
-                {/* Icon Display */}
-                <motion.div
-                    className="relative z-10 text-8xl"
-                    animate={isActive ? {
-                        scale: [1, 1.1, 1],
-                        rotate: [0, 5, -5, 0],
-                    } : {
-                        scale: 1,
-                        rotate: 0
-                    }}
-                    transition={{
-                        duration: 0.6,
-                        ease: "easeInOut"
-                    }}
-                >
-                    {item.icon}
-                </motion.div>
-
-                {/* Step Badge */}
-                <motion.div
-                    className="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-sm text-sm font-bold text-gray-800"
-                    whileHover={{ scale: 1.05 }}
-                >
-                    Step {item.step}
-                </motion.div>
-            </div>
-
-            {/* Content section */}
-            <div className="p-6 bg-white">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                    {item.subtitle}
-                </h4>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                    {item.desc}
-                </p>
-
-                {/* Button */}
+            {/* เพิ่มความสูงของ Container Carousel เพื่อให้ดูไม่อึดอัด */}
+            <div className="relative h-[550px] w-full flex items-center justify-center z-20 my-auto">
+                {/* Navigation Buttons (ปรับให้ดู Glow มากขึ้น) */}
                 <motion.button
-                    className="w-full py-2.5 px-4 bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.2, backgroundColor: "rgba(255,255,255,0.2)", boxShadow: "0 0 30px rgba(190, 126, 199, 0.8)" }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={prevCard}
+                    className="absolute left-[10%] z-30 bg-white/5 backdrop-blur-xl rounded-full p-5 transition-all shadow-[0_0_20px_rgba(190,126,199,0.3)] border border-white/20 group"
                 >
-                    เริ่มต้นเลย
+                    <ChevronLeft className="w-8 h-8 text-white group-hover:text-purple-200 transition-colors" />
                 </motion.button>
+
+                <motion.button
+                    whileHover={{ scale: 1.2, backgroundColor: "rgba(255,255,255,0.2)", boxShadow: "0 0 30px rgba(190, 126, 199, 0.8)" }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={nextCard}
+                    className="absolute right-[10%] z-30 bg-white/5 backdrop-blur-xl rounded-full p-5 transition-all shadow-[0_0_20px_rgba(190,126,199,0.3)] border border-white/20 group"
+                >
+                    <ChevronRight className="w-8 h-8 text-white group-hover:text-purple-200 transition-colors" />
+                </motion.button>
+
+                {/* Cards Carousel */}
+                <div className="relative w-full max-w-6xl h-full flex items-center justify-center"
+                    style={{
+                        perspective: "2500px", // เพิ่ม perspective ให้ดูมีความลึกมากขึ้น
+                        perspectiveOrigin: "center center"
+                    }}
+                >
+                    <AnimatePresence initial={false}>
+                        {tutorials.map((tutorial, index) => {
+                            const { x, z, rotateY, position, isCenter } = getCardPosition(index);
+
+                            return (
+                                <motion.div
+                                    key={tutorial.id}
+                                    initial={{ scale: 0.5, opacity: 0, x: x, z: z - 200, rotateY: rotateY }}
+                                    animate={{
+                                        x: x,
+                                        z: z,
+                                        scale: isCenter ? 1 : 0.7,
+                                        opacity: isCenter ? 1 : 0.3, // ลด opacity ตัวข้างๆ ลงอีกนิด
+                                        rotateY: rotateY,
+                                        zIndex: isCenter ? 20 : Math.round(10 - Math.abs(z) / 50),
+                                        // เพิ่ม brightness ให้ตัวกลางเด่นขึ้นอีก
+                                        filter: isCenter ? 'blur(0px) brightness(1.1) contrast(1.05)' : 'blur(5px) brightness(0.5) grayscale(20%)',
+                                    }}
+                                    exit={{
+                                        scale: 0.3,
+                                        opacity: 0,
+                                        x: x + (position < 0 ? -500 : 500),
+                                        z: z - 400,
+                                        rotateY: rotateY + (position < 0 ? -60 : 60),
+                                        transition: {
+                                            duration: 0.7,
+                                            ease: [0.25, 0.1, 0.25, 1],
+                                            type: "tween"
+                                        }
+                                    }}
+                                    transition={{
+                                        x: { type: "spring", stiffness: 50, damping: 20, mass: 1.2 },
+                                        z: { type: "spring", stiffness: 50, damping: 20, mass: 1.2 },
+                                        scale: { type: "spring", stiffness: 80, damping: 25 },
+                                        opacity: { duration: 0.5, ease: "easeInOut" },
+                                        rotateY: { type: "spring", stiffness: 50, damping: 25, mass: 1.5 },
+                                        filter: { duration: 0.5, ease: "easeInOut" }
+                                    }}
+                                    className="absolute w-[420px]"
+                                    style={{
+                                        pointerEvents: isCenter ? 'auto' : 'none',
+                                        transformStyle: "preserve-3d",
+                                        transformOrigin: 'center center',
+                                    }}
+                                >
+                                    <motion.div
+                                        whileHover={isCenter ? {
+                                            scale: 1.05,
+                                            rotateY: 0,
+                                            z: 40,
+                                            // เพิ่มเงาแสงสีม่วงเวลา Hover
+                                            boxShadow: "0 50px 120px -20px rgba(168, 85, 247, 0.5), 0 0 30px rgba(255,255,255,0.2) inset",
+                                            transition: {
+                                                duration: 0.5,
+                                                type: "spring",
+                                                stiffness: 150,
+                                                damping: 20
+                                            }
+                                        } : {}}
+                                        className="h-full rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                                        style={{
+                                            transformStyle: "preserve-3d",
+                                        }}
+                                    >
+                                        {/* ปรับ GlassBackground ให้มีความสว่างและสะท้อนมากขึ้น */}
+                                        <GlassBackground className="h-full border-white/30 bg-white/10"
+                                            style={{
+                                                transform: "translateZ(0)",
+                                                backfaceVisibility: "hidden",
+                                                background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02))'
+                                            }}
+                                        >
+                                            <div className="relative h-64 overflow-hidden rounded-t-3xl group-hover:brightness-110 transition-all">
+                                                <img
+                                                    src={tutorial.image}
+                                                    alt={tutorial.title}
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                />
+                                                {/* Overlay สีม่วงจางๆ */}
+                                                <div className="absolute inset-0 bg-linear-to-t from-[#090a1a] via-transparent to-transparent opacity-60" />
+                                            </div>
+
+                                            <div className="p-6 relative">
+                                                <h3
+                                                    className="text-3xl font-bold mb-3 drop-shadow-lg"
+                                                    style={{
+                                                        background: 'linear-gradient(90deg, #fff, #a855f7, #3b82f6)',
+                                                        WebkitBackgroundClip: 'text',
+                                                        WebkitTextFillColor: 'transparent',
+                                                    }}
+                                                >
+                                                    {tutorial.title}
+                                                </h3>
+                                                <p className="text-purple-100/80 mb-8 line-clamp-3 text-sm leading-relaxed font-light">
+                                                    {tutorial.description}
+                                                </p>
+
+                                                {isCenter && (
+                                                    <motion.button
+                                                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                        transition={{ duration: 0.5, delay: 0.2, type: "spring" }}
+                                                        whileHover={{ scale: 1.05, boxShadow: "0 20px 50px rgba(168, 85, 247, 0.6)" }}
+                                                        whileTap={{ scale: 0.95 }}
+                                                        onClick={() => openModal(tutorial)}
+                                                        // ปุ่มแบบ Gradient ที่ดูมีพลังมากขึ้น
+                                                        className="w-full bg-[rgba(190,126,199,0.56)] text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg relative overflow-hidden group"
+                                                    >
+                                                        <span className="relative z-10 flex items-center justify-center gap-2">
+                                                            เพิ่มเติม <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                                        </span>
+                                                        {/* แสงวิ่งผ่านปุ่ม */}
+                                                        <div className="absolute inset-0 h-full w-full bg-linear-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                                                    </motion.button>
+                                                )}
+                                            </div>
+                                        </GlassBackground>
+                                    </motion.div>
+                                </motion.div>
+                            );
+                        })}
+                    </AnimatePresence>
+                </div>
+
+                {/* Dots Indicator (ปรับให้ดู Glow) */}
+                <div className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 flex gap-4 z-20 bg-black/20 backdrop-blur-md px-6 py-3 rounded-full border border-white/10">
+                    {tutorials.map((_, index) => (
+                        <motion.button
+                            key={index}
+                            onClick={() => setCurrentIndex(index)}
+                            animate={{
+                                scale: currentIndex === index ? 1.5 : 1,
+                                opacity: currentIndex === index ? 1 : 0.4,
+                                background: currentIndex === index
+                                    ? 'linear-gradient(90deg, #a855f7, #ec4899)'
+                                    : 'rgba(255, 255, 255, 0.5)',
+                                boxShadow: currentIndex === index ? "0 0 20px rgba(168, 85, 247, 1)" : "none"
+                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className={`w-3 h-3 rounded-full transition-all`}
+                        />
+                    ))}
+                </div>
             </div>
 
-            {/* Active Indicator */}
             <AnimatePresence>
-                {isActive && (
-                    <motion.div
-                        className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        {[0, 1, 2].map((i) => (
-                            <motion.div
-                                key={i}
-                                className="w-2 h-2 rounded-full bg-gray-400"
-                                animate={{
-                                    scale: [1, 1.5, 1],
-                                    opacity: [0.6, 1, 0.6]
-                                }}
-                                transition={{
-                                    duration: 1.5,
-                                    repeat: Infinity,
-                                    delay: i * 0.2
-                                }}
-                            />
-                        ))}
-                    </motion.div>
+                {selectedCard && (
+                    <TutorialModal
+                        tutorial={selectedCard}
+                        onClose={closeModal}
+                    />
                 )}
             </AnimatePresence>
-        </motion.div>
+        </div>
     );
-}
+};

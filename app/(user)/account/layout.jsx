@@ -3,7 +3,7 @@
 import React from "react";
 import PageWrapper from "@/app/components/PageWrapper";
 import AccountSidebar from "@/app/components/AccountSidebar";
-import { Bot } from "lucide-react";
+import { User } from "lucide-react";
 
 
 export default function AccountLayout({ children }) {
@@ -11,12 +11,11 @@ export default function AccountLayout({ children }) {
         <div className="h-full w-full bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-8">
             <div className="items-start mb-10 border-b border-white/20 pb-6 flex gap-4">
                 <div className="flex items-center gap-3">
-                    <Bot className="text-white" size={52} />
+                    <User className="text-white" size={52} />
                     <div>
-                        <h1 className="text-xl font-semibold text-white">AI Prompts</h1>
+                        <h1 className="text-xl font-semibold text-white">Profile Setting</h1>
                         <p className="text-sm text-white/70">
-                            Use AI Prompts to customize and improve how responses are
-                            written.
+                            Manage your account information and preferences
                         </p>
                     </div>
                 </div>

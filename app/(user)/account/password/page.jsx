@@ -2,11 +2,18 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Lock, ShieldCheck, Eye, EyeOff, KeyRound, CheckCircle2, ArrowRight } from "lucide-react";
 
 export default function ChangePasswordPage() {
     const [currentPass, setCurrentPass] = useState("");
     const [newPass, setNewPass] = useState("");
     const [confirm, setConfirm] = useState("");
+
+    // State for toggling password visibility
+    const [showCurrent, setShowCurrent] = useState(false);
+    const [showNew, setShowNew] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+
     const router = useRouter();
 
     const handleUpdate = (e) => {
@@ -15,63 +22,149 @@ export default function ChangePasswordPage() {
             alert("New password and confirm do not match.");
             return;
         }
-
-        router.push("/account/notification");
+        // Demo action
         alert("Password updated (demo). Redirecting...");
+        router.push("/account/notification");
     };
 
     return (
-        <>
-        <h1 className="text-3xl mb-5 font-bold">Change Password</h1>
-            <div className="grid grid-cols-12 gap-6">
-                <div className="col-span-4">
-                    {/* left helper card */}
-                    <div className="rounded-lg p-6 bg-white/3 border border-white/6 backdrop-blur-md">
-                        <h4 className="text-white font-medium mb-2">Change Password</h4>
-                        <p className="text-xs text-white/50">Update your password periodically to keep your account secure.</p>
+        <div className="text-white flex items-center justify-center p-4 relative overflow-hidden">
+
+            {/* Main Card */}
+            <div className="w-full max-w-5xl bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden flex flex-col md:flex-row">
+
+                {/* Left Column: Security Tips */}
+                <div className="md:w-1/3 bg-black/20 p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-white/5">
+                    <div>
+                        <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/20">
+                            <ShieldCheck className="text-white w-8 h-8" />
+                        </div>
+
+                        <h2 className="text-xl font-bold mb-2">Secure Your Account</h2>
+                        <p className="text-white/50 text-sm mb-8 leading-relaxed">
+                            To keep your account safe, we recommend using a strong password that you haven't used elsewhere.
+                        </p>
+
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider">Password Requirements</h3>
+                            <ul className="space-y-3">
+                                <li className="flex items-center gap-3 text-sm text-white/70">
+                                    <CheckCircle2 size={16} className="text-emerald-400" /> At least 8 characters
+                                </li>
+                                <li className="flex items-center gap-3 text-sm text-white/70">
+                                    <CheckCircle2 size={16} className="text-emerald-400" /> Includes a number
+                                </li>
+                                <li className="flex items-center gap-3 text-sm text-white/70">
+                                    <CheckCircle2 size={16} className="text-emerald-400" /> Includes a symbol (!@#$)
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 md:mt-0 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                        <p className="text-xs text-emerald-200 flex items-start gap-2">
+                            <Lock size={14} className="mt-0.5 shrink-0" />
+                            Your password is encrypted and never stored in plain text.
+                        </p>
                     </div>
                 </div>
 
-                <div className="col-span-8">
-                    <form onSubmit={handleUpdate} className="space-y-4">
-                        <label className="flex flex-col text-sm text-white/70">
-                            <span className="mb-2">Current Password</span>
-                            <input
-                                type="password"
-                                value={currentPass}
-                                onChange={(e) => setCurrentPass(e.target.value)}
-                                className="rounded-md px-3 py-2 bg-white/5 text-white placeholder-white/40 border border-white/6"
-                            />
-                        </label>
+                {/* Right Column: Form */}
+                <div className="md:w-2/3 p-8 md:p-12">
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-lineart-to-r from-white to-white/60">
+                            Change Password
+                        </h1>
+                        <p className="text-white/40 text-sm mt-1">Please enter your current password to set a new one.</p>
+                    </div>
 
-                        <label className="flex flex-col text-sm text-white/70">
-                            <span className="mb-2">New Password</span>
-                            <input
-                                type="password"
-                                value={newPass}
-                                onChange={(e) => setNewPass(e.target.value)}
-                                className="rounded-md px-3 py-2 bg-white/5 text-white placeholder-white/40 border border-white/6"
-                            />
-                        </label>
+                    <form onSubmit={handleUpdate} className="space-y-6">
 
-                        <label className="flex flex-col text-sm text-white/70">
-                            <span className="mb-2">Confirm New Password</span>
-                            <input
-                                type="password"
-                                value={confirm}
-                                onChange={(e) => setConfirm(e.target.value)}
-                                className="rounded-md px-3 py-2 bg-white/5 text-white placeholder-white/40 border border-white/6"
-                            />
-                        </label>
+                        {/* Current Password */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-white/50 uppercase tracking-wider ml-1">Current Password</label>
+                            <div className="relative group">
+                                <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-emerald-400 transition-colors" size={18} />
+                                <input
+                                    type={showCurrent ? "text" : "password"}
+                                    value={currentPass}
+                                    onChange={(e) => setCurrentPass(e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full rounded-xl pl-12 pr-12 py-3 bg-white/5 text-white placeholder-white/20 border border-white/10 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCurrent(!showCurrent)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                                >
+                                    {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                        </div>
 
-                        <div className="pt-4">
-                            <button type="submit" className="rounded-xl px-6 py-3 bg-emerald-600 text-white font-medium">
+                        <hr className="border-white/5 my-2" />
+
+                        {/* New Password */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-white/50 uppercase tracking-wider ml-1">New Password</label>
+                            <div className="relative group">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-emerald-400 transition-colors" size={18} />
+                                <input
+                                    type={showNew ? "text" : "password"}
+                                    value={newPass}
+                                    onChange={(e) => setNewPass(e.target.value)}
+                                    placeholder="Enter new password"
+                                    className="w-full rounded-xl pl-12 pr-12 py-3 bg-white/5 text-white placeholder-white/20 border border-white/10 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowNew(!showNew)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                                >
+                                    {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Confirm Password */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-white/50 uppercase tracking-wider ml-1">Confirm New Password</label>
+                            <div className="relative group">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-emerald-400 transition-colors" size={18} />
+                                <input
+                                    type={showConfirm ? "text" : "password"}
+                                    value={confirm}
+                                    onChange={(e) => setConfirm(e.target.value)}
+                                    placeholder="Re-enter new password"
+                                    className="w-full rounded-xl pl-12 pr-12 py-3 bg-white/5 text-white placeholder-white/20 border border-white/10 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirm(!showConfirm)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                                >
+                                    {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="pt-6 border-t border-white/5 flex items-center justify-end gap-4">
+                            <button type="button" className="text-sm text-white/50 hover:text-white transition-colors px-4 py-2">
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="flex items-center gap-2 rounded-xl px-8 py-3 bg-linear-to-r from-emerald-600 to-teal-600 text-white font-semibold shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            >
                                 Update Password
+                                <ArrowRight size={18} />
                             </button>
                         </div>
+
                     </form>
                 </div>
             </div>
-        </>
+        </div>
     );
 }

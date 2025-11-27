@@ -34,17 +34,17 @@ export default function Sidebar() {
     const [selectedWorkspace, setSelectedWorkspace] = useState("Work Space");
     const workspaces = ["Work Space", "Development", "Marketing", "Support Team"];
 
-    // 🧠 ดึงผู้ใช้จาก localStorage
+    // ดึงชื่อเเละข้อมูลจาก localStorage
     const [userName, setUserName] = useState("Loading...");
     const [userRole, setUserRole] = useState("Employee");
 
     const [openUserMenu, setOpenUserMenu] = useState(false);
 
-    // 🔔 Notification State
+    // Notification State
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
 
-    // ---------------- Background modal state ----------------
+    // Background modal state
     const [showBgModal, setShowBgModal] = useState(false);
     const [bgList, setBgList] = useState([]);
     const [selectedBg, setSelectedBg] = useState(null);
@@ -130,7 +130,7 @@ export default function Sidebar() {
             console.error("Error loading notifications:", error);
         }
     };
-
+// ดึงชื่อเเละข้อมูลจาก localStorage
     useEffect(() => {
         try {
             const storedUser = localStorage.getItem("currentUser");
@@ -145,7 +145,7 @@ export default function Sidebar() {
             console.error("Error reading user from localStorage:", error);
         }
 
-        // load background list from localStorage (or set defaults)
+        // โหลด background list จาก localStorage
         const savedList = localStorage.getItem("backgroundList");
         if (savedList) {
             try {
@@ -177,7 +177,7 @@ export default function Sidebar() {
         router.push("/auth/login");
     };
 
-    // Upload handler: convert to data URL and add to bgList & localStorage
+    // การจัดการการอัปโหลด : แปลงเป็น URL และเพิ่มไปยัง bgList กับ localStorage
     const handleUploadBg = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -192,11 +192,11 @@ export default function Sidebar() {
         e.target.value = "";
     };
 
-    // Apply background: save to localStorage (Layout reads 'appBackground')
+    // เพิ่ม background ลงใน localStorage เเละ Layout เปลี่ยนเเบบ Realtime
     const applyBackground = (bg) => {
         setSelectedBg(bg);
         localStorage.setItem("appBackground", bg);
-        // Trigger event for Layout to update immediately
+        // ทำให้ Layout รู้เปลี่ยน
         window.dispatchEvent(new CustomEvent("background-changed", { detail: bg }));
         setShowBgModal(false);
     };
@@ -364,7 +364,7 @@ export default function Sidebar() {
                                     { href: "/Report/message", label: "Message Report" },
                                     { href: "/Report/responses", label: "Responses Report" },
                                     { href: "/Report/users", label: "Users Report" },
-                                    { href: "/Report/#", label: "Ai Token Report" },
+                                    { href: "/Report/aitoken", label: "Ai Token Report" },
                                 ]}
                                 pathname={pathname}
                             />

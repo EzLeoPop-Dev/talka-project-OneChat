@@ -10,6 +10,15 @@ import UseTemplates from "./usetemplates/usetemplates";
 
 export default function page() {
   const [view, setView] = useState("mainpage");
+
+  const [selectedTemplates, setSelectedTemplates] = useState([]);
+
+  const handleUseTemplate = (type) => {
+    setSelectedTemplates(prev =>
+      prev.includes(type) ? prev : [...prev, type]
+    );
+    setView("usetemplates");
+  };
   return (
     <>
       {view === "mainpage" && <AiSupport onNext={() => setView("templates")} />}
@@ -26,21 +35,21 @@ export default function page() {
         <Receptionist
           onNext={() => setView("receptionist")}
           onBack={() => setView("templates")}
-          onUseRecep={() => setView("usetemplates")}
+          onUseRecep={() => handleUseTemplate("receptionist")}
         />
       )}
       {view === "saleagent" && (
         <SaleAgent
           onNext={() => setView("saleagent")}
           onBack={() => setView("templates")}
-          onUseSale={() => setView("usetemplates")}
+          onUseSale={() => handleUseTemplate("saleagent")}
         />
       )}
       {view === "supportagent" && (
         <SupportAgent
           onNext={() => setView("supportagent")}
           onBack={() => setView("templates")}
-          onUseSup={() => setView("usetemplates")}
+          onUseSup={() => handleUseTemplate("supportagent")}
         />
       )}
       {view === "createnew" && (
@@ -51,6 +60,7 @@ export default function page() {
       )}
       {view === "usetemplates" && (
         <UseTemplates
+          selected={selectedTemplates}
           onBack={() => setView("templates")}
           onCreate={() => setView("templates")}
           onreceptionist={() => setView("receptionist")}

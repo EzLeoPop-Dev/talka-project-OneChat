@@ -93,7 +93,7 @@ export default function Receptionist({ onBack, onUseRecep }) {
             className="text-white/70 hover:text-white transition-colors duration-300 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg w-fit"
           >
             <p className="text-white text-base font-medium cursor-pointer">
-              UseTemplate
+              Use
             </p>
           </button>
         </div>
