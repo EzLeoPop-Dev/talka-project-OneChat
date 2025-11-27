@@ -1,7 +1,14 @@
 "use client";
 
-// 1. รับ prop 'onOpenContactDetails' เพิ่ม
-export default function ControlPanel({ onOpenAddTagModal, onOpenContactDetails, onOpenAddNote, onOpenChangeStatus, onOpenActivityLog }) {
+//  รับ prop 'onOpenSendToBoard' เพิ่มเข้ามา
+export default function ControlPanel({ 
+    onOpenAddTagModal, 
+    onOpenContactDetails, 
+    onOpenAddNote, 
+    onOpenChangeStatus, 
+    onOpenActivityLog,
+    onOpenSendToBoard 
+}) {
 
     return (
         <div className="w-[65px] mt-3 ml-3">
@@ -51,6 +58,15 @@ export default function ControlPanel({ onOpenAddTagModal, onOpenContactDetails, 
                         title="Activity Log"
                     >
                         <i className="fa-solid fa-clock-rotate-left text-white/70 group-hover:text-white text-lg transition-colors"></i>
+                    </button>
+
+                    {/*  ปุ่มที่ 6: Send to Board  */}
+                    <button 
+                        onClick={onOpenSendToBoard}
+                        className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"
+                        title="Send to Board"
+                    >
+                        <i className="fa-solid fa-file-import text-white text-lg transition-colors"></i>
                     </button>
                     
                 </div>
