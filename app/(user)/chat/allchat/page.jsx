@@ -19,6 +19,7 @@ import AiSuppBtn from "@/app/components/AiSuppBtn";
 import ChangeStatus from "@/app/components/Changestatus"; 
 import AiAssistantPanel from "@/app/components/AiAssistantPanel";
 import ActivityLogPanel from "@/app/components/ActivityLogPanel";
+import SendToBoardModal from "@/app/components/SendToBoardModal";
 
 // Data & Styles
 import "@/app/assets/css/other.css";
@@ -42,12 +43,10 @@ const processInitialData = (data) => {
         ...chat,
         email: chat.email || null,
         country: chat.country || null,
-        // แปลง Tag ให้เป็น Array เสมอ (ป้องกัน Error)
         tags: Array.isArray(chat.tags) ? chat.tags : (chat.tags ? [chat.tags] : []),
         notes: chat.notes || [],
         status: chat.status || "New Chat",
-        openTime: chat.time, // เก็บเวลาเริ่มต้นแชท
-        // กรองเอาเฉพาะข้อความลูกค้า (ไม่เอา 'me')
+        openTime: chat.time,
         messages: (chat.messages || []).filter(msg => msg.from !== 'me')
     }));
 };
@@ -71,6 +70,7 @@ export default function ChatPage() {
     const [isChangeStatusOpen, setIsChangeStatusOpen] = useState(false);
     const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
     const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
+    const [isSendToBoardOpen, setIsSendToBoardOpen] = useState(false); // ✅ State สำหรับ Modal Board
 
     // --- State: Filters & Settings ---
     const [activeFilter, setActiveFilter] = useState("All");
@@ -82,7 +82,6 @@ export default function ChatPage() {
     const [activePrompts, setActivePrompts] = useState([]);
     const [availableAgents, setAvailableAgents] = useState([]);
     const [availableTags, setAvailableTags] = useState([]);
-
 
     // -------------------------------------------------------------------------
     // 4. Effects (Data Loading & Saving)
@@ -119,7 +118,6 @@ export default function ChatPage() {
     useEffect(() => {
         if (isLoaded) {
             localStorage.setItem("onechat_data", JSON.stringify(chats));
-        
             window.dispatchEvent(new Event("chat-data-updated"));
         }
     }, [chats, isLoaded]);
@@ -205,8 +203,6 @@ export default function ChatPage() {
         }
     }, [selectedChatId, isLoaded, chats]);
 
-    
-
     // -------------------------------------------------------------------------
     // 5. Handlers (Logic Functions)
     // -------------------------------------------------------------------------
@@ -231,6 +227,7 @@ export default function ChatPage() {
         setIsAddNoteOpen(false);
         setIsChangeStatusOpen(false);
         setIsActivityLogOpen(false); 
+        setIsSendToBoardOpen(false); 
     };
 
     // --- Panel Open/Close ---
@@ -264,6 +261,15 @@ export default function ChatPage() {
     };
     const handleCloseActivityLog = () => setIsActivityLogOpen(false);
 
+    // ✅ ฟังก์ชันเปิด Modal Send To Board
+    const handleOpenSendToBoard = () => {
+        if (selectedChatId) {
+            closeAllPanels();
+            setIsSendToBoardOpen(true);
+        } else {
+            alert("Please select a chat first.");
+        }
+    };
 
     // --- Data Updates ---
     
@@ -278,7 +284,6 @@ export default function ChatPage() {
                     
                     addLog(chat.id, 'tag', isSelected ? `Removed tag "${tagName}"` : `Changed tag to "${tagName}"`);
                     
-                    // Toggle: ถ้ามีอยู่แล้วให้ลบ ถ้าไม่มีให้ใส่ (และลบอันเก่าออก)
                     const newTags = isSelected ? [] : [tagName];
                     return { ...chat, tags: newTags }; 
                 }
@@ -379,7 +384,6 @@ export default function ChatPage() {
         );
     };
 
-
     // -------------------------------------------------------------------------
     // 6. Data Processing (Filter & Sort)
     // -------------------------------------------------------------------------
@@ -403,12 +407,11 @@ export default function ChatPage() {
             return priorityA - priorityB;
         });
 
-
     // -------------------------------------------------------------------------
     // 7. Render UI
     // -------------------------------------------------------------------------
-    
-    // ถ้ายังโหลดไม่เสร็จ ให้แสดง Loading
+
+    // Loading Check
     if (!isLoaded) {
         return <div className="text-white text-center mt-20 animate-pulse">Loading Chat Data...</div>;
     }
@@ -494,6 +497,7 @@ export default function ChatPage() {
                         onOpenAddNote={handleOpenAddNote} 
                         onOpenChangeStatus={handleOpenChangeStatus}
                         onOpenActivityLog={handleOpenActivityLog}
+                        onOpenSendToBoard={handleOpenSendToBoard} // ✅ ส่งฟังก์ชันนี้ไป
                     />
                 )}
 
@@ -511,6 +515,15 @@ export default function ChatPage() {
                     isOpen={isAiAssistantOpen} 
                 />
             </div>
+
+
+            {isSendToBoardOpen && selectedChat && (
+                <SendToBoardModal 
+                    onClose={() => setIsSendToBoardOpen(false)} 
+                    chat={selectedChat} 
+                />
+            )}
+            
         </div>
     );
 }

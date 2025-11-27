@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -20,7 +20,11 @@ import {
     Upload,
     Monitor,
     Sun,
-    Moon
+    Moon,
+    Users,
+    LogOut,
+    Check,
+    X
 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -34,24 +38,24 @@ export default function Sidebar() {
     const [selectedWorkspace, setSelectedWorkspace] = useState("Work Space");
     const workspaces = ["Work Space", "Development", "Marketing", "Support Team"];
 
-    // 🧠 ดึงผู้ใช้จาก localStorage
+    // User State
     const [userName, setUserName] = useState("Loading...");
     const [userRole, setUserRole] = useState("Employee");
-
+    const [userTeam, setUserTeam] = useState("No Team"); // ✅ State สำหรับเก็บชื่อทีม
     const [openUserMenu, setOpenUserMenu] = useState(false);
 
-    // 🔔 Notification State
+    // Notification State
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
 
-    // ---------------- Background modal state ----------------
+    // Background & Theme State
     const [showBgModal, setShowBgModal] = useState(false);
     const [bgList, setBgList] = useState([]);
     const [selectedBg, setSelectedBg] = useState(null);
-
     const [showThemeModal, setShowThemeModal] = useState(false);
     const [selectedTheme, setSelectedTheme] = useState("dark");
 
+    // --- Themes Data ---
     const themes = [
         {
             id: 'light',
@@ -106,7 +110,6 @@ export default function Sidebar() {
         );
     };
 
-
     const loadNotifications = () => {
         try {
             const savedData = localStorage.getItem("onechat_data");
@@ -118,7 +121,7 @@ export default function Sidebar() {
                     id: chat.id,
                     name: chat.name,
                     profile: chat.imgUrl,
-                    platform: chat.channel, 
+                    platform: chat.channel,
                     message: chat.lastMessage || "มีข้อความใหม่",
                     time: chat.lastMessageTime || "ล่าสุด",
                     icon: chat.channel?.toLowerCase(),
@@ -131,21 +134,51 @@ export default function Sidebar() {
         }
     };
 
-    useEffect(() => {
+    // ✅ ฟังก์ชันโหลดข้อมูล User และค้นหา Team (แก้ไขใหม่)
+    const loadUserData = () => {
         try {
             const storedUser = localStorage.getItem("currentUser");
+            const storedTeams = localStorage.getItem("teams"); // 1. ดึงข้อมูลทีมจาก LocalStorage
+
             if (storedUser) {
                 const user = JSON.parse(storedUser);
-                setUserName(user.username || "Unknown User");
+                const currentName = user.username || "Unknown User";
+
+                setUserName(currentName);
                 setUserRole(user.role || "Employee");
+
+                // 2. Logic ค้นหาทีม
+                let myTeamName = "No Team";
+                if (storedTeams) {
+                    try {
+                        const teams = JSON.parse(storedTeams);
+                        // หา Team ที่สมาชิก (members) มีชื่อของ user คนปัจจุบันอยู่
+                        const foundTeam = teams.find(t => 
+                            t.members && Array.isArray(t.members) && t.members.includes(currentName)
+                        );
+                        
+                        if (foundTeam) {
+                            myTeamName = foundTeam.name;
+                        }
+                    } catch (e) {
+                        console.error("Error parsing teams:", e);
+                    }
+                }
+                setUserTeam(myTeamName); // อัปเดต State
+
             } else {
                 setUserName("Guest");
+                setUserTeam("No Team");
             }
         } catch (error) {
-            console.error("Error reading user from localStorage:", error);
+            console.error("Error reading user data:", error);
         }
+    };
 
-        // load background list from localStorage (or set defaults)
+    useEffect(() => {
+        loadUserData(); // โหลดครั้งแรก
+
+        // โหลด Background
         const savedList = localStorage.getItem("backgroundList");
         if (savedList) {
             try {
@@ -164,11 +197,22 @@ export default function Sidebar() {
 
         loadNotifications();
 
+        // Listen events
         const handleChatUpdate = () => loadNotifications();
         window.addEventListener("chat-data-updated", handleChatUpdate);
+        
+        // ✅ เพิ่ม Listener: ถ้ามีการ update user หรือ storage (เช่น สร้างทีมใหม่) ให้โหลดข้อมูลใหม่
+        window.addEventListener("user_updated", loadUserData); 
+        window.addEventListener("storage", loadUserData); 
+
+        // Interval check (กันพลาด)
+        const intervalId = setInterval(loadUserData, 2000);
 
         return () => {
             window.removeEventListener("chat-data-updated", handleChatUpdate);
+            window.removeEventListener("user_updated", loadUserData);
+            window.removeEventListener("storage", loadUserData);
+            clearInterval(intervalId);
         };
     }, []);
 
@@ -177,7 +221,6 @@ export default function Sidebar() {
         router.push("/auth/login");
     };
 
-    // Upload handler: convert to data URL and add to bgList & localStorage
     const handleUploadBg = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -192,46 +235,49 @@ export default function Sidebar() {
         e.target.value = "";
     };
 
-    // Apply background: save to localStorage (Layout reads 'appBackground')
     const applyBackground = (bg) => {
         setSelectedBg(bg);
         localStorage.setItem("appBackground", bg);
-        // Trigger event for Layout to update immediately
         window.dispatchEvent(new CustomEvent("background-changed", { detail: bg }));
         setShowBgModal(false);
     };
+
+    // Close Dropdown Outside Click
+    const notiRef = useRef(null);
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (notiRef.current && !notiRef.current.contains(e.target)) setShowNotifications(false);
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     return (
         <div className="flex p-3">
             <div
                 className="relative w-[250px] h-[98vh] rounded-3xl pt-6 pr-1 overflow-hidden flex flex-col justify-between"
                 style={{
-                    background:
-                        "linear-gradient(180deg, rgba(190, 126, 199, 0.5), rgba(139, 90, 158, 0.5))",
+                    background: "linear-gradient(180deg, rgba(190, 126, 199, 0.5), rgba(139, 90, 158, 0.5))",
                     boxShadow: "0 64px 64px -32px rgba(41, 15, 0, 0.56)",
                 }}
             >
                 <div className="absolute inset-0 backdrop-blur-[160px] bg-white/5"></div>
 
                 {/* Sidebar content */}
-                <div className="relative z-10 flex px-6 flex-col flex-1 overflow-y-auto">
+                <div className="relative z-10 flex px-6 flex-col flex-1 overflow-y-auto custom-scrollbar">
 
-                    {/* 🔔 Header icons */}
+                    {/* Header icons */}
                     <div className="flex items-center justify-between mb-5">
-
-                        {/* Notification Bell */}
                         <button
                             onClick={() => setShowNotifications(true)}
                             className="relative p-2 rounded-xl hover:bg-white/10 transition text-white"
                             aria-label="Open notifications"
                         >
-                            {/* ✅ แสดงจุดแดงเฉพาะเมื่อมี Notification */}
                             {notifications.length > 0 && (
                                 <div className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] bg-red-500 rounded-full animate-pulse px-1">
                                     <span className="text-[10px] font-bold text-white">{notifications.length}</span>
                                 </div>
                             )}
-                            
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                                 <path d="M18.63 13A17.89 17.89 0 0 1 18 8" />
@@ -241,61 +287,60 @@ export default function Sidebar() {
                         </button>
                     </div>
 
-                    {/* User Section */}
+                    {/* ✅ User Section (Updated Layout: Team under Name) */}
                     <div className="flex items-center justify-between gap-3 mb-8 relative">
-
                         <div className="flex items-center gap-3">
+                            {/* Avatar */}
                             <div
-                                className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                                style={{
-                                    backgroundColor: stringToColor(userName),
-                                }}
+                                className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg border-2 border-white/20 shadow-md shrink-0"
+                                style={{ backgroundColor: stringToColor(userName) }}
                             >
                                 {getInitials(userName)}
                             </div>
 
-                            <div>
-                                <p className="text-xs text-white/60 uppercase tracking-wide">
+                            {/* Info Column */}
+                            <div className="flex flex-col items-start gap-0.5">
+                                {/* Role (Top) */}
+                                <p className="text-[10px] text-white/50 uppercase tracking-wide leading-none">
                                     {userRole}
                                 </p>
-                                <p className="text-white font-medium">{userName}</p>
+                                
+                                {/* Name (Middle) */}
+                                <p className="text-white font-bold text-sm leading-tight truncate max-w-[100px]" title={userName}>
+                                    {userName}
+                                </p>
+
+                                {/* Team (Bottom) - Moved here */}
+                                <div className="flex items-center gap-1.5 text-[10px] text-white/80 bg-white/10 px-2 py-0.5 rounded mt-1 border border-white/5">
+                                    <Users size={10} className="opacity-70"/>
+                                    <span className="truncate max-w-[80px] font-medium" title={userTeam}>{userTeam}</span>
+                                </div>
                             </div>
                         </div>
 
+                        {/* Options Button */}
                         <button
                             onClick={() => setOpenUserMenu(!openUserMenu)}
-                            className="text-white/80 hover:text-white px-2 py-1 rounded-lg"
+                            className="text-white/80 hover:text-white px-2 py-1 rounded-lg hover:bg-white/10 transition self-start mt-1"
                         >
                             •••
                         </button>
 
+                        {/* Dropdown Menu */}
                         {openUserMenu && (
                             <div className="absolute top-14 right-0 w-48 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-2 space-y-1 z-30">
                                 <Link href="/account/profile">
-                                    <button className="w-full text-left px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white rounded-lg text-sm">
-                                        My Profile
-                                    </button>
+                                    <button className="w-full text-left px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white rounded-lg text-sm">My Profile</button>
                                 </Link>
-
                                 <Link href="/account/password">
-                                    <button className="w-full text-left px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white rounded-lg text-sm">
-                                        Change Password
-                                    </button>
+                                    <button className="w-full text-left px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white rounded-lg text-sm">Change Password</button>
                                 </Link>
-
                                 <Link href="/account/notification">
-                                    <button className="w-full text-left px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white rounded-lg text-sm">
-                                        Notification Settings
-                                    </button>
+                                    <button className="w-full text-left px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white rounded-lg text-sm">Notification Settings</button>
                                 </Link>
-
                                 <hr className="border-white/20" />
-
-                                <button
-                                    onClick={handleLogout}
-                                    className="w-full text-left px-3 py-2 text-red-400 hover:bg-red-400/20 hover:text-red-300 rounded-lg text-sm"
-                                >
-                                    Logout
+                                <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-400 hover:bg-red-400/20 hover:text-red-300 rounded-lg text-sm flex items-center gap-2">
+                                    <LogOut size={14} /> Logout
                                 </button>
                             </div>
                         )}
@@ -316,12 +361,11 @@ export default function Sidebar() {
                             <DropdownMenu
                                 title="Chat"
                                 icon={<MessageCircle size={20} />}
-                                isOpen={openDropdown === "all-chat"}
-                                onToggle={() =>
-                                    setOpenDropdown(openDropdown === "all-chat" ? null : "all-chat")
-                                }
+                                isOpen={openDropdown === "Chat"}
+                                onToggle={() => setOpenDropdown(openDropdown === "Chat" ? null : "Chat")}
                                 links={[
                                     { href: "/chat/allchat", label: "All Chat" },
+                                    { href: "/chat/customchat", label: "Custom Chat" },
                                     { href: "/chat/facebook", label: "Facebook" },
                                     { href: "/chat/line", label: "Line" },
                                 ]}
@@ -335,7 +379,7 @@ export default function Sidebar() {
                                 pathname={pathname}
                             />
 
-                            <p className="text-xs text-white/50 uppercase tracking-wider my-3">Admin Zone</p>
+                            <p className="text-xs text-white/50 uppercase tracking-wider my-3 pt-2 border-t border-white/10">Admin Zone</p>
 
                             <SidebarLink
                                 href="/contact"
@@ -355,9 +399,7 @@ export default function Sidebar() {
                                 title="Report"
                                 icon={<Megaphone size={20} />}
                                 isOpen={openDropdown === "Report"}
-                                onToggle={() =>
-                                    setOpenDropdown(openDropdown === "Report" ? null : "Report")
-                                }
+                                onToggle={() => setOpenDropdown(openDropdown === "Report" ? null : "Report")}
                                 links={[
                                     { href: "/Report/contacts", label: "Contact Report" },
                                     { href: "/Report/conversation", label: "Conversation Report" },
@@ -373,9 +415,7 @@ export default function Sidebar() {
                                 title="Admin Panel"
                                 icon={<Shield size={20} />}
                                 isOpen={openDropdown === "Admin"}
-                                onToggle={() =>
-                                    setOpenDropdown(openDropdown === "Admin" ? null : "Admin")
-                                }
+                                onToggle={() => setOpenDropdown(openDropdown === "Admin" ? null : "Admin")}
                                 links={[
                                     { href: "/admin/generalinfo", label: "General Info" },
                                     { href: "/admin/channel", label: "Connect Platform" },
@@ -390,340 +430,137 @@ export default function Sidebar() {
                     </div>
                 </div>
 
-                {/* Workspace Selector */}
-                <div className="relative z-20 p-3 space-y-4">
-
+                {/* Workspace Selector (Bottom) */}
+                <div className="relative z-20 p-3 space-y-4 bg-black/10 backdrop-blur-sm">
                     <div className="relative">
-
-                        {/* TOP RIGHT ICON BUTTONS */}
-                        <div className="flex items-center mb-2 gap-2 z-20">
-
-                            {/* Change Theme (icon only for now) */}
-                            <button
-                                onClick={() => setShowThemeModal(true)}
-                                className="p-2 rounded-md bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all hover:scale-110"
-                                title="Change Theme"
-                            >
-                                <Palette size={18} />
-                            </button>
-
-                            {/* Change Background (opens modal to pick/upload background for entire dashboard) */}
-                            <button
-                                onClick={() => setShowBgModal(true)}
-                                className="p-2 rounded-md bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all hover:scale-110"
-                                title="Change Background"
-                            >
-                                <ImageIcon size={18} />
-                            </button>
-
+                        <div className="flex items-center justify-end mb-2 gap-2 z-20">
+                            <button onClick={() => setShowThemeModal(true)} className="p-2 rounded-md bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all hover:scale-105" title="Change Theme"><Palette size={16} /></button>
+                            <button onClick={() => setShowBgModal(true)} className="p-2 rounded-md bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all hover:scale-105" title="Change Background"><ImageIcon size={16} /></button>
                         </div>
 
-                        {/* WORKSPACE DROPDOWN */}
                         <button
                             onClick={() => setIsOpenWorkspace(!isOpenWorkspace)}
-                            className="w-full flex items-center justify-between gap-3 border border-[rgba(254,253,253,0.5)] backdrop-blur-xl text-white px-4 py-3 rounded-2xl shadow-md transition-all hover:bg-[rgba(32,41,59,0.25)]"
+                            className="w-full flex items-center justify-between gap-3 border border-[rgba(254,253,253,0.3)] bg-white/5 text-white px-3 py-2.5 rounded-xl shadow-sm transition-all hover:bg-white/10"
                         >
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 flex items-center justify-center bg-red-600 rounded-xl">
-                                    <Building2 size={20} color="white" />
+                                <div className="w-8 h-8 flex items-center justify-center bg-red-600 rounded-lg shadow-md">
+                                    <Building2 size={16} color="white" />
                                 </div>
                                 <span className="font-medium text-sm">{selectedWorkspace}</span>
                             </div>
-                            <ChevronDown
-                                size={18}
-                                className={`transition-transform duration-300 ${isOpenWorkspace ? "rotate-180" : ""
-                                    }`}
-                            />
+                            <ChevronDown size={16} className={`transition-transform duration-300 ${isOpenWorkspace ? "rotate-180" : ""}`} />
                         </button>
 
-                        {/* Dropdown list */}
-                        <div
-                            className={`absolute bottom-full mb-2 w-full bg-white/80 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden border border-white/40 transition-all duration-300 ${isOpenWorkspace
-                                ? "max-h-60 opacity-100"
-                                : "max-h-0 opacity-0"
-                                }`}
-                        >
+                        <div className={`absolute bottom-full mb-2 w-full bg-[#1e1e2e] border border-white/10 rounded-xl shadow-xl overflow-hidden transition-all duration-300 ${isOpenWorkspace ? "max-h-60 opacity-100" : "max-h-0 opacity-0"}`}>
                             {workspaces.map((ws) => (
                                 <button
                                     key={ws}
-                                    onClick={() => {
-                                        setSelectedWorkspace(ws);
-                                        setIsOpenWorkspace(false);
-                                    }}
-                                    className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${selectedWorkspace === ws
-                                        ? "bg-purple-200/60 text-purple-900"
-                                        : "text-gray-700 hover:bg-white/60"
-                                        }`}
+                                    onClick={() => { setSelectedWorkspace(ws); setIsOpenWorkspace(false); }}
+                                    className={`w-full text-left px-4 py-3 text-xs font-medium transition-colors border-b border-white/5 last:border-0 ${selectedWorkspace === ws ? "bg-purple-600 text-white" : "text-white/70 hover:bg-white/10"}`}
                                 >
                                     {ws}
                                 </button>
                             ))}
                         </div>
                     </div>
-
-                    {/* Logo */}
-                    <div className="Logo flex items-center justify-center mt-4 gap-3 opacity-50">
-                        <Image
-                            src="/images/LogoSidebar.png"
-                            alt="Picture of the author"
-                            width={30}
-                            height={30}
-                        />
-                        <h1 className="text-2xl font-bold cursor-default">T a l k a</h1>
+                    <div className="Logo flex items-center justify-center mt-2 gap-2 opacity-40 hover:opacity-80 transition-opacity duration-300">
+                        <Image src="/images/LogoSidebar.png" alt="Talka Logo" width={24} height={24} className="object-contain" />
+                        <h1 className="text-lg font-bold cursor-default tracking-widest">T a l k a</h1>
                     </div>
                 </div>
             </div>
 
-            {/* 🔔 Notification Modal with animation */}
+            {/* Notification Modal */}
             <AnimatePresence>
                 {showNotifications && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 flex items-center justify-center z-999"
-                    >
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-md" onClick={() => setShowNotifications(false)}></div>
-
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.7, y: 40 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.7, y: 40 }}
-                            transition={{ duration: 0.25, ease: "easeOut" }}
-                            className="relative w-[500px] max-h-[70vh] bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl p-5 overflow-y-auto z-10"
-                        >
-
-                            <h2 className="text-xl text-white font-semibold mb-4 text-center">
-                                Notifications ({notifications.length})
-                            </h2>
-
-                            <div className="space-y-3">
-                                {notifications.length === 0 ? (
-                                    <p className="text-white/50 text-center py-10">ไม่มีการแจ้งเตือนใหม่</p>
-                                ) : (
-                                    notifications.map((n) => (
-                                        <div
-                                            key={n.id}
-                                            className="w-full flex items-center gap-4 p-3 rounded-xl bg-white/10 hover:bg-white/20 transition cursor-pointer"
-                                            onClick={() => {
-                                                router.push(`/chat/allchat?id=${n.id}`);
-                                                setShowNotifications(false);
-                                            }}
-                                        >
-                                        {/* รูปโปรไฟล์ */}
-                                        {n.profile ? (
-                                            <img src={n.profile} className="w-12 h-12 rounded-full object-cover" />
-                                        ) : (
-                                                <div className="w-12 h-12 rounded-full bg-gray-500 flex items-center justify-center text-white font-bold">
-                                                    {n.name.charAt(0)}
-                                                </div>
-                                            )}
-
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="text-white font-medium">{n.name}</p>
-
-                                                    {n.icon === "facebook" && <Facebook size={16} className="text-blue-400" />}
-                                                    {n.icon === "line" && <MessageSquare size={16} className="text-green-400" />}
-                                                    <span className="bg-red-500/20 text-red-300 text-[10px] px-2 py-0.5 rounded-full border border-red-500/30">New</span>
-                                                </div>
-
-                                                <p className="text-white/60 text-sm">
-                                                    {n.platform} • {n.time}
-                                                </p>
-                                                <p className="text-white/80 mt-1 text-sm line-clamp-1">
-                                                    {n.message}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-
-                            <button
-                                onClick={() => setShowNotifications(false)}
-                                className="w-full mt-5 py-2 bg-white/20 text-white rounded-xl hover:bg-white/30 transition"
-                            >
-                                Close
-                            </button>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* ---------------- Background Modal ---------------- */}
-            <AnimatePresence>
-                {showBgModal && (
-                    <motion.div
-                        key="bg-modal-backdrop"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 flex items-center justify-center z-1000"
-                    >
-                        <motion.div
-                            onClick={() => setShowBgModal(false)}
-                            className="absolute inset-0 bg-black/50 backdrop-blur-md"
-                        />
-
-                        <motion.div
-                            key="bg-modal"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            transition={{ type: "spring", stiffness: 140, damping: 18 }}
-                            className="relative w-[680px] max-h-[80vh] bg-white/6 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-5 overflow-y-auto z-20"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold text-white">Choose Background</h3>
-                                <button
-                                    onClick={() => setShowBgModal(false)}
-                                    className="text-white/70 hover:text-white p-2 rounded"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-
-                            {/* Grid of backgrounds */}
-                            <div className="grid grid-cols-3 gap-4">
-                                {bgList.map((bg, idx) => (
-                                    <div
-                                        key={idx}
-                                        className={`relative rounded-xl overflow-hidden cursor-pointer border ${selectedBg === bg ? "border-white/60" : "border-white/10"
-                                            }`}
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-[9999]">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowNotifications(false)}></div>
+                        <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-[400px] max-h-[70vh] bg-[#1a1a2e] border border-white/10 rounded-2xl shadow-2xl p-5 overflow-y-auto z-10">
+                            <h2 className="text-lg text-white font-semibold mb-4 text-center border-b border-white/10 pb-2">Notifications</h2>
+                            <div className="space-y-2">
+                                {notifications.map((n) => (
+                                    <div 
+                                        key={n.id} 
+                                        // ✅ เพิ่ม onClick ให้กดแล้วไปหน้า Chat
+                                        onClick={() => {
+                                            router.push(`/chat/allchat?id=${n.id}`);
+                                            setShowNotifications(false);
+                                        }}
+                                        className="w-full flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer border border-white/5"
                                     >
-                                        <img
-                                            src={bg}
-                                            alt={`bg-${idx}`}
-                                            className="w-full h-36 object-cover"
-                                        />
-                                        <div className="p-2 absolute left-2 bottom-2">
-                                            <button
-                                                onClick={() => applyBackground(bg)}
-                                                className="bg-white/20 text-white px-3 py-1 rounded-md hover:bg-white/30 transition"
-                                            >
-                                                Apply
-                                            </button>
+                                        <img src={n.profile} className="w-10 h-10 rounded-full object-cover" />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-white text-sm font-medium truncate">{n.name}</p>
+                                                <span className="text-[10px] text-white/40">{n.time}</span>
+                                            </div>
+                                            <p className="text-white/60 text-xs line-clamp-2 mt-0.5">{n.message}</p>
+                                            <div className="mt-1 flex items-center gap-1 text-[10px] text-white/40">
+                                                <span>via {n.platform}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
+                            <button onClick={() => setShowNotifications(false)} className="w-full mt-4 py-2 bg-white/10 text-white text-sm rounded-lg hover:bg-white/20 transition">Close</button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                            {/* Upload new */}
-                            <div className="mt-5">
-                                <label className="flex items-center gap-3 p-3 rounded-lg bg-white/8 border border-white/12 cursor-pointer hover:bg-white/12 transition">
-                                    <Upload className="w-5 h-5" />
-                                    <span className="text-white/80">Upload an image</span>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleUploadBg}
-                                        className="hidden"
-                                    />
-                                </label>
-                                <p className="text-xs text-white/60 mt-2">Uploaded images store in browser (local only).</p>
+            {/* Background Modal */}
+            <AnimatePresence>
+                {showBgModal && (
+                    <motion.div key="bg-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-[9999]">
+                        <motion.div onClick={() => setShowBgModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+                        <motion.div key="bg-modal" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-[600px] max-h-[80vh] bg-[#1e1e2e] border border-white/10 rounded-2xl shadow-2xl p-6 overflow-y-auto z-20" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-white">Choose Background</h3>
+                                <button onClick={() => setShowBgModal(false)} className="text-white/50 hover:text-white"><X size={24} /></button>
                             </div>
-
-                            <div className="mt-5 flex justify-end">
-                                <button
-                                    onClick={() => setShowBgModal(false)}
-                                    className="px-4 py-2 rounded-md bg-white/10 hover:bg-white/20 transition text-white"
-                                >
-                                    Close
-                                </button>
+                            <div className="grid grid-cols-3 gap-4">
+                                {bgList.map((bg, idx) => (
+                                    <div key={idx} className={`relative rounded-xl overflow-hidden cursor-pointer border-2 aspect-video group ${selectedBg === bg ? "border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)]" : "border-transparent hover:border-white/30"}`}>
+                                        <img src={bg} alt={`bg-${idx}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button onClick={() => applyBackground(bg)} className="bg-white text-black px-3 py-1 rounded-full text-xs font-bold transform translate-y-2 group-hover:translate-y-0 transition-transform">Apply</button>
+                                        </div>
+                                        {selectedBg === bg && <div className="absolute top-2 right-2 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center"><Check size={12} color="white" /></div>}
+                                    </div>
+                                ))}
+                                <label className="flex flex-col items-center justify-center gap-2 rounded-xl bg-white/5 border-2 border-dashed border-white/20 cursor-pointer hover:bg-white/10 transition hover:border-white/40 aspect-video">
+                                    <Upload className="w-6 h-6 text-white/50" />
+                                    <span className="text-xs text-white/50 font-medium">Upload Image</span>
+                                    <input type="file" accept="image/*" onChange={handleUploadBg} className="hidden" />
+                                </label>
                             </div>
                         </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
+            {/* Theme Modal */}
             <AnimatePresence>
                 {showThemeModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 flex items-center justify-center z-50 p-4"
-                    >
-                        <motion.div
-                            onClick={() => setShowThemeModal(false)}
-                            className="absolute inset-0 bg-black/50 backdrop-blur-md"
-                        />
-
-                        <motion.div
-                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                            transition={{ type: "spring", stiffness: 140, damping: 18 }}
-                            className="relative w-full max-w-[500px] bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl p-6 z-20"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <h3 className="text-2xl font-bold text-white mb-6">Choose Your Theme</h3>
-
-                            <div className="grid grid-cols-1 gap-4">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-[9999] p-4">
+                        <motion.div onClick={() => setShowThemeModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+                        <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-md bg-[#1e1e2e] border border-white/10 rounded-2xl shadow-2xl p-6 z-20" onClick={(e) => e.stopPropagation()}>
+                            <h3 className="text-xl font-bold text-white mb-6">Choose Theme</h3>
+                            <div className="space-y-3">
                                 {themes.map((theme) => {
                                     const Icon = theme.icon;
                                     const isSelected = selectedTheme === theme.id;
-
                                     return (
-                                        <motion.button
-                                            key={theme.id}
-                                            onClick={() => handleThemeChange(theme.id)}
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            className={`relative p-4 rounded-xl border-2 transition-all ${isSelected
-                                                ? "border-blue-500 bg-blue-500/20 shadow-lg shadow-blue-500/30"
-                                                : "border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30"
-                                                }`}
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className={`p-3 rounded-lg ${isSelected ? "bg-blue-500" : "bg-white/10"
-                                                    }`}>
-                                                    <Icon className="w-6 h-6 text-white" />
-                                                </div>
-
-                                                <div className="flex-1 text-left">
-                                                    <h4 className="text-white font-semibold text-lg mb-2">
-                                                        {theme.name}
-                                                    </h4>
-                                                    {theme.preview}
-                                                </div>
-
-                                                {isSelected && (
-                                                    <motion.div
-                                                        initial={{ scale: 0 }}
-                                                        animate={{ scale: 1 }}
-                                                        className="absolute top-4 right-4 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center"
-                                                    >
-                                                        <svg
-                                                            className="w-4 h-4 text-white"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                            stroke="currentColor"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={3}
-                                                                d="M5 13l4 4L19 7"
-                                                            />
-                                                        </svg>
-                                                    </motion.div>
-                                                )}
+                                        <button key={theme.id} onClick={() => handleThemeChange(theme.id)} className={`w-full relative p-4 rounded-xl border-2 transition-all text-left group flex items-center gap-4 ${isSelected ? "border-purple-500 bg-purple-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"}`}>
+                                            <div className={`p-2 rounded-lg ${isSelected ? "bg-purple-500 text-white" : "bg-white/10 text-white/50 group-hover:text-white"}`}><Icon size={20} /></div>
+                                            <div>
+                                                <h4 className={`font-semibold ${isSelected ? "text-white" : "text-white/70 group-hover:text-white"}`}>{theme.name}</h4>
+                                                <p className="text-xs text-white/40">Switch to {theme.name.toLowerCase()} mode</p>
                                             </div>
-                                        </motion.button>
+                                            {isSelected && <div className="absolute top-1/2 -translate-y-1/2 right-4 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center"><Check size={12} color="white" /></div>}
+                                        </button>
                                     );
                                 })}
-                            </div>
-
-                            <div className="mt-6 flex justify-end gap-3">
-                                <button
-                                    onClick={() => setShowThemeModal(false)}
-                                    className="px-6 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 transition text-white font-medium"
-                                >
-                                    Close
-                                </button>
                             </div>
                         </motion.div>
                     </motion.div>
@@ -734,65 +571,79 @@ export default function Sidebar() {
     );
 }
 
-/* Sidebar Link Component */
+// --------------------------------------------------------
+// ✅ Helper Components
+// --------------------------------------------------------
+
 function SidebarLink({ href, icon, label, pathname }) {
+    const isActive = pathname.startsWith(href);
     return (
         <Link
             href={href}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${pathname.startsWith(href)
-                ? "bg-white/20 text-white"
-                : "text-white/80 hover:bg-white/10 hover:text-white"
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${isActive
+                ? "bg-white/20 text-white shadow-lg"
+                : "text-white/70 hover:bg-white/10 hover:text-white"
                 }`}
         >
-            {icon}
+            {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-purple-400 rounded-r-full shadow-[0_0_10px_#a855f7]"></div>}
+            <div className={`transition-transform duration-200 ${isActive ? "scale-110 text-purple-200" : "group-hover:scale-110"}`}>
+                {icon}
+            </div>
             <span className="text-sm font-medium">{label}</span>
         </Link>
     );
 }
 
 function DropdownMenu({ title, icon, links, isOpen, onToggle, pathname }) {
+    const isParentActive = links.some(link => pathname === link.href);
+
     return (
         <div>
             <button
                 onClick={onToggle}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${isOpen
-                    ? "bg-white/20 text-white"
-                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isOpen || isParentActive
+                    ? "bg-white/10 text-white"
+                    : "text-white/70 hover:bg-white/10 hover:text-white"
                     }`}
             >
-                {icon}
+                <div className={`transition-transform duration-200 ${isOpen || isParentActive ? "scale-110 text-purple-300" : "group-hover:scale-110"}`}>
+                    {icon}
+                </div>
                 <span className="text-sm font-medium">{title}</span>
                 <ChevronDown
                     size={16}
-                    className={`ml-auto transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+                    className={`ml-auto transition-transform duration-300 opacity-50 ${isOpen ? "rotate-180 opacity-100" : ""
                         }`}
                 />
             </button>
 
             <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-80 opacity-100 mt-1" : "max-h-0 opacity-0"
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"
                     }`}
             >
-                <div className="ml-4 flex flex-col space-y-1">
-                    {links.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors duration-300 ${pathname === link.href
-                                ? "bg-white/20 text-white"
-                                : "text-white/70 hover:bg-white/10 hover:text-white"
-                                }`}
-                        >
-                            {link.label}
-                        </Link>
-                    ))}
+                <div className="ml-4 border-l border-white/10 pl-2 space-y-1 py-1">
+                    {links.map((link) => {
+                        const isLinkActive = pathname === link.href;
+                        return (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className={`block w-full text-left px-4 py-2 rounded-lg text-sm transition-all duration-200 ${isLinkActive
+                                    ? "bg-white/15 text-white font-medium translate-x-1"
+                                    : "text-white/60 hover:bg-white/5 hover:text-white hover:translate-x-1"
+                                    }`}
+                            >
+                                {link.label}
+                            </Link>
+                        )
+                    })}
                 </div>
             </div>
         </div>
     );
 }
 
-/* Utils */
+// Utils
 function getInitials(name) {
     if (!name) return "?";
     const parts = name.trim().split(" ");
