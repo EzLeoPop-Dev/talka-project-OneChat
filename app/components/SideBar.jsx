@@ -38,11 +38,7 @@ export default function Sidebar() {
     const [selectedWorkspace, setSelectedWorkspace] = useState("Work Space");
     const workspaces = ["Work Space", "Development", "Marketing", "Support Team"];
 
-<<<<<<< HEAD
-    // ดึงชื่อเเละข้อมูลจาก localStorage
-=======
     // User State
->>>>>>> 7e7f1a766c02be26637a831fe92747e1ebb331c4
     const [userName, setUserName] = useState("Loading...");
     const [userRole, setUserRole] = useState("Employee");
     const [userTeam, setUserTeam] = useState("No Team"); // ✅ State สำหรับเก็บชื่อทีม
@@ -52,11 +48,7 @@ export default function Sidebar() {
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
 
-<<<<<<< HEAD
-    // Background modal state
-=======
     // Background & Theme State
->>>>>>> 7e7f1a766c02be26637a831fe92747e1ebb331c4
     const [showBgModal, setShowBgModal] = useState(false);
     const [bgList, setBgList] = useState([]);
     const [selectedBg, setSelectedBg] = useState(null);
@@ -141,14 +133,9 @@ export default function Sidebar() {
             console.error("Error loading notifications:", error);
         }
     };
-<<<<<<< HEAD
-// ดึงชื่อเเละข้อมูลจาก localStorage
-    useEffect(() => {
-=======
 
     // ✅ ฟังก์ชันโหลดข้อมูล User และค้นหา Team (แก้ไขใหม่)
     const loadUserData = () => {
->>>>>>> 7e7f1a766c02be26637a831fe92747e1ebb331c4
         try {
             const storedUser = localStorage.getItem("currentUser");
             const storedTeams = localStorage.getItem("teams"); // 1. ดึงข้อมูลทีมจาก LocalStorage
@@ -166,10 +153,10 @@ export default function Sidebar() {
                     try {
                         const teams = JSON.parse(storedTeams);
                         // หา Team ที่สมาชิก (members) มีชื่อของ user คนปัจจุบันอยู่
-                        const foundTeam = teams.find(t => 
+                        const foundTeam = teams.find(t =>
                             t.members && Array.isArray(t.members) && t.members.includes(currentName)
                         );
-                        
+
                         if (foundTeam) {
                             myTeamName = foundTeam.name;
                         }
@@ -188,14 +175,10 @@ export default function Sidebar() {
         }
     };
 
-<<<<<<< HEAD
-        // โหลด background list จาก localStorage
-=======
     useEffect(() => {
         loadUserData(); // โหลดครั้งแรก
 
         // โหลด Background
->>>>>>> 7e7f1a766c02be26637a831fe92747e1ebb331c4
         const savedList = localStorage.getItem("backgroundList");
         if (savedList) {
             try {
@@ -217,10 +200,10 @@ export default function Sidebar() {
         // Listen events
         const handleChatUpdate = () => loadNotifications();
         window.addEventListener("chat-data-updated", handleChatUpdate);
-        
+
         // ✅ เพิ่ม Listener: ถ้ามีการ update user หรือ storage (เช่น สร้างทีมใหม่) ให้โหลดข้อมูลใหม่
-        window.addEventListener("user_updated", loadUserData); 
-        window.addEventListener("storage", loadUserData); 
+        window.addEventListener("user_updated", loadUserData);
+        window.addEventListener("storage", loadUserData);
 
         // Interval check (กันพลาด)
         const intervalId = setInterval(loadUserData, 2000);
@@ -238,10 +221,6 @@ export default function Sidebar() {
         router.push("/auth/login");
     };
 
-<<<<<<< HEAD
-    // การจัดการการอัปโหลด : แปลงเป็น URL และเพิ่มไปยัง bgList กับ localStorage
-=======
->>>>>>> 7e7f1a766c02be26637a831fe92747e1ebb331c4
     const handleUploadBg = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -256,17 +235,9 @@ export default function Sidebar() {
         e.target.value = "";
     };
 
-<<<<<<< HEAD
-    // เพิ่ม background ลงใน localStorage เเละ Layout เปลี่ยนเเบบ Realtime
     const applyBackground = (bg) => {
         setSelectedBg(bg);
         localStorage.setItem("appBackground", bg);
-        // ทำให้ Layout รู้เปลี่ยน
-=======
-    const applyBackground = (bg) => {
-        setSelectedBg(bg);
-        localStorage.setItem("appBackground", bg);
->>>>>>> 7e7f1a766c02be26637a831fe92747e1ebb331c4
         window.dispatchEvent(new CustomEvent("background-changed", { detail: bg }));
         setShowBgModal(false);
     };
@@ -333,7 +304,7 @@ export default function Sidebar() {
                                 <p className="text-[10px] text-white/50 uppercase tracking-wide leading-none">
                                     {userRole}
                                 </p>
-                                
+
                                 {/* Name (Middle) */}
                                 <p className="text-white font-bold text-sm leading-tight truncate max-w-[100px]" title={userName}>
                                     {userName}
@@ -341,7 +312,7 @@ export default function Sidebar() {
 
                                 {/* Team (Bottom) - Moved here */}
                                 <div className="flex items-center gap-1.5 text-[10px] text-white/80 bg-white/10 px-2 py-0.5 rounded mt-1 border border-white/5">
-                                    <Users size={10} className="opacity-70"/>
+                                    <Users size={10} className="opacity-70" />
                                     <span className="truncate max-w-[80px] font-medium" title={userTeam}>{userTeam}</span>
                                 </div>
                             </div>
@@ -435,7 +406,7 @@ export default function Sidebar() {
                                     { href: "/Report/message", label: "Message Report" },
                                     { href: "/Report/responses", label: "Responses Report" },
                                     { href: "/Report/users", label: "Users Report" },
-                                    { href: "/Report/aitoken", label: "Ai Token Report" },
+                                    { href: "/Report/#", label: "Ai Token Report" },
                                 ]}
                                 pathname={pathname}
                             />
@@ -508,8 +479,8 @@ export default function Sidebar() {
                             <h2 className="text-lg text-white font-semibold mb-4 text-center border-b border-white/10 pb-2">Notifications</h2>
                             <div className="space-y-2">
                                 {notifications.map((n) => (
-                                    <div 
-                                        key={n.id} 
+                                    <div
+                                        key={n.id}
                                         // ✅ เพิ่ม onClick ให้กดแล้วไปหน้า Chat
                                         onClick={() => {
                                             router.push(`/chat/allchat?id=${n.id}`);
