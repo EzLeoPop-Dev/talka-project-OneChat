@@ -3,18 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Lock, Eye, EyeOff, Check, CheckCircle, AlertCircle, X } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Mail, X, CheckCircle, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function RegisterPage() {
   const router = useRouter();
 
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const [errorUser, setErrorUser] = useState("");
+  const [errorEmail, setErrorEmail] = useState("");
   const [errorPass, setErrorPass] = useState("");
   const [errorConfirm, setErrorConfirm] = useState("");
 
@@ -24,42 +26,27 @@ export default function RegisterPage() {
     success: false,
   });
 
-  const passwordChecks = {
-    length: password.length >= 8,
-    number: /[0-9]/.test(password),
-    special: /[^A-Za-z0-9]/.test(password),
-  };
 
-  const isPasswordValid = Object.values(passwordChecks).every(Boolean);
-  const passedConditions = Object.values(passwordChecks).filter(Boolean).length;
-
-  let strength = "";
-  let strengthColor = "";
-  if (passedConditions <= 1) {
-    strength = "Weak";
-    strengthColor = "bg-red-500";
-  } else if (passedConditions <= 2) {
-    strength = "Medium";
-    strengthColor = "bg-orange-500";
-  } else {
-    strength = "Strong";
-    strengthColor = "bg-green-500";
-  }
 
   const handleRegister = (e) => {
     e.preventDefault();
     let hasError = false;
 
+   
     if (!username.trim()) {
       setErrorUser("โปรดกรอกชื่อผู้ใช้");
       hasError = true;
     } else setErrorUser("");
 
+   
+    if (!email.trim()) {
+        setErrorEmail("โปรดกรอกอีเมล");
+        hasError = true;
+    } else setErrorEmail("");
+
+
     if (!password.trim()) {
       setErrorPass("โปรดกรอกรหัสผ่าน");
-      hasError = true;
-    } else if (!isPasswordValid) {
-      setErrorPass("รหัสผ่านยังไม่ตรงตามข้อกำหนด");
       hasError = true;
     } else setErrorPass("");
 
@@ -79,12 +66,12 @@ export default function RegisterPage() {
       return;
     }
 
-    users.push({ username, password });
+    users.push({ username, password, email });
     localStorage.setItem("users", JSON.stringify(users));
 
     localStorage.setItem(
       "currentUser",
-      JSON.stringify({ username, password, role: "Owner" })
+      JSON.stringify({ username, password, email, role: "Owner" })
     );
 
     localStorage.setItem("justRegistered", "true");
@@ -140,6 +127,8 @@ export default function RegisterPage() {
             <p className="text-gray-500 mb-2 text-sm">สมัครสมาชิกเพื่อใช้งาน</p>
 
             <form className="w-full space-y-5" onSubmit={handleRegister}>
+              
+              {/* Username */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Username
@@ -165,6 +154,33 @@ export default function RegisterPage() {
                 )}
               </div>
 
+              {/*  Email */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <div
+                  className={`flex items-center border rounded-full px-3 py-2.5 ${
+                    errorEmail ? "border-red-500" : "border-gray-300"
+                  } focus-within:ring-1 focus-within:ring-purple-400`}
+                >
+                  <Mail className="text-purple-600 mr-2" size={18} />
+                  <input
+                    type="email"
+                    placeholder="example@mail.com"
+                    className="w-full outline-none placeholder-gray-400 text-black"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                {errorEmail && (
+                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">
+                    {errorEmail}
+                  </p>
+                )}
+              </div>
+
+              {/* Passwor */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password
@@ -191,42 +207,7 @@ export default function RegisterPage() {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-
-                <AnimatePresence>
-                  {password.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden mt-2 pl-2 text-xs space-y-1 text-gray-500"
-                    >
-                      <Condition
-                        text="มีตัวเลข อย่างน้อย 1 ตัว"
-                        valid={passwordChecks.number}
-                      />
-                      <Condition
-                        text="มีอักขระพิเศษ อย่างน้อย 1 ตัว"
-                        valid={passwordChecks.special}
-                      />
-                      <Condition
-                        text="มีความยาว อย่างน้อย 8 ตัวอักษร"
-                        valid={passwordChecks.length}
-                      />
-
-                      <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${strengthColor}`}
-                          style={{ width: `${(passedConditions / 3) * 100}%` }}
-                        ></div>
-                      </div>
-                      <div className="text-right text-[10px] font-semibold mt-1">
-                        {strength}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
+                
                 {errorPass && (
                   <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">
                     {errorPass}
@@ -234,6 +215,7 @@ export default function RegisterPage() {
                 )}
               </div>
 
+              {/* Confirm Password */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Confirm Password
@@ -267,12 +249,7 @@ export default function RegisterPage() {
                     backgroundImage:
                       "linear-gradient(140deg, rgba(93, 61, 153, 1) 0%, rgba(201, 117, 173, 1) 100%)",
                   }}
-                  className={`w-full text-white py-2.5 rounded-full transition shadow-md ${
-                    isPasswordValid
-                      ? "hover:opacity-90"
-                      : "opacity-60 cursor-not-allowed"
-                  }`}
-                  disabled={!isPasswordValid}
+                  className="w-full text-white py-2.5 rounded-full transition shadow-md hover:opacity-90"
                 >
                   สมัครสมาชิก
                 </button>
@@ -324,7 +301,6 @@ export default function RegisterPage() {
               initial={{ scale: 0.8, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
               <button
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors hover:rotate-90 duration-300"
@@ -334,14 +310,7 @@ export default function RegisterPage() {
               </button>
 
               <motion.div
-                initial={{ scale: 0, rotate: -45 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 200,
-                  damping: 15,
-                  delay: 0.1,
-                }}
+
                 className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg mb-2
                 ${
                   popup.success
@@ -364,29 +333,10 @@ export default function RegisterPage() {
                   {popup.message}
                 </p>
               </div>
-
-            
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
-  );
-}
-
-function Condition({ text, valid }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -2 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -2 }}
-      transition={{ duration: 0.2 }}
-      className={`flex items-center gap-2 ${
-        valid ? "text-green-600" : "text-gray-400"
-      }`}
-    >
-      <Check size={14} className={`${valid ? "opacity-100" : "opacity-40"}`} />
-      <span>{text}</span>
-    </motion.div>
   );
 }

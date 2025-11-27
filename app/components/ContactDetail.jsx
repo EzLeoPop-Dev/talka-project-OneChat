@@ -1,149 +1,177 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const COUNTRY_TO_PREFIX = {
-    "Thailand": "66+",
-    "USA": "1+",
-    "Japan": "81+"
-};
+export default function ContactDetails({ onClose, contact, onUpdateContact }) {
+  
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("");
 
-export default function ContactDetail({ contact, onClose, onSave, onDelete, AVAILABLE_TAGS = [], AVAILABLE_COMPANIES = [] }) {
-    const [formData, setFormData] = useState(contact);
-    const [showCompanyList, setShowCompanyList] = useState(false);
-    const companyWrapperRef = useRef(null);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [isEditingCountry, setIsEditingCountry] = useState(false);
 
-    // Close company dropdown on click outside
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (companyWrapperRef.current && !companyWrapperRef.current.contains(event.target)) {
-                setShowCompanyList(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+  useEffect(() => {
+    if (contact) {
+      setPhone(contact.phone || "");
+      setEmail(contact.email || "");
+      setCountry(contact.country || "");
+    }
+    setIsEditingPhone(false);
+    setIsEditingEmail(false);
+    setIsEditingCountry(false);
+  }, [contact]);
 
-    // Update form data when contact changes
-    useEffect(() => {
-        setFormData(contact);
-    }, [contact]);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        const newValue = value === "" ? null : value;
-        setFormData(prev => {
-            const updated = { ...prev, [name]: newValue };
-            if (name === "country" && COUNTRY_TO_PREFIX[value]) {
-                updated.phonePrefix = COUNTRY_TO_PREFIX[value];
-            }
-            return updated;
-        });
-    };
-
-    const handleCompanySelect = (company) => {
-        setFormData(prev => ({ ...prev, company: company }));
-        setShowCompanyList(false);
-    };
-
-    const handleSubmit = (e) => { e.preventDefault(); onSave(formData); };
-    const handleDelete = () => { if (onDelete) onDelete(contact.id); onClose(); };
-
-    if (!contact) return null;
-
+  if (!contact) {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-6 w-full max-w-md text-white" onClick={e => e.stopPropagation()}>
-                
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
-                <h2 className="text-2xl font-bold mb-4">Contact details</h2>
-                
-                <div className="flex items-center gap-4 mb-4">
-                    <img src={formData.imgUrl} alt={formData.name} className="w-16 h-16 rounded-full bg-gray-600" />
-                    <div className="flex-1"><h3 className="text-xl font-semibold">{formData.name}</h3></div>
-                    {formData.channel === 'Facebook' && <i className="fa-brands fa-facebook text-3xl text-blue-500"></i>}
-                    {formData.channel === 'Instagram' && <i className="fa-brands fa-instagram text-3xl text-pink-500"></i>}
-                    {formData.channel === 'Line' && <i className="fa-brands fa-line text-3xl text-green-500"></i>}
-                </div>
-
-                {/* ... (Assigned User Section) ... */}
-                <div className="flex items-center gap-2 mb-6">
-                    <select name="assignedUser" value={formData.assignedUser || "Admin"} onChange={handleChange} className="flex-1 text-white outline-0 bg-gray-700 rounded-lg py-2 px-4 border border-gray-600 appearance-none">
-                        <option value="Admin">User nameAdmin</option>
-                        <option value="User">User nameUser</option>
-                    </select>
-                    <button className="p-2 bg-gray-700 rounded-lg hover:bg-gray-600"><i className="fa-solid fa-comment"></i></button>
-                </div>
-
-                <h3 className="text-lg font-semibold mb-3">Contact fields</h3>
-                <form onSubmit={handleSubmit} className="space-y-4">
-
-                    {/* Company */}
-                    <div className="relative" ref={companyWrapperRef}>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">Company</label>
-                        <div className="relative mt-1">
-                            <input type="text" name="company" value={formData.company || ""} onChange={handleChange} onClick={() => setShowCompanyList(true)} className="w-full text-white outline-0 bg-gray-700 rounded-lg py-2 px-4 border border-gray-600 pr-10" placeholder="Select or type new company" autoComplete="off"/>
-                            <div className="absolute inset-y-0 right-0 flex items-center px-3 cursor-pointer text-gray-400 hover:text-white" onClick={() => setShowCompanyList(!showCompanyList)}><i className={`fa-solid fa-chevron-down transition-transform ${showCompanyList ? 'rotate-180' : ''}`}></i></div>
-                        </div>
-                        {showCompanyList && (
-                            <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                                {AVAILABLE_COMPANIES.length > 0 ? (
-                                    AVAILABLE_COMPANIES.map((comp, index) => (
-                                        <div key={index} className="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm" onClick={() => handleCompanySelect(comp)}>{comp}</div>
-                                    ))
-                                ) : (<div className="px-4 py-2 text-gray-400 text-sm italic">No existing companies</div>)}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Phone */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">Phone Number</label>
-                        <div className="flex gap-2">
-                            <select name="phonePrefix" value={formData.phonePrefix || '66+'} onChange={handleChange} className="text-white outline-0 bg-gray-700 rounded-lg py-2 px-3 border border-gray-600 appearance-none">
-                                <option value="66+">66+</option><option value="1+">1+</option><option value="81+">81+</option>
-                            </select>
-                            <input type="tel" name="phone" value={formData.phone || ""} onChange={handleChange} className="flex-1 w-full text-white outline-0 bg-gray-700 rounded-lg py-2 px-4 border border-gray-600"/>
-                        </div>
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
-                        <input type="email" name="email" value={formData.email || ""} onChange={handleChange} className="mt-1 w-full text-white outline-0 bg-gray-700 rounded-lg py-2 px-4 border border-gray-600"/>
-                    </div>
-                    
-                    {/* Country */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">Country</label>
-                        <select name="country" value={formData.country || ""} onChange={handleChange} className="mt-1 w-full text-white outline-0 bg-gray-700 rounded-lg py-2 px-4 border border-gray-600 appearance-none">
-                            <option value="">N/A</option><option value="Thailand">Thailand</option><option value="USA">USA</option><option value="Japan">Japan</option><option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    {/* Tags */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">Tags</label>
-                        <select 
-                            name="tags"
-                            value={formData.tags || ""} 
-                            onChange={handleChange}
-                            className="mt-1 w-full text-white outline-0 bg-gray-700 rounded-lg py-2 px-4 border border-gray-600 appearance-none"
-                        >
-                            <option value="">N/A</option> 
-                            {AVAILABLE_TAGS.map((tagObj) => (
-                                <option key={tagObj.name} value={tagObj.name}>
-                                    {tagObj.emoji} {tagObj.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex justify-end gap-4 pt-4">
-                        <button type="button" onClick={handleDelete} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Delete</button>
-                        <button type="submit" className="bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold py-2 px-4 rounded-lg">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+      <div className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 flex flex-col self-start text-white/70">
+        Loading...
+      </div>
     );
+  }
+
+  const handleSave = (field) => {
+    if (typeof onUpdateContact !== 'function') {
+      console.error("onUpdateContact is not a function. Check page.jsx");
+      return; 
+    }
+
+    if (field === 'phone') {
+      onUpdateContact(contact.id, { phone: phone }); 
+      setIsEditingPhone(false); 
+    }
+    if (field === 'email') {
+      onUpdateContact(contact.id, { email: email }); 
+      setIsEditingEmail(false); 
+    }
+    if (field === 'country') {
+      onUpdateContact(contact.id, { country: country });
+      setIsEditingCountry(false);
+    }
+  };
+
+  const EditButton = ({ onClick }) => (
+    <button 
+        onClick={onClick}
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all border border-white/5 shadow-sm"
+        title="Edit"
+    >
+        <i className="fa-solid fa-pen text-xs"></i>
+    </button>
+  );
+
+  return (
+    <div className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 flex flex-col self-start overflow-auto">
+      
+      <h2 className="text-white text-2xl font-semibold mb-5">Contact details</h2>
+
+      {/* Profile Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-3xl shadow-lg shrink-0 text-white">
+          {contact.avatar}
+        </div>
+        
+        <div className="min-w-0">
+          <h3 className="text-white font-semibold text-lg truncate">{contact.name}</h3>
+        </div>
+      </div>
+
+      {/* Contact Fields */}
+      <div className="space-y-6">
+        <h4 className="text-white/90 font-semibold text-md mb-2 border-b border-white/10 pb-2">Contact fields</h4>
+
+        {/* Phone */}
+        <div>
+          <label className="text-white/50 text-[10px] uppercase tracking-wider mb-1 block">Phone Number</label>
+          {isEditingPhone ? (
+            <div className="flex gap-2 mt-1 animate-fade-in">
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="flex-1 bg-white/10 text-white text-sm rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-blue-400 border border-white/10"
+                placeholder="0123456789"
+                autoFocus
+              />
+              <button onClick={() => handleSave('phone')} className="bg-white/20 hover:bg-white/30 text-white w-8 h-8 rounded-lg flex items-center justify-center transition-colors"><i className="fa-solid fa-check"></i></button>
+              <button onClick={() => setIsEditingPhone(false)} className="bg-white/10 hover:bg-white/20 text-white w-8 h-8 rounded-lg flex items-center justify-center transition-colors"><i className="fa-solid fa-xmark"></i></button>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/5 transition-colors -mx-2">
+              {contact.phone ? (
+                <p className="text-white text-sm font-medium">{contact.phone}</p>
+              ) : (
+                <p className="text-white/30 text-sm italic">Add Phone Number</p>
+              )}
+              <EditButton onClick={() => setIsEditingPhone(true)} />
+            </div>
+          )}
+        </div>
+
+        {/* --- Email Address --- */}
+        <div>
+          <label className="text-white/50 text-[10px] uppercase tracking-wider mb-1 block">Email Address</label>
+          {isEditingEmail ? (
+            <div className="flex gap-2 mt-1 animate-fade-in">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1 bg-white/10 text-white text-sm rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-blue-400 border border-white/10"
+                placeholder="example@email.com"
+                autoFocus
+              />
+              <button onClick={() => handleSave('email')} className="bg-white/20 hover:bg-white/30 text-white w-8 h-8 rounded-lg flex items-center justify-center transition-colors"><i className="fa-solid fa-check"></i></button>
+              <button onClick={() => setIsEditingEmail(false)} className="bg-white/10 hover:bg-white/20 text-white w-8 h-8 rounded-lg flex items-center justify-center transition-colors"><i className="fa-solid fa-xmark"></i></button>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/5 transition-colors -mx-2">
+              {contact.email ? (
+                <p className="text-white text-sm font-medium">{contact.email}</p>
+              ) : (
+                <p className="text-white/30 text-sm italic">Add Email Address</p>
+              )}
+              <EditButton onClick={() => setIsEditingEmail(true)} />
+            </div>
+          )}
+        </div>
+
+        {/* --- Country --- */}
+        <div>
+          <label className="text-white/50 text-[10px] uppercase tracking-wider mb-1 block">Country</label>
+          {isEditingCountry ? (
+            <div className="flex gap-2 mt-1 animate-fade-in">
+              <input
+                type="text"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="flex-1 bg-white/10 text-white text-sm rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-blue-400 border border-white/10"
+                placeholder="e.g. Thailand"
+                autoFocus
+              />
+              <button onClick={() => handleSave('country')} className="bg-white/20 hover:bg-white/30 text-white w-8 h-8 rounded-lg flex items-center justify-center transition-colors"><i className="fa-solid fa-check"></i></button>
+              <button onClick={() => setIsEditingCountry(false)} className="bg-white/10 hover:bg-white/20 text-white w-8 h-8 rounded-lg flex items-center justify-center transition-colors"><i className="fa-solid fa-xmark"></i></button>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/5 transition-colors -mx-2">
+              {contact.country ? (
+                <p className="text-white text-sm font-medium">{contact.country}</p>
+              ) : (
+                <p className="text-white/30 text-sm italic">Add Country</p>
+              )}
+              <EditButton onClick={() => setIsEditingCountry(true)} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ปุ่ม Done */}
+      <button
+        onClick={onClose}
+        className="w-full bg-white/20 hover:bg-white/30 text-white font-bold py-3 rounded-xl transition-all mt-8 backdrop-blur-sm"
+      >
+        Done
+      </button>
+    </div>
+  );
 }

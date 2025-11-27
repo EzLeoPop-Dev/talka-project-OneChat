@@ -2,10 +2,11 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation"; 
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, SlidersHorizontal, Plus, Bell, User, Check, X, MessageSquare, Settings, ChevronDown, Globe, Users, Briefcase, Save, LogOut } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, Bell, User, Check, X, MessageSquare, Settings, ChevronDown, Globe, Users, Briefcase, Save, LogOut, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
+// ... (Constants: employeeOptions, industries, roles, DEFAULT_INVITES เหมือนเดิม) ...
 const employeeOptions = [
     { value: "1-5", label: "1-5" },
     { value: "6-20", label: "6-20" },
@@ -91,10 +92,8 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
 
     const [workspaces, setWorkspaces] = useState([]);
 
-
     const [invites, setInvites] = useState([]);
 
-    
     useEffect(() => {
         const storedUser = localStorage.getItem("currentUser");
         if (storedUser) {
@@ -104,7 +103,6 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
             const processedKey = `processedInvites_${userObj.username}`;
             const processedIds = JSON.parse(localStorage.getItem(processedKey) || "[]");
             
-        
             const availableInvites = DEFAULT_INVITES.filter(inv => !processedIds.includes(inv.id));
             setInvites(availableInvites);
 
@@ -112,8 +110,7 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
             router.push("/auth/login");
             return;
         }
-
-     
+      
         const savedWorkspaces = localStorage.getItem("workspaces");
         if (savedWorkspaces) {
             try {
@@ -133,7 +130,6 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
         }
     }, [router]);
 
-    
     useEffect(() => {
         if (isLoaded) {
             localStorage.setItem("workspaces", JSON.stringify(workspaces));
@@ -145,10 +141,37 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
         router.push("/auth/login");
     };
 
+    const handleEnterWorkspace = (ws) => {
+        console.log("Switching to workspace:", ws.name, "with Role:", ws.role);
+        if (currentUser) {
+            const updatedUser = { 
+                ...currentUser, 
+                role: ws.role,
+                permission: ws.role 
+            };
+            localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+            setCurrentUser(updatedUser);
+            window.dispatchEvent(new Event("user_updated"));
+            setTimeout(() => {
+                window.location.href = "/chat/allchat"; 
+            }, 100);
+        } else {
+            router.push("/chat/allchat");
+        }
+    };
+
+    //ฟังก์ชันลบ Workspace
+    const handleDeleteWorkspace = (e, id) => {
+        e.stopPropagation(); 
+        const confirmMsg = lang === "th" ? "คุณต้องการลบพื้นที่ทำงานนี้ใช่หรือไม่?" : "Are you sure you want to delete this workspace?";
+        if (confirm(confirmMsg)) {
+            setWorkspaces(prev => prev.filter(ws => ws.id !== id));
+        }
+    };
+
     const processedWorkspaces = useMemo(() => {
         let result = workspaces.filter((ws) => 
             ws.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      
             (ws.owner === currentUser?.username || !ws.owner)
         );
         return result.sort((a, b) => {
@@ -195,7 +218,6 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
     const handleInvite = (id, accept) => {
         if (accept) {
             const invite = invites.find(i => i.id === id);
-        
             const newWs = {
                 id: Date.now(), 
                 name: `${invite.name}'s Space`, 
@@ -207,11 +229,7 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
             };
             setWorkspaces([newWs, ...workspaces]);
         }
-        
-     
         setInvites(invites.filter(i => i.id !== id));
-
-       
         if (currentUser) {
             const processedKey = `processedInvites_${currentUser.username}`;
             const processedIds = JSON.parse(localStorage.getItem(processedKey) || "[]");
@@ -222,7 +240,6 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
         }
     };
 
-    // Close dropdowns
     const notiRef = useRef(null);
     const sortRef = useRef(null);
     const profileRef = useRef(null);
@@ -243,36 +260,22 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
     return (
         <div className={`relative min-h-screen flex flex-col overflow-hidden transition-colors duration-500 ${dark ? "text-white" : "text-gray-800"}`}>
             
-           
             <div className="absolute inset-0 z-0 pointer-events-none">
                 <motion.div className="absolute inset-0" animate={{ background: dark ? "linear-gradient(135deg, #0f0f14, #1a1a2e, #0f0f14)" : "linear-gradient(135deg, #f0f0f5, #eef2ff, #f0f0f5)", backgroundSize: "400% 400%", backgroundPosition: ["0% 50%", "50% 100%", "100% 50%", "50% 0%", "0% 50%"] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} />
                 <motion.div className="absolute w-[600px] h-[600px] bg-[rgba(184,110,159,0.4)] rounded-full filter blur-3xl opacity-40" initial={{ x: -480, y: -50 }} animate={{ x: [-480, 480, -480] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} />
                 <FloatingFirefly size={6} color="#fef08a" pathX={[-200, 200]} pathY={[-50, 50]} duration={12} />
             </div>
 
-           
             <header className='max-w-[1400px] w-full mx-auto mt-3 bg-[rgba(32,41,59,0.25)] backdrop-blur-2xl border-[rgba(255,255,255,0.30)] border px-6 md:px-10 py-2 rounded-[40px] relative z-40'>
                 <nav className='flex justify-between items-center'>
-                    
-                    {/* LOGO SECTION */}
                     <div className="logo flex justify-between items-center gap-3">
-                        <Image
-                            src="/images/LogoNav.png"
-                            width={50}
-                            height={50}
-                            alt="Talka Logo"
-                            className="object-contain"
-                        />
+                        <Image src="/images/LogoNav.png" width={50} height={50} alt="Talka Logo" className="object-contain"/>
                         <p className={`text-xl font-semibold ${dark ? "text-white" : "text-gray-800"}`}>Talka</p>
                     </div>
-
-                    {/* OPTIONS SECTION */}
                     <div className="flex items-center gap-4">
                         <button onClick={() => setDark(!dark)} className="p-2 rounded-full hover:bg-white/10 transition">{dark ? "🌞" : "🌙"}</button>
                         <button onClick={() => setLang(lang === "th" ? "en" : "th")} className="text-sm font-bold hover:text-purple-400 transition">{lang === "th" ? "TH" : "EN"}</button>
                         <div className="h-6 w-[1px] bg-white/20 mx-1"></div>
-                        
-                        {/* Notification */}
                         <div className="relative" ref={notiRef}>
                             <button onClick={() => setIsNotiOpen(!isNotiOpen)} className={`relative p-2 rounded-full transition ${isNotiOpen ? "bg-white/20" : "hover:bg-white/10"}`}>
                                 <Bell size={20} />
@@ -281,57 +284,31 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
                             <AnimatePresence>
                                 {isNotiOpen && (
                                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className={`absolute right-0 mt-3 w-80 rounded-2xl shadow-2xl border backdrop-blur-xl p-2 z-50 ${dark ? "bg-[#1a1a2e]/95 border-white/10" : "bg-white/95 border-gray-200"}`}>
-                                            {invites.length === 0 ? <div className="p-4 text-center opacity-50 text-sm">No new notifications</div> : invites.map((invite) => (
-                                                <div key={invite.id} className={`mb-2 p-3 rounded-xl flex items-center gap-3 ${dark ? "bg-white/5" : "bg-gray-50"}`}>
-                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${invite.avatarColor}`}>{invite.name[0]}</div>
-                                                    <div className="flex-1 min-w-0"><p className="text-sm font-medium truncate">{invite.name}</p><p className="text-[10px] opacity-60">{invite.action}</p></div>
-                                                    <div className="flex gap-1">
-                                                        <button onClick={() => handleInvite(invite.id, true)} className="p-1.5 bg-green-500/10 text-green-500 rounded"><Check size={14} /></button>
-                                                        <button onClick={() => handleInvite(invite.id, false)} className="p-1.5 bg-red-500/10 text-red-500 rounded"><X size={14} /></button>
-                                                    </div>
+                                        {invites.length === 0 ? <div className="p-4 text-center opacity-50 text-sm">No new notifications</div> : invites.map((invite) => (
+                                            <div key={invite.id} className={`mb-2 p-3 rounded-xl flex items-center gap-3 ${dark ? "bg-white/5" : "bg-gray-50"}`}>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${invite.avatarColor}`}>{invite.name[0]}</div>
+                                                <div className="flex-1 min-w-0"><p className="text-sm font-medium truncate">{invite.name}</p><p className="text-[10px] opacity-60">{invite.action}</p></div>
+                                                <div className="flex gap-1">
+                                                    <button onClick={() => handleInvite(invite.id, true)} className="p-1.5 bg-green-500/10 text-green-500 rounded"><Check size={14} /></button>
+                                                    <button onClick={() => handleInvite(invite.id, false)} className="p-1.5 bg-red-500/10 text-red-500 rounded"><X size={14} /></button>
                                                 </div>
-                                            ))}
+                                            </div>
+                                        ))}
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>
-
-                        {/* Profile Dropdown */}
                         <div className="relative" ref={profileRef}>
-                            <button 
-                                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className="flex items-center gap-3 px-2 py-1 rounded-full hover:bg-white/10 transition"
-                            >
-                            
-                                <div className="text-right hidden md:block">
-                                    <p className="text-sm font-bold">{currentUser?.username || "Guest"}</p>
-                                </div>
-                                
-                                <div className={`w-9 h-9 rounded-full ${themeColorClass} flex items-center justify-center border border-[rgba(255,255,255,0.30)] shadow-lg`}>
-                                    <span className="text-white font-bold text-lg">
-                                        {currentUser?.username ? currentUser.username[0].toUpperCase() : "G"}
-                                    </span>
-                                </div>
+                            <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center gap-3 px-2 py-1 rounded-full hover:bg-white/10 transition">
+                                <div className="text-right hidden md:block"><p className="text-sm font-bold">{currentUser?.username || "Guest"}</p></div>
+                                <div className={`w-9 h-9 rounded-full ${themeColorClass} flex items-center justify-center border border-[rgba(255,255,255,0.30)] shadow-lg`}><span className="text-white font-bold text-lg">{currentUser?.username ? currentUser.username[0].toUpperCase() : "G"}</span></div>
                                 <ChevronDown size={14} className={`opacity-50 transition-transform ${isProfileOpen ? "rotate-180" : ""}`}/>
                             </button>
-
-                                {/* Dropdown Menu */}
-                                <AnimatePresence>
+                            <AnimatePresence>
                                 {isProfileOpen && (
-                                    <motion.div 
-                                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                                        className={`absolute right-0 mt-3 w-48 rounded-xl shadow-2xl border backdrop-blur-xl py-2 z-50 ${dark ? "bg-[#1a1a2e]/95 border-white/10" : "bg-white/95 border-gray-200"}`}
-                                    >
-                                        <div className="px-4 py-3 border-b border-white/10 mb-2">
-                                            <p className="text-sm font-bold truncate">{currentUser?.username}</p>
-                                            <p className="text-xs opacity-50 truncate">Signed in successfully</p>
-                                        </div>
-                                        <button 
-                                            onClick={handleLogout}
-                                            className="w-full text-left px-4 py-2 text-sm hover:bg-red-500/10 text-red-400 flex items-center gap-2"
-                                        >
-                                            <LogOut size={16} /> Log Out
-                                        </button>
+                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className={`absolute right-0 mt-3 w-48 rounded-xl shadow-2xl border backdrop-blur-xl py-2 z-50 ${dark ? "bg-[#1a1a2e]/95 border-white/10" : "bg-white/95 border-gray-200"}`}>
+                                        <div className="px-4 py-3 border-b border-white/10 mb-2"><p className="text-sm font-bold truncate">{currentUser?.username}</p><p className="text-xs opacity-50 truncate">Signed in successfully</p></div>
+                                        <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm hover:bg-red-500/10 text-red-400 flex items-center gap-2"><LogOut size={16} /> Log Out</button>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -340,13 +317,9 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
                 </nav>
             </header>
 
-            {/* Main Content */}
             <main className="relative z-10 flex-1 max-w-6xl mx-auto w-full p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                    <h1 className="text-2xl font-bold tracking-wider uppercase text-white/90 drop-shadow-md">
-                        {lang === "th" ? "พื้นที่ทำงานของคุณ" : "YOUR WORKSPACES"}
-                    </h1>
-                    
+                    <h1 className="text-2xl font-bold tracking-wider uppercase text-white/90 drop-shadow-md">{lang === "th" ? "พื้นที่ทำงานของคุณ" : "YOUR WORKSPACES"}</h1>
                     <div className="flex gap-3">
                         <div className={`flex items-center px-3 py-2.5 rounded-xl border border-white/10 ${dark ? "bg-black/20" : "bg-white/40"}`}>
                             <Search size={18} className="opacity-50 mr-2" />
@@ -370,26 +343,26 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    {/* Create Button */}
                     <motion.button whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.08)" }} whileTap={{ scale: 0.98 }} onClick={handleOpenWizard} className={`h-48 rounded-2xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-3 transition-colors group ${dark ? "hover:border-white/40" : "hover:border-gray-400"}`}>
                         <div className="p-4 rounded-full bg-white/5 group-hover:scale-110 transition-transform"><Plus size={28} className="opacity-70" /></div>
                         <span className="text-sm font-medium opacity-70">{lang === "th" ? "สร้างใหม่" : "Create New"}</span>
                     </motion.button>
 
-                    {/* Workspace Cards */}
                     <AnimatePresence mode="popLayout">
                         {processedWorkspaces.map((ws) => (
                             <motion.div key={ws.id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className={`h-48 rounded-2xl p-5 flex flex-col justify-between border border-white/5 shadow-lg backdrop-blur-sm relative overflow-hidden group ${dark ? "bg-[#1e1e24]/80 hover:bg-[#25252d]" : "bg-white/60 hover:bg-white/80"}`}>
                                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-bl-full pointer-events-none"></div>
                                 <div>
                                     <div className="flex justify-between items-start mb-2">
-                                        <button 
-                                            onClick={() => handleOpenEdit(ws)} 
-                                            className="p-1.5 -ml-2 rounded-lg hover:bg-white/10 text-white/40 hover:text-white/90 transition z-20"
-                                            title="Edit Workspace"
-                                        >
-                                            <Settings size={16} />
-                                        </button>
+                                        <div className="flex gap-1 -ml-2 z-20">
+                                            <button onClick={() => handleOpenEdit(ws)} className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white/90 transition" title="Edit">
+                                                <Settings size={16} />
+                                            </button>
+                                            {/* ✅ 3. เพิ่มปุ่มลบ */}
+                                            <button onClick={(e) => handleDeleteWorkspace(e, ws.id)} className="p-1.5 rounded-lg hover:bg-red-500/20 text-white/40 hover:text-red-400 transition" title="Delete">
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
                                         
                                         <span className={`text-[10px] px-2.5 py-1 rounded-full border font-bold tracking-wide uppercase ${getRoleStyle(ws.role)}`}>
                                             {ws.role}
@@ -402,35 +375,23 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
                                         <span className="flex items-center gap-1"><Briefcase size={10} /> {ws.industry || "General"}</span>
                                     </div>
                                 </div>
-                                <Link href="/chat/allchat">
-                                    <button className={`w-full py-2.5 rounded-xl bg-white/5 ${themeHoverClass} hover:text-white text-sm font-medium transition border border-white/5`}>{lang === "th" ? "เข้าสู่พื้นที่" : "Open Space"}</button>
-                                </Link>
+                                
+                                <button onClick={() => handleEnterWorkspace(ws)} className={`w-full py-2.5 rounded-xl bg-white/5 ${themeHoverClass} hover:text-white text-sm font-medium transition border border-white/5`}>
+                                    {lang === "th" ? "เข้าสู่พื้นที่" : "Open Space"}
+                                </button>
                             </motion.div>
                         ))}
                     </AnimatePresence>
                 </div>
             </main>
 
-            {/* WIZARD MODAL */}
             <AnimatePresence>
                 {isWizardOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsWizardOpen(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-                        
-                        <motion.div 
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }} 
-                            animate={{ scale: 1, opacity: 1, y: 0 }} 
-                            exit={{ scale: 0.95, opacity: 0, y: 10 }}
-                            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh] ${dark ? "bg-[#13131a] text-white" : "bg-white text-black"}`}
-                        >
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 10 }} className={`relative w-full max-w-4xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh] ${dark ? "bg-[#13131a] text-white" : "bg-white text-black"}`}>
                             <div className="h-2 bg-gray-700 w-full">
-                                <motion.div
-                                    className="h-full rounded-full"
-                                    animate={{ width: `${(wizardStep / 3) * 100}%` }}
-                                    style={{
-                                        background: "linear-gradient(140deg, rgb(93, 61, 153) 0%, rgb(201, 117, 173) 100%)",
-                                    }}
-                                />
+                                <motion.div className="h-full rounded-full" animate={{ width: `${(wizardStep / 3) * 100}%` }} style={{ background: "linear-gradient(140deg, rgb(93, 61, 153) 0%, rgb(201, 117, 173) 100%)" }} />
                             </div>
 
                             <div className="p-8 overflow-y-auto custom-scrollbar">
@@ -480,7 +441,6 @@ export default function WorkspaceDashboard({ initialLang = "th" }) {
                 )}
             </AnimatePresence>
 
-            {/* EDIT MODAL */}
             <AnimatePresence>
                 {isEditOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

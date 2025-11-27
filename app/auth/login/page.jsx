@@ -206,14 +206,7 @@ export default function LoginPage() {
               </button>
 
               <motion.div
-                initial={{ scale: 0, rotate: -45 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 200,
-                  damping: 15,
-                  delay: 0.1,
-                }}
+         
                 className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg mb-2
                 ${
                   popup.success
