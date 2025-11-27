@@ -3,10 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import "@/app/assets/css/other.css";
 
-// 1. Import Data
+// Import Data
 import initialChatData from "@/app/data/mockData.js";
 
-// --- Helper Data Processing ---
+// Helper Data Processing 
 const processInitialData = (data) => {
   if (!data) return [];
   return data.map((chat, index) => ({
@@ -19,7 +19,7 @@ const processInitialData = (data) => {
 };
 
 export default function ChatBoardInlineFinal() {
-  // --- State ---
+  // State 
   const [chats, setChats] = useState([]);
   const [columns, setColumns] = useState([
     { id: "col-1", title: "Inbox" },
@@ -39,20 +39,16 @@ export default function ChatBoardInlineFinal() {
   const [isAddColumnMode, setIsAddColumnMode] = useState(false);
   const [newColumnTitle, setNewColumnTitle] = useState("");
 
-  // ใช้ Ref เพื่อป้องกัน Infinite Loop เวลา save
   const isUpdatingRef = useRef(false);
 
-  // --- LOCAL STORAGE & REALTIME SYNC LOGIC ---
+  // Local Storage & Realtime Sync Logic
 
   useEffect(() => {
-    // 1. โหลดข้อมูลครั้งแรก
     loadData();
     loadUser(); 
 
-    // 2. ฟังก์ชัน Sync ข้อมูลเมื่อมีการเปลี่ยนแปลง
     const handleStorageSync = (e) => {
-        // กรอง Event ที่ไม่เกี่ยวข้องออก
-        if (isUpdatingRef.current) return; // ถ้าตัวเราเองเป็นคนอัพเดท ไม่ต้องโหลดซ้ำ
+        if (isUpdatingRef.current) return; 
         
         if (
             e.type === "chat-data-updated" || 
@@ -64,12 +60,10 @@ export default function ChatBoardInlineFinal() {
         }
     };
 
-    // 3. ติดตั้ง Event Listeners
-    window.addEventListener("storage", handleStorageSync);          // ฟังข้าม Tab
-    window.addEventListener("chat-data-updated", handleStorageSync); // ฟังจากหน้า Main Chat
-    window.addEventListener("board-data-updated", handleStorageSync); // ฟังจาก Modal
+    window.addEventListener("storage", handleStorageSync);          
+    window.addEventListener("chat-data-updated", handleStorageSync); 
+    window.addEventListener("board-data-updated", handleStorageSync); 
 
-    // 4. (Optional) Auto-Sync ทุก 2 วินาที (กันเหนียว)
     const intervalId = setInterval(() => {
         if (!isUpdatingRef.current) loadData();
     }, 2000);
@@ -89,28 +83,25 @@ export default function ChatBoardInlineFinal() {
     }
   };
 
-  //ฟังก์ชัน Load Data แบบ Merge (หัวใจสำคัญ)
   const loadData = () => {
     try {
-        // 1. โหลดข้อมูล Chat หลัก (Source of Truth สำหรับข้อความ)
+        // โหลดข้อมูล Chat หลัก 
         const mainChatDataRaw = localStorage.getItem("onechat_data");
         const mainChats = mainChatDataRaw ? JSON.parse(mainChatDataRaw) : [];
 
-        // 2. โหลดข้อมูล Board (เพื่อเอา columnId)
+        // โหลดข้อมูล Board 
         const boardChatsRaw = localStorage.getItem("app_board_chats");
         const boardChats = boardChatsRaw ? JSON.parse(boardChatsRaw) : [];
 
-        // 3. โหลด Columns
+        // โหลด Columns
         const savedColumns = localStorage.getItem("app_board_columns");
         if (savedColumns) setColumns(JSON.parse(savedColumns));
 
-        // 4. Merge: ใช้ List จาก Board แต่ดึง 'ข้อความล่าสุด' จาก Main Chat
         let mergedChats = boardChats.map(bChat => {
             const freshChat = mainChats.find(m => m.id === bChat.id);
             if (freshChat) {
                 return {
-                    ...bChat, // ใช้ตำแหน่ง Column เดิม
-                    // อัพเดทข้อมูลที่อาจเปลี่ยนใน Main Chat
+                    ...bChat,
                     messages: freshChat.messages, 
                     lastMessage: freshChat.messages && freshChat.messages.length > 0 
                         ? freshChat.messages[freshChat.messages.length - 1].text 
@@ -126,15 +117,14 @@ export default function ChatBoardInlineFinal() {
         });
 
         if (mergedChats.length === 0 && !boardChatsRaw) {
-             setChats(processInitialData(initialChatData));
+            setChats(processInitialData(initialChatData));
         } else {
-             // เช็คว่าข้อมูลเปลี่ยนจริงไหมก่อน Set State (เพื่อลดการกระพริบ)
-             setChats(prev => {
+            setChats(prev => {
                 if (JSON.stringify(prev) !== JSON.stringify(mergedChats)) {
                     return mergedChats;
                 }
                 return prev;
-             });
+            });
         }
         
         setIsLoaded(true);
@@ -143,30 +133,27 @@ export default function ChatBoardInlineFinal() {
     }
   };
 
-  // บันทึกเมื่อ State เปลี่ยน
   useEffect(() => {
     if (isLoaded) {
-      isUpdatingRef.current = true; // ล็อคไว้
+      isUpdatingRef.current = true; 
       localStorage.setItem("app_board_chats", JSON.stringify(chats));
       localStorage.setItem("app_board_columns", JSON.stringify(columns));
-      setTimeout(() => { isUpdatingRef.current = false; }, 100); // ปลดล็อค
+      setTimeout(() => { isUpdatingRef.current = false; }, 100);
     }
   }, [chats, columns, isLoaded]);
 
-  // --- Logic Functions ---
-
+  // Logic Functions
   const handleInputChange = (chatId, value) => {
     setMessageDrafts(prev => ({ ...prev, [chatId]: value }));
   };
 
-  //  Send Message: ต้องอัพเดททั้ง Board และ Main Chat
+  //  Send Message
   const handleSendMessage = (chatId) => {
     const text = messageDrafts[chatId]?.trim();
     if (!text) return;
 
     const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-    //  อัพเดท UI ฝั่ง Board ทันที
     const updatedChats = chats.map(chat => {
       if (chat.id === chatId) {
         const updatedMessages = [
@@ -185,7 +172,7 @@ export default function ChatBoardInlineFinal() {
     setChats(updatedChats);
     setMessageDrafts(prev => ({ ...prev, [chatId]: "" }));
 
-    // Sync กลับไปที่ Main Chat (Database หลัก)
+    // Sync กลับไปที่ Main Chat 
     try {
         const mainChatsRaw = localStorage.getItem("onechat_data");
         let mainChats = mainChatsRaw ? JSON.parse(mainChatsRaw) : [];
@@ -206,7 +193,6 @@ export default function ChatBoardInlineFinal() {
             return chat;
         });
 
-        // Save & Dispatch Event
         localStorage.setItem("onechat_data", JSON.stringify(mainChats));
         window.dispatchEvent(new Event("chat-data-updated"));
     } catch (e) {
@@ -247,7 +233,6 @@ export default function ChatBoardInlineFinal() {
   };
 
   const handleAddChatToColumn = (chatId) => {
-    // ดึงข้อมูลสดจาก Main Chat มาใส่เสมอ
     const mainChatsRaw = localStorage.getItem("onechat_data");
     const mainChats = mainChatsRaw ? JSON.parse(mainChatsRaw) : [];
     const freshChat = mainChats.find(c => c.id === chatId);
@@ -269,12 +254,9 @@ export default function ChatBoardInlineFinal() {
   };
 
   const getFilteredChats = () => {
-    // โหลดข้อมูลทั้งหมดจาก Main Chat เพื่อแสดงใน Modal
     const mainChatsRaw = localStorage.getItem("onechat_data");
     const allMainChats = mainChatsRaw ? JSON.parse(mainChatsRaw) : [];
     
-    // กรองเอาเฉพาะที่ยังไม่อยู่ในบอร์ด (ถ้าต้องการ) หรือจะโชว์หมดก็ได้
-    // ในที่นี้โชว์เฉพาะที่ยังไม่อยู่ในบอร์ด
     const existingIds = chats.map(c => c.id);
     let available = allMainChats.filter(c => !existingIds.includes(c.id));
 
@@ -298,11 +280,11 @@ export default function ChatBoardInlineFinal() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden p-4 font-sans text-white" onClick={() => { setActiveDropdownChatId(null); setShowAiModelSelectId(null); }}>
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 -z-10" />
+      <div className="absolute inset-0 bg-linear-to-br from-slate-900 to-slate-800 -z-10" />
 
       <div className="flex h-full gap-4 overflow-x-auto pb-2 items-start no-scrollbar">
         {columns.map((col) => (
-          <div key={col.id} className="bg-[rgba(43,50,63,0.2)] border border-[rgba(253,254,253,0.1)] backdrop-blur-md rounded-3xl shadow-xl pt-4 px-3 pb-3 h-full flex flex-col min-w-[85vw] md:min-w-[40vw] lg:min-w-[24vw] flex-shrink-0 transition-all">
+          <div key={col.id} className="bg-[rgba(43,50,63,0.2)] border border-[rgba(253,254,253,0.1)] backdrop-blur-md rounded-3xl shadow-xl pt-4 px-3 pb-3 h-full flex flex-col min-w-[85vw] md:min-w-[40vw] lg:min-w-[24vw] shrink-0 transition-all">
             {/* Column Header */}
             <div className="flex justify-between items-center mb-4 px-2 shrink-0 h-8">
               {editingColId === col.id ? (
@@ -321,12 +303,12 @@ export default function ChatBoardInlineFinal() {
                   return (
                     <motion.div key={chat.id} className={`border transition-colors duration-300 overflow-hidden rounded-2xl relative flex flex-col ${isOpen ? "bg-slate-800/10 border-white/20 shadow-xl ring-1 ring-white/10" : "bg-white/30 hover:bg-white/10 border-white/10 cursor-pointer"}`}>
                       
-                      {/* --- 1. CARD HEADER (Collapsed) --- */}
+                      {/* CARD HEADER */}
                       {!isOpen && (
                         <div onClick={() => handleToggleChat(chat.id)} className="p-3 flex justify-between items-start cursor-pointer select-none shrink-0 relative group">
                           <div className="flex items-center gap-3 overflow-hidden">
                             <div className="relative">
-                              <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-xl shadow-lg shrink-0">{chat.avatar}</div>
+                              <div className="w-10 h-10 bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-xl shadow-lg shrink-0">{chat.avatar}</div>
                               <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-800 ${chat.platform === "line" || chat.channel === "Line" ? "bg-[#06c755]" : "bg-[#1877f2]"}`}>
                                 {chat.platform === "line" || chat.channel === "Line" ? (<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="white" viewBox="0 0 16 16"><path d="M8 0c4.418 0 8 3.582 8 8s-3.582 8-8 8-8-3.582-8-8 3.582-8 8-8zM8 2C4.686 2 2 4.686 2 8c0 1.818.813 3.444 2.098 4.604-.15.557-.536 1.623-1.146 2.237.798-.052 1.979-.29 2.778-.998a5.96 5.96 0 0 0 2.27.457c3.314 0 6-2.686 6-6S11.314 2 8 2z" /></svg>) : (<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="white" viewBox="0 0 16 16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z" /></svg>)}
                               </div>
@@ -342,16 +324,16 @@ export default function ChatBoardInlineFinal() {
                         </div>
                       )}
 
-                      {/* --- 2. INLINE CHAT UI (Expanded) --- */}
+                      {/* INLINE CHAT UI */}
                       <AnimatePresence>
                         {isOpen && (
                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 420, opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }} className="flex flex-col h-full">
                             
-                            {/* A. Header */}
+                            {/* Header */}
                             <div className="flex items-center justify-between border-b border-white/10 p-3 bg-black/10 shrink-0 relative" onClick={() => handleToggleChat(chat.id)}>
                               <div className="flex items-center gap-3 cursor-pointer">
                                 <div className="relative">
-                                  <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-xl shadow-lg shrink-0">{chat.avatar}</div>
+                                  <div className="w-10 h-10 bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-xl shadow-lg shrink-0">{chat.avatar}</div>
                                   <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-800 ${chat.platform === "line" || chat.channel === "Line" ? "bg-[#06c755]" : "bg-[#1877f2]"}`}>
                                     {chat.platform === "line" || chat.channel === "Line" ? (<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="white" viewBox="0 0 16 16"><path d="M8 0c4.418 0 8 3.582 8 8s-3.582 8-8 8-8-3.582-8-8 3.582-8 8-8zM8 2C4.686 2 2 4.686 2 8c0 1.818.813 3.444 2.098 4.604-.15.557-.536 1.623-1.146 2.237.798-.052 1.979-.29 2.778-.998a5.96 5.96 0 0 0 2.27.457c3.314 0 6-2.686 6-6S11.314 2 8 2z" /></svg>) : (<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="white" viewBox="0 0 16 16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z" /></svg>)}
                                   </div>
@@ -394,7 +376,7 @@ export default function ChatBoardInlineFinal() {
                               </div>
                             </div>
 
-                            {/* B. Message List */}
+                            {/* Message List */}
                             <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4 bg-transparent">
                               {chat.messages && chat.messages.map((msg, index) => {
                                   const isMe = msg.from === "me";
@@ -412,7 +394,7 @@ export default function ChatBoardInlineFinal() {
                               })}
                             </div>
 
-                            {/* C. Input Area */}
+                            {/* Input Area */}
                             <div className="p-3 shrink-0 mt-2">
                               <div className="bg-[#2b2b2b]/5 backdrop-blur-md border border-white/10 rounded-2xl p-3 shadow-lg relative group">
                                 <textarea 
@@ -427,29 +409,25 @@ export default function ChatBoardInlineFinal() {
                                     }}
                                     className="w-full bg-transparent text-white text-sm px-1 outline-none resize-none h-14 placeholder-white/30 custom-scrollbar" 
                                 />
-                                <div className="h-[1px] w-full bg-white/10 my-2"></div>
+                                <div className="h-px w-full bg-white/10 my-2"></div>
                                 
-                                {/*  Toolbar */}
+                                {/* Toolbar */}
                                 <div className="flex justify-between items-center pt-2">
                                     <div className="flex gap-3 text-white/60">
                                         
-                                        {/* 1. AI Magic Icon (Font Awesome) */}
                                         <button className="hover:text-purple-400 transition" title="AI Rewrite">
                                             <i className="fa-solid fa-wand-magic-sparkles"></i>
                                         </button>
 
-                                        {/* 2. Icons Icon (Font Awesome) */}
                                         <button className="hover:text-white transition" title="Add Media">
                                             <i className="fa-solid fa-icons"></i>
                                         </button>
 
-                                        {/* 3. Attach File Icon (Font Awesome) */}
                                         <button className="hover:text-white transition" title="Attach File">
                                             <i className="fa-solid fa-paperclip"></i>
                                         </button>
                                     </div>
                                     
-                                    {/* Send Button (SVG remains for now as no replacement was provided) */}
                                     <button onClick={() => handleSendMessage(chat.id)} className="text-white hover:text-blue-400 transition-transform hover:scale-110">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -489,7 +467,7 @@ export default function ChatBoardInlineFinal() {
       </div>
 
       {isSelectChatModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
           <div className="bg-slate-800 border border-white/20 rounded-3xl p-6 w-[600px] shadow-2xl flex flex-col max-h-[80vh]">
             <div className="flex justify-between items-center mb-4 shrink-0">
               <h3 className="text-white text-xl font-semibold">Select Chat</h3>
@@ -504,7 +482,7 @@ export default function ChatBoardInlineFinal() {
                 {getFilteredChats().length === 0 ? (<p className="text-center text-white/30 py-8">No chats found</p>) : (
                     getFilteredChats().map(chat => (
                         <div key={chat.id} onClick={() => handleAddChatToColumn(chat.id)} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 cursor-pointer border border-transparent hover:border-white/10 transition-all">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-gray-600 to-gray-500 flex items-center justify-center text-sm font-bold text-white shrink-0">{chat.avatar}</div>
+                            <div className="w-10 h-10 rounded-full bg-linear-to-tr from-gray-600 to-gray-500 flex items-center justify-center text-sm font-bold text-white shrink-0">{chat.avatar}</div>
                             <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-center"><span className="text-white/90 text-sm font-medium truncate">{chat.name}</span><span className={`text-[9px] px-1.5 rounded ${chat.platform === "line" || chat.channel === "Line" ? "bg-[#06c755]/20 text-[#06c755]" : "bg-[#1877f2]/20 text-[#1877f2]"}`}>{chat.platform === "line" || chat.channel === "Line" ? "LINE" : "FB"}</span></div>
                                 <p className="text-xs text-white/40 truncate mt-0.5">{chat.lastMessage || chat.message || "No messages"}</p>

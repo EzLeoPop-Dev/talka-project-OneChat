@@ -15,7 +15,7 @@ export default function ControlPanel({
             <div className="w-full">
                 <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl py-6 flex flex-col items-center gap-6">
                     
-                    {/* ปุ่มที่ 1: Tags */}
+                    {/* Tags */}
                     <button 
                         onClick={onOpenAddTagModal} 
                         className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"
@@ -24,7 +24,7 @@ export default function ControlPanel({
                         <i className="fa-solid fa-tags text-white/70 group-hover:text-white text-lg transition-colors"></i>
                     </button>
 
-                    {/* ปุ่มที่ 2: Profile */}
+                    {/* Profile */}
                     <button 
                         onClick={onOpenContactDetails} 
                         className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"
@@ -33,7 +33,7 @@ export default function ControlPanel({
                         <i className="fa-solid fa-info text-white/70 group-hover:text-white text-lg transition-colors"></i>
                     </button>
 
-                    {/* ปุ่มที่ 3: Notes */}
+                    {/* Notes */}
                     <button 
                         onClick={onOpenAddNote}
                         className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"
@@ -42,7 +42,7 @@ export default function ControlPanel({
                         <i className="fa-solid fa-book text-white/70 group-hover:text-white text-lg transition-colors"></i>
                     </button>
 
-                    {/* ปุ่มที่ 4: Change Status */}
+                    {/* Change Status */}
                     <button 
                         onClick={onOpenChangeStatus}
                         className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"
@@ -51,7 +51,7 @@ export default function ControlPanel({
                         <i className="fa-solid fa-timeline text-white/70 group-hover:text-white text-lg transition-colors"></i>
                     </button>
 
-                    {/* ปุ่มที่ 5: Activity Log */}
+                    {/* Activity Log */}
                     <button 
                         onClick={onOpenActivityLog}
                         className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"
@@ -60,7 +60,7 @@ export default function ControlPanel({
                         <i className="fa-solid fa-clock-rotate-left text-white/70 group-hover:text-white text-lg transition-colors"></i>
                     </button>
 
-                    {/*  ปุ่มที่ 6: Send to Board  */}
+                    {/* Send to Board */}
                     <button 
                         onClick={onOpenSendToBoard}
                         className="group w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-200 active:scale-90"

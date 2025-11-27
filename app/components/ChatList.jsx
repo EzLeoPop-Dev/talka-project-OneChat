@@ -26,11 +26,9 @@ export default function ChatList({ chats, onSelectChat, selectedId, availableTag
                             return (
                                 <div
                                     key={chat.id}
-                                    // 🔴 แก้ไขตรงนี้ครับ: เพิ่มการอัพเดท URL 🔴
                                     onClick={() => {
                                         onSelectChat(chat);
-                                        // สั่งเปลี่ยน URL ทันทีที่กด (โดยไม่รีเฟรชหน้า) 
-                                        // เพื่อให้เวลาตอบแชทแล้วมันไม่เด้งกลับไปหาคนเก่า
+                                        
                                         window.history.replaceState(null, '', `?id=${chat.id}`);
                                     }} 
                                     className={`bg-white/30 backdrop-blur-lg rounded-2xl p-4 hover:bg-white/40 transition-all cursor-pointer border border-white/20 ${selectedId === chat.id ? "ring-2 ring-blue-400" : ""

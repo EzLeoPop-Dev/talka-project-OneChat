@@ -18,7 +18,7 @@ import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-// ------------------- UI Helpers -------------------
+// UI Helpers
 const Button = ({ children, className = "", ...props }) => (
   <button
     className={`px-3 py-2 rounded-md border border-[rgba(254,253,253,0.5)] text-white hover:bg-[rgba(255,255,255,0.1)] transition ${className}`}
@@ -111,7 +111,6 @@ const SimplePagination = ({ totalItems, itemsPerPage, currentPage, setCurrentPag
   );
 };
 
-// ------------------- Utility functions -------------------
 const formatDisplayDayMonth = (dateStr) => {
   const d = new Date(dateStr);
   const day = d.getDate();
@@ -126,7 +125,7 @@ const isoWithRandomTime = (dateStr, index = 0) => {
   return d.toISOString();
 };
 
-// ------------------- Main Component -------------------
+// Main Component
 export default function MessagesPage() {
   const defaultStart = calenderData?.[calenderData.length - 5]?.date || "2025-10-26";
   const defaultEnd = calenderData?.[calenderData.length - 1]?.date || "2025-10-29";
@@ -264,7 +263,7 @@ export default function MessagesPage() {
         onChange={(item) => setRange([item.selection])}
         moveRangeOnFirstSelection={false}
         ranges={range}
-        rangeColors={["#8B5CF6"]} // <-- เปลี่ยนจาก "#60A5FA" เป็นสีม่วง
+        rangeColors={["#8B5CF6"]} // 
       />
       <Button
         onClick={() => setShowCalendar(false)}

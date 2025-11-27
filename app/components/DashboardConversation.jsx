@@ -43,7 +43,6 @@ const allChartData = {
   ]
 };
 
-// ------------------------------------
 
 export default function DashboardConversation() {
   
@@ -62,7 +61,6 @@ export default function DashboardConversation() {
   
   const { totals, yAxisConfig } = useMemo(() => {
     
-   
     let maxDataValue = 0;
     const totals = currentData.reduce(
         (acc, curr) => {
@@ -107,8 +105,7 @@ export default function DashboardConversation() {
   return (
     <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-4 flex flex-col min-h-[400px]">
       
-     
-      <div className="flex justify-between items-center flex-shrink-0 relative z-10">
+      <div className="flex justify-between items-center shrink-0 relative z-10">
         <div className="flex items-center gap-2">
           <h2 className="text-white/90 text-sm">Conversations Overview</h2>
       </div>
@@ -141,8 +138,8 @@ export default function DashboardConversation() {
       
       </div>
 
-      {/* --- Stats --- */}
-      <div className="flex gap-8 mt-4 flex-shrink-0">
+      {/*  Stats  */}
+      <div className="flex gap-8 mt-4 shrink-0">
         <div>
           <p className="text-sm text-white/80">Opened</p>
           <div className="flex items-baseline gap-2 mt-1">
@@ -160,7 +157,7 @@ export default function DashboardConversation() {
       </div>
 
       
-      <div className="flex gap-4 mt-2 flex-shrink-0">
+      <div className="flex gap-4 mt-2 shrink-0">
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
           <span className="text-xs text-white/60">Opened</span>
@@ -171,8 +168,8 @@ export default function DashboardConversation() {
         </div>
       </div>
 
-      {/* --- Graph --- */}
-      <div className="flex-grow mt-4 min-h-[200px] relative z-0">
+      {/*  Graph  */}
+      <div className="grow mt-4 min-h-[200px] relative z-0">
         <ResponsiveContainer width="100%" minHeight={250}>
           <LineChart
             data={currentData} 

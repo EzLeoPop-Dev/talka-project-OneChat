@@ -16,7 +16,6 @@ useEffect(() => {
     if (storedData) {
         const chats = JSON.parse(storedData);
 
-      // --- Logic การคำนวณ ---
 
       // New Customers (ลูกค้าใหม่ = Status "New Chat")
         const newCustCount = chats.filter(c => c.status === 'New Chat').length;
@@ -28,7 +27,6 @@ useEffect(() => {
 
       // Incoming Message (รวมข้อความขาเข้าทั้งหมด)
         const incomingCount = chats.reduce((total, c) => {
-        // นับเฉพาะข้อความที่ไม่ได้มาจาก 'me'
         const customerMsgs = c.messages ? c.messages.filter(msg => msg.from !== 'me').length : 0;
         return total + customerMsgs;
     }, 0);

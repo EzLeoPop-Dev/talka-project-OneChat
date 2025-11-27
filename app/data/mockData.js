@@ -1,5 +1,4 @@
 const unifiedMockData = [
-  // --- ID 1: Somchai ---
   {
       id: 1,
       name: "Somchai Mhaiprong",
@@ -21,7 +20,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 2: Jinju ---
   {
       id: 2,
       name: "Jinju Jingjang",
@@ -40,7 +38,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 3: Jane Doe ---
   {
       id: 3,
       name: "Jane Doe",
@@ -62,7 +59,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 4: Robert Brown ---
   {
       id: 4,
       name: "Robert Brown",
@@ -84,7 +80,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 5: Emily Chen ---
   {
       id: 5,
       name: "Emily Chen",
@@ -106,7 +101,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 6: Michael Wilson ---
   {
       id: 6,
       name: "Michael Wilson",
@@ -128,7 +122,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 7: Sarah O'Connor ---
   {
       id: 7,
       name: "Sarah O'Connor",
@@ -150,7 +143,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 8: David Kim ---
   {
       id: 8,
       name: "David Kim",
@@ -172,7 +164,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 9: Jessica Jones ---
   {
       id: 9,
       name: "Jessica Jones",
@@ -194,7 +185,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 10: William Davis ---
   {
       id: 10,
       name: "William Davis",
@@ -216,7 +206,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 11: OH HO ---
   {
       id: 11, 
       name: "OH HO",
@@ -238,7 +227,6 @@ const unifiedMockData = [
       ]
   },
   
-  // --- ID 12: Linda Garcia ---
   {
       id: 12,
       name: "Linda Garcia",
@@ -260,7 +248,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 13: Thomas Anderson ---
   {
       id: 13,
       name: "Thomas Anderson",
@@ -282,7 +269,6 @@ const unifiedMockData = [
       ]
   },
 
-  // --- ID 14: Nancy Drew ---
   {
       id: 14,
       name: "Nancy Drew",
@@ -305,6 +291,5 @@ const unifiedMockData = [
   }
 ];
 
-// ✅ Export
 export { unifiedMockData };
 export default unifiedMockData;

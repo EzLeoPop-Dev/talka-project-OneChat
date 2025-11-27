@@ -29,7 +29,6 @@ export default function GeneralInfoPage() {
         setCurrentWsId(targetWs.id);
         setWorkspaceName(targetWs.name);
 
-        // ดึงค่า Timeout และ Timezone เก่ามาแสดง (ถ้าเคยบันทึกไว้)
         if (targetWs.timeout !== undefined) setTimeoutValue(targetWs.timeout);
         if (targetWs.timezone !== undefined) setTimezone(targetWs.timezone);
       }
@@ -37,16 +36,16 @@ export default function GeneralInfoPage() {
     setLoading(false);
   }, [workspaceId]);
 
-  // 2. ฟังก์ชันบันทึกข้อมูลทั้งหมดลง Local Storage
+  // ฟังก์ชันบันทึกข้อมูลทั้งหมดลง Local Storage
   const handleSave = () => {
     if (!currentWsId) return;
 
     const updatedWorkspaces = workspaces.map((ws) => 
       ws.id === currentWsId ? { 
         ...ws, 
-        name: workspaceName, // บันทึกชื่อ
-        timeout: timeout,    // บันทึก Timeout (เก็บค่าไว้เฉยๆ)
-        timezone: timezone   // บันทึก Timezone (เก็บค่าไว้เฉยๆ)
+        name: workspaceName, 
+        timeout: timeout,    
+        timezone: timezone   
       } : ws
     );
 

@@ -72,7 +72,7 @@ export default function FilterPopup({
                         <FilterRadio 
                             key={tagObj.name} 
                             group="tag" 
-                            value={tagObj.name} // ส่งชื่อไปเก็บใน state
+                            value={tagObj.name} 
                         >
                             <span className="mr-1">{tagObj.emoji}</span> {tagObj.name}
                         </FilterRadio>

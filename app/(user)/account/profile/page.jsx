@@ -11,7 +11,6 @@ export default function ProfilePage() {
     const [role, setRole] = useState("Employee"); 
     const [avatar, setAvatar] = useState("");
 
-    // --- Helper Functions ---
     function getInitials(name) {
         if (!name) return "?";
         const parts = name.trim().split(" ");
@@ -27,9 +26,8 @@ export default function ProfilePage() {
         const color = Math.floor(Math.abs(Math.sin(hash) * 16777215) % 16777215).toString(16);
         return `#${"0".repeat(6 - color.length) + color}`;
     }
-    // ------------------------------------------
 
-    // 1. Load Data
+    // Load Data
     useEffect(() => {
         try {
             const storedUser = localStorage.getItem("currentUser");
@@ -43,7 +41,6 @@ export default function ProfilePage() {
                 setEmail(user.email || "");
                 setRole(user.role || "Employee");
                 
-                // ถ้ามีรูป (URL ยาวๆ) ให้ใช้รูป ถ้าไม่มีให้เป็นค่าว่าง (เพื่อไปเข้า Logic สร้าง Avatar สี)
                 setAvatar(user.avatar && user.avatar.length > 10 ? user.avatar : ""); 
             }
         } catch (error) {
@@ -51,7 +48,7 @@ export default function ProfilePage() {
         }
     }, []);
 
-    // 2. Save Data
+    // Save Data
     const handleSave = (e) => {
         e.preventDefault();
         try {
@@ -64,7 +61,6 @@ export default function ProfilePage() {
                 ...userObj,
                 username: fullName, 
                 email: email,
-                // ถ้า avatar เป็นค่าว่าง (คือไม่ได้อัปรูป) ให้บันทึกเป็นตัวย่อชื่อ
                 avatar: avatar || fullName.charAt(0).toUpperCase()
             };
 
@@ -135,7 +131,7 @@ export default function ProfilePage() {
 
                 {/* Right Column: Edit Form */}
                 <div className="md:w-2/3 p-8 md:p-12">
-                     {/* ... Form  ... */}
+                     {/* Form */}
                     <div className="flex justify-between items-end mb-8">
                         <div>
                             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-white/60">

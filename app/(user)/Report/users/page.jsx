@@ -6,7 +6,7 @@ import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-// ------------------- UI Helpers -------------------
+// UI Helpers 
 const Button = ({ children, className = "", ...props }) => (
   <button
     className={`px-3 py-2 rounded-md border border-[rgba(254,253,253,0.5)] text-white hover:bg-[rgba(255,255,255,0.1)] transition ${className}`}
@@ -83,7 +83,7 @@ const PaginationControls = ({ totalItems, itemsPerPage, currentPage, setCurrentP
   );
 };
 
-// ------------------- Main Component -------------------
+// Main Component
 export default function UsersPage() {
   const defaultStart = "2025-10-27";
   const defaultEnd = "2025-10-31";
@@ -100,8 +100,8 @@ export default function UsersPage() {
   const [commentCurrentPage, setCommentCurrentPage] = useState(1);
   const [commentItemsPerPage] = useState(5);
 
-  const totalUserItems = 0; // ปรับตาม data จริง
-  const totalCommentItems = 0; // ปรับตาม data จริง
+  const totalUserItems = 0; 
+  const totalCommentItems = 0; 
 
   useEffect(() => {
     const handleClickOutside = (event) => {

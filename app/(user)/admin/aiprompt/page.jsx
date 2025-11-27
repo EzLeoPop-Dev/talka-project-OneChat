@@ -11,7 +11,7 @@ export default function AiPromptsPage() {
   const [editingPromptId, setEditingPromptId] = useState(null);
   const [deletePrompt, setDeletePrompt] = useState(null);
 
-  // 3. useEffect: โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+  // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
   useEffect(() => {
     const savedPrompts = localStorage.getItem("onechat_prompts");
     if (savedPrompts) {
@@ -21,7 +21,7 @@ export default function AiPromptsPage() {
     }
   }, []);
   
-  // 4. useEffect: บันทึกข้อมูลทุกครั้งที่ prompts เปลี่ยนแปลง (Add/Edit/Delete/Toggle)
+  //บันทึกข้อมูลทุกครั้งที่ prompts เปลี่ยนแปลง (Add/Edit/Delete/Toggle)
   useEffect(() => {
     if (prompts.length > 0) {
         localStorage.setItem("onechat_prompts", JSON.stringify(prompts));

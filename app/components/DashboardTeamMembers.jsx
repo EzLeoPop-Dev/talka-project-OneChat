@@ -6,9 +6,8 @@ export default function DashboardTeamMembers() {
   const [loading, setLoading] = useState(true);
   const [myTeamName, setMyTeamName] = useState("");
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 3; // โชว์ทีละ 3 คน 
+  const ITEMS_PER_PAGE = 3; 
 
   useEffect(() => {
     const storedUser = localStorage.getItem("currentUser");
@@ -18,33 +17,29 @@ export default function DashboardTeamMembers() {
       const me = JSON.parse(storedUser);
       const teams = JSON.parse(storedTeams);
       
-      // หาชื่อตัวเอง (เช็คทั้ง username และ name)
       const myName = me.name || me.username;
 
-      // หาว่าเราอยู่ในทีมไหน (หาทีมที่มีชื่อเราใน array members)
       const myTeam = teams.find(t => t.members.includes(myName));
 
       if (myTeam) {
         setMyTeamName(myTeam.name);
         
-        // แปลงรายชื่อสมาชิก (String Array) ให้เป็น Object Array พร้อมรูป (Mock รูปถ้าหาไม่เจอ)
         const teamMembersData = myTeam.members.map((memberName, index) => ({
             id: index,
             name: memberName,
-            // ใช้ UI Avatars สร้างรูปจากชื่อ
             avatar: `https://ui-avatars.com/api/?name=${memberName}&background=random`,
             role: memberName === myName ? (me.role || "Member") : "Member" 
         }));
 
         setMembers(teamMembersData);
       } else {
-        setMembers([]); // ไม่อยู่ในทีมไหนเลย
+        setMembers([]); 
       }
     }
     setLoading(false);
   }, []);
 
-  // --- Pagination Logic ---
+  //  Pagination Logic 
   const totalPages = Math.ceil(members.length / ITEMS_PER_PAGE);
   const currentItems = members.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -66,7 +61,6 @@ export default function DashboardTeamMembers() {
       
       <div className="flex justify-between items-center pb-3 mb-4 border-b border-white/20 shrink-0">
         <h2 className="text-white/90 text-sm">Team Members</h2>
-        {/* แสดงชื่อทีมมุมขวา (ถ้ามี) */}
         {myTeamName && <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/70">{myTeamName}</span>}
       </div>
       

@@ -65,7 +65,7 @@ export default function ContactDetail({ contact, onClose, onSave, onDelete, AVAI
                     {formData.channel === 'Line' && <i className="fa-brands fa-line text-3xl text-green-500"></i>}
                 </div>
 
-                {/* ... (Assigned User Section) ... */}
+                {/* Assigned User Section*/}
                 <div className="flex items-center gap-2 mb-6">
                     <select name="assignedUser" value={formData.assignedUser || "Admin"} onChange={handleChange} className="flex-1 text-white outline-0 bg-gray-700 rounded-lg py-2 px-4 border border-gray-600 appearance-none">
                         <option value="Admin">User nameAdmin</option>

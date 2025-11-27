@@ -1,11 +1,9 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
 
-//  เพิ่ม prop onSearchChange เข้ามา
 export default function ChatFitter({ onFilterChange, availableCompanies = [], onCompanyChange, onSearchChange }) {
     const [selected, setSelected] = useState("radio1");
     
-    // State สำหรับ Dropdown บริษัท
     const [isCompanyOpen, setIsCompanyOpen] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const dropdownRef = useRef(null);
@@ -43,12 +41,10 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
                         type="text"
                         className="text-white outline-0 bg-transparent w-full min-w-[150px]"
                         placeholder="Search"
-                     
                         onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
                     />
                 </div>
 
-             
                 <div className="flex flex-wrap md:flex-nowrap gap-3 md:gap-5 text-white overflow-x-auto md:overflow-visible flex-1 scrollbar-hide">
                     {[
                         { id: "radio1", label: "All Chat", value: "All" },
@@ -72,7 +68,7 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
                     ))}
                 </div>
 
-               
+    
                 <div className="relative shrink-0" ref={dropdownRef}>
                     <button 
                         onClick={() => setIsCompanyOpen(!isCompanyOpen)}

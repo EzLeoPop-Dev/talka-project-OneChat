@@ -5,7 +5,6 @@ import { useState, useMemo } from "react";
 export default function ActivityLog() {
   const [expandedRow, setExpandedRow] = useState(null);
 
-  // ---- FILTER STATE ----
   const [filterType, setFilterType] = useState("all");
   const [sortOrder, setSortOrder] = useState("newest");
   const [searchText, setSearchText] = useState("");
@@ -99,16 +98,16 @@ export default function ActivityLog() {
     invite_user: "text-purple-300",
   };
 
-  // ---- FILTER + SORT + SEARCH ----
+  // FILTER + SORT + SEARCH
   const filteredLogs = useMemo(() => {
     let logs = [...activityLogs];
 
-    // 1) FILTER TYPE
+    //  FILTER TYPE
     if (filterType !== "all") {
       logs = logs.filter((log) => log.type === filterType);
     }
 
-    // 2) SEARCH (message, actor, target)
+    // SEARCH (message, actor, target)
     if (searchText.trim() !== "") {
       logs = logs.filter((log) =>
         [log.message, log.actor, log.target]
@@ -118,7 +117,7 @@ export default function ActivityLog() {
       );
     }
 
-    // 3) SORT
+    // SORT
     logs.sort((a, b) => {
       const timeA = new Date(a.timestamp).getTime();
       const timeB = new Date(b.timestamp).getTime();

@@ -109,7 +109,7 @@ export default function ContactDetails({ onClose, contact, onUpdateContact }) {
           )}
         </div>
 
-        {/* --- Email Address --- */}
+        {/* Email Address */}
         <div>
           <label className="text-white/50 text-[10px] uppercase tracking-wider mb-1 block">Email Address</label>
           {isEditingEmail ? (
@@ -137,7 +137,7 @@ export default function ContactDetails({ onClose, contact, onUpdateContact }) {
           )}
         </div>
 
-        {/* --- Country --- */}
+        {/* Country */}
         <div>
           <label className="text-white/50 text-[10px] uppercase tracking-wider mb-1 block">Country</label>
           {isEditingCountry ? (

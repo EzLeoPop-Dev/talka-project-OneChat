@@ -67,7 +67,7 @@ export default function DashboardContacts() {
                             if (Array.isArray(contact.tags)) tagsArray = contact.tags;
                             else if (contact.tags) tagsArray = [contact.tags];
 
-                            return tagsArray.slice(0, 2).map((tag, idx) => ( // โชว์แค่ 2 tags
+                            return tagsArray.slice(0, 2).map((tag, idx) => (
                                 <span key={idx} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
                                     {tag}
                                 </span>

@@ -6,7 +6,6 @@ import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { GlassBackground } from '@/app/components/GlassBackground';
 import TutorialModal from '@/app/components/TutorialModal';
 
-// ... (ข้อมูล tutorials Array เหมือนเดิม ไม่ต้องแก้ไข) ...
 const tutorials = [
     {
         id: 1,
@@ -171,12 +170,12 @@ export default function Page() {
         setCurrentIndex((prev) => (prev - 1 + tutorials.length) % tutorials.length);
     };
 
-    // ฟังก์ชันสำหรับคำนวณตำแหน่งการ์ดแบบวงกลม (เหมือนเดิม)
+    // ฟังก์ชันสำหรับคำนวณตำแหน่งการ์ดแบบวงกลม
     const getCardPosition = (index) => {
         const total = tutorials.length;
         const diff = (index - currentIndex + total) % total;
         const angle = (diff / total) * Math.PI * 2;
-        const radius = 550; // เพิ่มรัศมีนิดหน่อยให้ดูกว้างขึ้น
+        const radius = 550; 
         const x = Math.sin(angle) * radius;
         const z = Math.cos(angle) * radius - radius;
         const rotateY = -(angle * 180) / Math.PI;
@@ -196,7 +195,7 @@ export default function Page() {
     };
 
     return (
-        // Container หลัก: เปลี่ยนจากกล่อง fix ความสูง เป็นเต็มจอและใช้สีเข้ม
+        // Container หลัก
         <div className="h-fit w-full overflow-hidden backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl text-white relative flex flex-col items-center py-10">
 
             <div className="fixed inset-0 pointer-events-none">
@@ -207,14 +206,13 @@ export default function Page() {
                     backgroundImage: 'radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 5px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px), radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 4px)',
                     backgroundSize: '550px 550px, 350px 350px, 250px 250px',
                     backgroundPosition: '0 0, 40px 60px, 130px 270px',
-                    animation: 'starsAnimation 120s linear infinite' // เพิ่ม keyframe ใน global css ถ้าต้องการให้เคลื่อนที่
+                    animation: 'starsAnimation 120s linear infinite'
                 }}></div>
 
-                {/* 3. Central Epic Glow (แสงออร่าหลัง Carousel) */}
+                {/* Central Epic Glow */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[150px] mix-blend-screen z-0"></div>
                 <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] mix-blend-screen z-0"></div>
             </div>
-            {/* ------------------------------------- */}
 
 
             <motion.div
@@ -223,7 +221,6 @@ export default function Page() {
                 className="text-center mb-10 relative z-10 mt-10"
             >
                 <motion.div variants={textVariants} className="inline-block relative">
-                    {/* เพิ่มไอคอน Sparkles เล็กๆ */}
                     <Sparkles className="absolute -top-6 -left-8 w-8 h-8 text-purple-400 animate-pulse" />
                     <h1 className="text-[50px] font-bold leading-tight">
                         <span className="block bg-clip-text text-transparent bg-linear-to-r from-white via-purple-200 to-blue-200 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
@@ -239,9 +236,8 @@ export default function Page() {
                 <p className='text-lg font-semibold mt-6 text-purple-300 tracking-widest uppercase'>Tutorials</p>
             </motion.div>
 
-            {/* เพิ่มความสูงของ Container Carousel เพื่อให้ดูไม่อึดอัด */}
             <div className="relative h-[550px] w-full flex items-center justify-center z-20 my-auto">
-                {/* Navigation Buttons (ปรับให้ดู Glow มากขึ้น) */}
+                {/* Navigation Buttons */}
                 <motion.button
                     whileHover={{ scale: 1.2, backgroundColor: "rgba(255,255,255,0.2)", boxShadow: "0 0 30px rgba(190, 126, 199, 0.8)" }}
                     whileTap={{ scale: 0.9 }}
@@ -263,7 +259,7 @@ export default function Page() {
                 {/* Cards Carousel */}
                 <div className="relative w-full max-w-6xl h-full flex items-center justify-center"
                     style={{
-                        perspective: "2500px", // เพิ่ม perspective ให้ดูมีความลึกมากขึ้น
+                        perspective: "2500px", 
                         perspectiveOrigin: "center center"
                     }}
                 >
@@ -279,10 +275,9 @@ export default function Page() {
                                         x: x,
                                         z: z,
                                         scale: isCenter ? 1 : 0.7,
-                                        opacity: isCenter ? 1 : 0.3, // ลด opacity ตัวข้างๆ ลงอีกนิด
+                                        opacity: isCenter ? 1 : 0.3, 
                                         rotateY: rotateY,
                                         zIndex: isCenter ? 20 : Math.round(10 - Math.abs(z) / 50),
-                                        // เพิ่ม brightness ให้ตัวกลางเด่นขึ้นอีก
                                         filter: isCenter ? 'blur(0px) brightness(1.1) contrast(1.05)' : 'blur(5px) brightness(0.5) grayscale(20%)',
                                     }}
                                     exit={{
@@ -317,7 +312,6 @@ export default function Page() {
                                             scale: 1.05,
                                             rotateY: 0,
                                             z: 40,
-                                            // เพิ่มเงาแสงสีม่วงเวลา Hover
                                             boxShadow: "0 50px 120px -20px rgba(168, 85, 247, 0.5), 0 0 30px rgba(255,255,255,0.2) inset",
                                             transition: {
                                                 duration: 0.5,
@@ -331,7 +325,6 @@ export default function Page() {
                                             transformStyle: "preserve-3d",
                                         }}
                                     >
-                                        {/* ปรับ GlassBackground ให้มีความสว่างและสะท้อนมากขึ้น */}
                                         <GlassBackground className="h-full border-white/30 bg-white/10"
                                             style={{
                                                 transform: "translateZ(0)",
@@ -345,7 +338,6 @@ export default function Page() {
                                                     alt={tutorial.title}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 />
-                                                {/* Overlay สีม่วงจางๆ */}
                                                 <div className="absolute inset-0 bg-linear-to-t from-[#090a1a] via-transparent to-transparent opacity-60" />
                                             </div>
 
@@ -372,13 +364,11 @@ export default function Page() {
                                                         whileHover={{ scale: 1.05, boxShadow: "0 20px 50px rgba(168, 85, 247, 0.6)" }}
                                                         whileTap={{ scale: 0.95 }}
                                                         onClick={() => openModal(tutorial)}
-                                                        // ปุ่มแบบ Gradient ที่ดูมีพลังมากขึ้น
                                                         className="w-full bg-[rgba(190,126,199,0.56)] text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg relative overflow-hidden group"
                                                     >
                                                         <span className="relative z-10 flex items-center justify-center gap-2">
                                                             เพิ่มเติม <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                                         </span>
-                                                        {/* แสงวิ่งผ่านปุ่ม */}
                                                         <div className="absolute inset-0 h-full w-full bg-linear-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
                                                     </motion.button>
                                                 )}
@@ -391,7 +381,7 @@ export default function Page() {
                     </AnimatePresence>
                 </div>
 
-                {/* Dots Indicator (ปรับให้ดู Glow) */}
+                {/* Dots Indicator */}
                 <div className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 flex gap-4 z-20 bg-black/20 backdrop-blur-md px-6 py-3 rounded-full border border-white/10">
                     {tutorials.map((_, index) => (
                         <motion.button
