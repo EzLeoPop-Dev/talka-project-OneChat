@@ -24,7 +24,7 @@ export default function ContactDetails({ onClose, contact, onUpdateContact }) {
 
   if (!contact) {
     return (
-      <div className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 flex flex-col self-start text-white/70">
+      <div className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 flex flex-col self-start text-white/70">
         Loading...
       </div>
     );

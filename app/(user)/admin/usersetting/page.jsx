@@ -1,5 +1,5 @@
 "use client";
-import { CircleUser, Ban, Edit, Info, X, AlertTriangle, User } from "lucide-react";
+import { CircleUser, Ban, Edit, Info, X, AlertTriangle, User, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function UserSettingPage() {
@@ -47,30 +47,30 @@ export default function UserSettingPage() {
       if (!parsedCurrentUser.name) { parsedCurrentUser.name = parsedCurrentUser.username || "My Name"; isUpdated = true; }
       if (!parsedCurrentUser.permission) { parsedCurrentUser.permission = parsedCurrentUser.role || "Owner"; isUpdated = true; }
       if (!parsedCurrentUser.role) { parsedCurrentUser.role = parsedCurrentUser.permission; isUpdated = true; }
-      
+
       //  เพิ่ม: ถ้าไม่มี email ให้ตั้งค่าเริ่มต้น (เพื่อให้แสดงผลตามที่ขอ)
-      if (!parsedCurrentUser.email) { 
-          parsedCurrentUser.email = "me@example.com"; 
-          isUpdated = true; 
+      if (!parsedCurrentUser.email) {
+        parsedCurrentUser.email = "me@example.com";
+        isUpdated = true;
       }
 
       if (isUpdated) {
         localStorage.setItem("currentUser", JSON.stringify(parsedCurrentUser));
       }
     }
-    
+
     // อัปเดต State Current User
     setCurrentUser(parsedCurrentUser);
 
     // ✅ 1.2 เพิ่มส่วนนี้: โหลด Users อื่นๆ จาก LocalStorage ด้วย (แก้ปัญหา User หาย)
     const storedUsers = localStorage.getItem("app_users");
     if (storedUsers) {
-        try {
-            const parsedUsers = JSON.parse(storedUsers);
-            setUsers(parsedUsers);
-        } catch (e) {
-            console.error("Error loading app_users", e);
-        }
+      try {
+        const parsedUsers = JSON.parse(storedUsers);
+        setUsers(parsedUsers);
+      } catch (e) {
+        console.error("Error loading app_users", e);
+      }
     }
 
     // โหลดเสร็จแล้วค่อยอนุญาตให้ Save
@@ -134,7 +134,7 @@ export default function UserSettingPage() {
       setCurrentUser(updatedMe);
       localStorage.setItem("currentUser", JSON.stringify(updatedMe));
       // ส่ง event บอก component อื่น (เช่น sidebar) ว่า user เปลี่ยนแล้ว
-      window.dispatchEvent(new Event("user_updated")); 
+      window.dispatchEvent(new Event("user_updated"));
     } else {
       setUsers((prev) =>
         prev.map((user) =>
@@ -202,82 +202,86 @@ export default function UserSettingPage() {
       )}
 
       <div className="w-full h-[94vh] p-2 md:p-4">
-        <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
-          <div className="relative max-w-3xl p-8 pb-0">
-            <div className="flex items-center gap-3 mb-8">
-              <CircleUser className="text-white" size={52} />
-              <div>
-                <h1 className="text-xl font-semibold text-white">User Setting</h1>
-                <p className="text-sm text-white/70">Manage workspace members.</p>
+        <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
+
+
+            <div className="relative max-w-3xl p-8 pb-0">
+              <div className="flex items-center gap-3 mb-8 ">
+                <Users className="text-white p-2 bg-white/5 rounded-xl border border-white/10" size={50} />
+                <div>
+                  <h1 className="text-xl font-semibold text-white">User Setting</h1>
+                  <p className="text-sm text-white/70">
+                    Manage workspace members.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="border-t border-white/28 mx-7 mb-8 mt-[-10]"></div>
+            <div className="border-t border-white/28 mx-7 mb-8 mt-[-10]"></div>
 
-          <div className="flex justify-between items-center w-full mb-6 px-4 gap-4">
-            <button onClick={openAddModal} className="flex items-center text-white bg-[rgba(255,255,255,0.22)] shadow-2xl rounded-2xl py-3 px-5 hover:bg-[#ffffff52] cursor-pointer">
-              <i className="fa-solid fa-plus mr-2"></i> Add User
-            </button>
-            <div className="flex items-center text-white bg-[rgba(255,255,255,0.22)] shadow-2xl rounded-2xl py-2 px-4 gap-2 w-[250px]">
-              <i className="fa-solid fa-magnifying-glass mr-3"></i>
-              <input type="text" className="text-white outline-0 bg-transparent w-full" placeholder="Search User..." />
+            <div className="flex justify-between items-center w-full mb-6 px-4 gap-4">
+              <button onClick={openAddModal} className="flex items-center text-white bg-[rgba(255,255,255,0.22)] shadow-2xl rounded-2xl py-3 px-5 hover:bg-[#ffffff52] cursor-pointer">
+                <i className="fa-solid fa-plus mr-2"></i> Add User
+              </button>
+              <div className="flex items-center text-white bg-[rgba(255,255,255,0.22)] shadow-2xl rounded-2xl py-2 px-4 gap-2 w-[250px]">
+                <i className="fa-solid fa-magnifying-glass mr-3"></i>
+                <input type="text" className="text-white outline-0 bg-transparent w-full" placeholder="Search User..." />
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-3 w-full overflow-y-auto px-2 pb-4">
-            {displayUsers.map((user) => {
-              const isMe = currentUser && user.id === currentUser.id;
-              
-              //  Logic การดึงชื่อและ Role ที่ฉลาดขึ้น
-              const displayName = user.name || user.username || "Unknown User";
-              const displayRole = user.permission || user.role || "No Role";
-              const displayEmail = user.email; 
+            <div className="flex flex-col gap-3 w-full overflow-y-auto px-2 pb-4">
+              {displayUsers.map((user) => {
+                const isMe = currentUser && user.id === currentUser.id;
 
-              return (
-                <div
-                  key={user.id}
-                  className="flex justify-between items-center bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.3)] rounded-2xl py-3 px-5 shadow-md backdrop-blur-md hover:bg-[rgba(255,255,255,0.2)] transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <CircleUser className="text-white" size={36} />
+                //  Logic การดึงชื่อและ Role ที่ฉลาดขึ้น
+                const displayName = user.name || user.username || "Unknown User";
+                const displayRole = user.permission || user.role || "No Role";
+                const displayEmail = user.email;
 
-                    <div className="flex flex-col">
-                      {/* 2. บรรทัดบน: ชื่อ + You */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-white font-semibold">{displayName}</span>
-                        {isMe && <span className="text-[10px] bg-purple-500 text-white px-2 py-0.5 rounded-full">You</span>}
+                return (
+                  <div
+                    key={user.id}
+                    className="flex justify-between items-center bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.3)] rounded-2xl py-3 px-5 shadow-md backdrop-blur-md hover:bg-[rgba(255,255,255,0.2)] transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <CircleUser className="text-white" size={36} />
+
+                      <div className="flex flex-col">
+                        {/* 2. บรรทัดบน: ชื่อ + You */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-white font-semibold">{displayName}</span>
+                          {isMe && <span className="text-[10px] bg-purple-500 text-white px-2 py-0.5 rounded-full">You</span>}
+                        </div>
+                        {/* 3. บรรทัดล่าง: Role + Email (แสดง Email ถ้ามี) */}
+                        <span className="text-white/70 text-sm">
+                          {displayRole} {displayEmail ? `- ${displayEmail}` : ""}
+                        </span>
                       </div>
-                      {/* 3. บรรทัดล่าง: Role + Email (แสดง Email ถ้ามี) */}
-                      <span className="text-white/70 text-sm">
-                        {displayRole} {displayEmail ? `- ${displayEmail}` : ""}
-                      </span>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-2">
-                    {!isMe && (
-                      <>
-                        <button onClick={() => openDeleteModal(user)} className="flex items-center gap-1 bg-red-500/30 border border-red-400 text-red-200 rounded-lg px-3 py-1 text-sm hover:bg-red-500/50 transition cursor-pointer">
-                          <Ban size={16} /> remove
-                        </button>
+                    <div className="flex items-center gap-2">
+                      {!isMe && (
+                        <>
+                          <button onClick={() => openDeleteModal(user)} className="flex items-center gap-1 bg-red-500/30 border border-red-400 text-red-200 rounded-lg px-3 py-1 text-sm hover:bg-red-500/50 transition cursor-pointer">
+                            <Ban size={16} /> remove
+                          </button>
+                          <button onClick={() => openEditModal(user)} className="flex items-center gap-1 bg-white/20 border border-white/40 text-white rounded-lg px-3 py-1 text-sm hover:bg-white/30 transition cursor-pointer">
+                            <Edit size={16} /> Edit
+                          </button>
+                        </>
+                      )}
+                      {/* ถ้าเป็นตัวเอง ก็สามารถแก้ไขได้ (เพิ่มปุ่ม Edit ให้ตัวเอง) */}
+                      {isMe && (
                         <button onClick={() => openEditModal(user)} className="flex items-center gap-1 bg-white/20 border border-white/40 text-white rounded-lg px-3 py-1 text-sm hover:bg-white/30 transition cursor-pointer">
                           <Edit size={16} /> Edit
                         </button>
-                      </>
-                    )}
-                    {/* ถ้าเป็นตัวเอง ก็สามารถแก้ไขได้ (เพิ่มปุ่ม Edit ให้ตัวเอง) */}
-                    {isMe && (
-                       <button onClick={() => openEditModal(user)} className="flex items-center gap-1 bg-white/20 border border-white/40 text-white rounded-lg px-3 py-1 text-sm hover:bg-white/30 transition cursor-pointer">
-                          <Edit size={16} /> Edit
-                        </button>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+      );
 }

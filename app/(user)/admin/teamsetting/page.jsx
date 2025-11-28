@@ -15,8 +15,8 @@ function TeamModal({
   teamMembers,
   setTeamMembers,
   userOptions,
-  platforms,      
-  setPlatforms    
+  platforms,
+  setPlatforms
 }) {
   if (!isOpen) return null;
 
@@ -62,37 +62,37 @@ function TeamModal({
           <label className="block text-sm mb-2">Connected Platforms</label>
           <div className="flex gap-4">
             <label className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${platforms.includes('line') ? 'bg-[#06c755]/20 border-[#06c755]' : 'bg-[#1c1d25] border-white/30'}`}>
-                <input 
-                    type="checkbox" 
-                    className="hidden"
-                    checked={platforms.includes('line')}
-                    onChange={() => {
-                        if (platforms.includes('line')) {
-                            setPlatforms(platforms.filter(p => p !== 'line'));
-                        } else {
-                            setPlatforms([...platforms, 'line']);
-                        }
-                    }}
-                />
-                <i className="fa-brands fa-line text-[#06c755] text-xl"></i>
-                <span className="text-sm">Line OA</span>
+              <input
+                type="checkbox"
+                className="hidden"
+                checked={platforms.includes('line')}
+                onChange={() => {
+                  if (platforms.includes('line')) {
+                    setPlatforms(platforms.filter(p => p !== 'line'));
+                  } else {
+                    setPlatforms([...platforms, 'line']);
+                  }
+                }}
+              />
+              <i className="fa-brands fa-line text-[#06c755] text-xl"></i>
+              <span className="text-sm">Line OA</span>
             </label>
 
             <label className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${platforms.includes('facebook') ? 'bg-[#1877f2]/20 border-[#1877f2]' : 'bg-[#1c1d25] border-white/30'}`}>
-                <input 
-                    type="checkbox" 
-                    className="hidden"
-                    checked={platforms.includes('facebook')}
-                    onChange={() => {
-                        if (platforms.includes('facebook')) {
-                            setPlatforms(platforms.filter(p => p !== 'facebook'));
-                        } else {
-                            setPlatforms([...platforms, 'facebook']);
-                        }
-                    }}
-                />
-                <i className="fa-brands fa-facebook text-[#1877f2] text-xl"></i>
-                <span className="text-sm">Facebook</span>
+              <input
+                type="checkbox"
+                className="hidden"
+                checked={platforms.includes('facebook')}
+                onChange={() => {
+                  if (platforms.includes('facebook')) {
+                    setPlatforms(platforms.filter(p => p !== 'facebook'));
+                  } else {
+                    setPlatforms([...platforms, 'facebook']);
+                  }
+                }}
+              />
+              <i className="fa-brands fa-facebook text-[#1877f2] text-xl"></i>
+              <span className="text-sm">Facebook</span>
             </label>
           </div>
         </div>
@@ -121,9 +121,9 @@ function TeamModal({
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-medium flex items-center gap-2">
-                        {user.name}
-                        {/* แสดงป้าย You ถ้าเป็นตัวเอง */}
-                        {user.isMe && <span className="bg-purple-500 text-[10px] px-1.5 rounded text-white">You</span>}
+                      {user.name}
+                      {/* แสดงป้าย You ถ้าเป็นตัวเอง */}
+                      {user.isMe && <span className="bg-purple-500 text-[10px] px-1.5 rounded text-white">You</span>}
                     </span>
                     {/* แสดง Role จริงๆ */}
                     <span className="text-xs text-white/50">{user.role}</span>
@@ -189,35 +189,35 @@ export default function TeamSettingPage() {
   useEffect(() => {
     const storedUsers = localStorage.getItem("app_users");
     const storedCurrentUser = localStorage.getItem("currentUser");
-    
+
     let allUsers = [];
 
-    
-    if (storedCurrentUser) {
-        const me = JSON.parse(storedCurrentUser);
-        
-        // เช็คทั้ง role และ permission
-        // ถ้า me.role มีค่า ให้ใช้ role, ถ้าไม่มี ให้ลอง permission, ถ้าไม่มีอีก ให้เป็น Owner
-        const myRole = me.role || me.permission || 'Owner'; 
-        
-        // ชื่อเหมือนกัน เช็คทั้ง name และ username
-        const myName = me.name || me.username || "My Name";
 
-        allUsers.push({ id: me.id, name: myName, role: myRole, isMe: true });
+    if (storedCurrentUser) {
+      const me = JSON.parse(storedCurrentUser);
+
+      // เช็คทั้ง role และ permission
+      // ถ้า me.role มีค่า ให้ใช้ role, ถ้าไม่มี ให้ลอง permission, ถ้าไม่มีอีก ให้เป็น Owner
+      const myRole = me.role || me.permission || 'Owner';
+
+      // ชื่อเหมือนกัน เช็คทั้ง name และ username
+      const myName = me.name || me.username || "My Name";
+
+      allUsers.push({ id: me.id, name: myName, role: myRole, isMe: true });
     } else {
-        // Mock ถ้าไม่มี Login จริง
-        allUsers.push({ id: 999, name: "My Name", role: 'Owner', isMe: true });
+      // Mock ถ้าไม่มี Login จริง
+      allUsers.push({ id: 999, name: "My Name", role: 'Owner', isMe: true });
     }
 
     // 2. ใส่คนอื่นตามมา
     if (storedUsers) {
       const parsedUsers = JSON.parse(storedUsers);
       // คนอื่นใช้ field 'permission' เป็นหลักตาม UserSettingPage แต่ถ้าไม่มีก็ลองดู role
-      const others = parsedUsers.map(u => ({ 
-          id: u.id, 
-          name: u.name, 
-          role: u.permission || u.role || "Member", 
-          isMe: false 
+      const others = parsedUsers.map(u => ({
+        id: u.id,
+        name: u.name,
+        role: u.permission || u.role || "Member",
+        isMe: false
       }));
       allUsers = [...allUsers, ...others];
     }
@@ -229,7 +229,7 @@ export default function TeamSettingPage() {
   useEffect(() => {
     const storedTeams = localStorage.getItem("teams");
     if (storedTeams) {
-        setTeams(JSON.parse(storedTeams));
+      setTeams(JSON.parse(storedTeams));
     }
     setIsLoaded(true);
   }, []);
@@ -275,7 +275,7 @@ export default function TeamSettingPage() {
       name: teamName.trim(),
       desc: teamDesc.trim(),
       members: teamMembers,
-      platforms: platforms, 
+      platforms: platforms,
       createdAt: new Date().toISOString(),
     };
     setTeams((prev) => [...prev, newTeam]);
@@ -308,12 +308,12 @@ export default function TeamSettingPage() {
       prev.map((t) =>
         t.id === editTeam.id
           ? {
-              ...t,
-              name: teamName.trim(),
-              desc: teamDesc.trim(),
-              members: teamMembers,
-              platforms: platforms,
-            }
+            ...t,
+            name: teamName.trim(),
+            desc: teamDesc.trim(),
+            members: teamMembers,
+            platforms: platforms,
+          }
           : t
       )
     );
@@ -364,13 +364,16 @@ export default function TeamSettingPage() {
       />
 
       <div className="w-full h-[94vh] p-2 md:p-4">
-        <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 flex flex-col h-full">
-          <div className="relative max-w-3xl p-8">
-            <div className="flex items-center gap-3 mb-8">
-              <UsersRound className="text-white" size={52} />
+        <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 flex flex-col h-full">
+
+          <div className="relative max-w-3xl p-8 pb-0">
+            <div className="flex items-center gap-3 mb-8 ">
+              <UsersRound className="text-white p-2 bg-white/5 rounded-xl border border-white/10" size={50} />
               <div>
                 <h1 className="text-xl font-semibold text-white">Team Setting</h1>
-                <p className="text-sm text-white/70">Manage your teams and members.</p>
+                <p className="text-sm text-white/70">
+                  Manage your teams and members.
+                </p>
               </div>
             </div>
           </div>
@@ -402,8 +405,8 @@ export default function TeamSettingPage() {
                         {team.name}
                         {/* ไอคอน Platform (เอาวงกลมพื้นหลังออกตามคำขอ) */}
                         <div className="flex gap-2">
-                            {team.platforms?.includes('line') && <i className="fa-brands fa-line text-[#06c755] text-2xl"></i>}
-                            {team.platforms?.includes('facebook') && <i className="fa-brands fa-facebook text-[#1877f2] text-2xl"></i>}
+                          {team.platforms?.includes('line') && <i className="fa-brands fa-line text-[#06c755] text-2xl"></i>}
+                          {team.platforms?.includes('facebook') && <i className="fa-brands fa-facebook text-[#1877f2] text-2xl"></i>}
                         </div>
                       </h3>
                       <p className="text-sm text-gray-400 mb-2">{team.desc || "No description"}</p>

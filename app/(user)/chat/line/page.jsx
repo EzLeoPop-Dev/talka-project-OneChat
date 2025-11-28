@@ -1,8 +1,7 @@
 "use client";
 
-// -----------------------------------------------------------------------------
-// 1. Imports
-// -----------------------------------------------------------------------------
+
+// Imports
 import { useState, useEffect, useMemo } from "react"; 
 import { useSearchParams } from "next/navigation";
 
@@ -26,9 +25,9 @@ import { unifiedMockData } from '@/app/data/mockData';
 import { DEFAULT_TAGS } from "@/app/data/defaultTags";
 import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
 
-// -----------------------------------------------------------------------------
-// 2. Constants & Config
-// -----------------------------------------------------------------------------
+
+//Constants & Config
+
 const CHANNEL_FILTER = "Line"; 
 const ALL_AVAILABLE_STATUS = ["New Chat", "Open", "Pending", "Closed"];
 
@@ -51,19 +50,18 @@ const processInitialData = (data) => {
     }));
 };
 
-// -----------------------------------------------------------------------------
-// 3. Main Component
-// -----------------------------------------------------------------------------
+// Main Component
+
 export default function FacebookChatPage() {
     const searchParams = useSearchParams();
     
-    // --- States ---
+    // States
     const [chats, setChats] = useState(() => processInitialData(unifiedMockData));
     const [selectedChatId, setSelectedChatId] = useState(null);
     const selectedChat = chats.find(chat => chat.id === selectedChatId);
     const [isLoaded, setIsLoaded] = useState(false); 
 
-    // --- Panels ---
+    // Panels 
     const [isAddTagModalOpen, setIsAddTagModalOpen] = useState(false);
     const [isContactDetailsOpen, setIsContactDetailsOpen] = useState(false);
     const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
@@ -71,7 +69,7 @@ export default function FacebookChatPage() {
     const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
     const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
 
-    // --- Filters & Data ---
+    // Filters & Data
     const [activeFilter, setActiveFilter] = useState("All");
     const [activeCompanyFilter, setActiveCompanyFilter] = useState(null);
     const [activityLogs, setActivityLogs] = useState([]); 
@@ -81,9 +79,8 @@ export default function FacebookChatPage() {
     const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "Admin", avatar: "A" });
 
 
-    // -------------------------------------------------------------------------
+
     // 4. Effects (Data Loading)
-    // -------------------------------------------------------------------------
 
     // Load User
     useEffect(() => {

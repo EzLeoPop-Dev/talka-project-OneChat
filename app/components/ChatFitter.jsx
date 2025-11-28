@@ -34,7 +34,7 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
     }, []);
 
     return (
-        <div className="menubar flex flex-col md:flex-row bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] rounded-2xl p-4 md:p-5 gap-4 md:gap-7 items-center">
+        <div className="menubar flex flex-col md:flex-row bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] rounded-3xl shadow-2xl p-4 md:p-5 gap-4 md:gap-7 items-center">
 
                 {/* Search Bar */}
                 <div className="search flex items-center text-white bg-[rgba(32,41,59,0.25)] rounded-2xl py-2 px-4 w-full md:w-auto shrink-0">

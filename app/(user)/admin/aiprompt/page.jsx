@@ -15,16 +15,16 @@ export default function AiPromptsPage() {
   useEffect(() => {
     const savedPrompts = localStorage.getItem("onechat_prompts");
     if (savedPrompts) {
-        setPrompts(JSON.parse(savedPrompts));
+      setPrompts(JSON.parse(savedPrompts));
     } else {
-        setPrompts(DEFAULT_AI_PROMPTS);
+      setPrompts(DEFAULT_AI_PROMPTS);
     }
   }, []);
-  
+
   // 4. useEffect: บันทึกข้อมูลทุกครั้งที่ prompts เปลี่ยนแปลง (Add/Edit/Delete/Toggle)
   useEffect(() => {
     if (prompts.length > 0) {
-        localStorage.setItem("onechat_prompts", JSON.stringify(prompts));
+      localStorage.setItem("onechat_prompts", JSON.stringify(prompts));
     }
   }, [prompts]);
 
@@ -89,24 +89,17 @@ export default function AiPromptsPage() {
 
   return (
     <div className="w-full h-[94vh] p-4">
-      <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
+      <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-start p-8">
-          <div className="flex items-center gap-3">
-            <Bot className="text-white" size={52} />
+        <div className="relative max-w-3xl p-8 pb-0">
+          <div className="flex items-center gap-3 mb-8 ">
+            <Bot className="text-white p-2 bg-white/5 rounded-xl border border-white/10" size={50} />
             <div>
               <h1 className="text-xl font-semibold text-white">AI Prompts</h1>
               <p className="text-sm text-white/70">
                 Use AI Prompts to customize and improve how responses are
                 written.
               </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-white/80 py-2 px-4 cursor-pointer transition">
-              <BookOpenText size={24} />
-              <span className="text-sm">Learn more</span>
             </div>
           </div>
         </div>

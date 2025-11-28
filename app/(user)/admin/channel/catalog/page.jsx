@@ -70,19 +70,16 @@ export default function ChannelCatalog({ onConnectFacebook, onConnectLine }) {
 
       {/* MAIN PAGE */}
       <div className="w-full h-[94vh] p-6">
-        <div className="bg-[rgba(32,41,59,0.25)] border border-white/20 backdrop-blur-2xl rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.35)] p-10 h-full flex flex-col">
+        <div className="bg-[rgba(32,41,59,0.37)] border border-white/20 backdrop-blur-2xl rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.35)] p-10 h-full flex flex-col">
           {/* Header */}
-          <div className="flex justify-between items-start p-8">
-            <div className="flex items-center gap-4">
-              <BriefcaseBusiness
-                className="text-white drop-shadow-lg"
-                size={52}
-              />
+          <div className="flex justify-between items-start py-5 relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/5 rounded-xl border border-white/10">
+                <BriefcaseBusiness className="text-white" size={40} />
+              </div>
               <div>
-                <h1 className="text-2xl font-semibold text-white tracking-wide">
-                  Channel Catalog
-                </h1>
-                <p className="text-sm text-white/70 mt-1">
+                <h1 className="text-xl font-semibold text-white">Channel Catalog</h1>
+                <p className="text-sm text-white/60">
                   Manage your messaging channels and discover new ones to help
                   you acquire more customers.
                 </p>

@@ -4,7 +4,7 @@ import { X, Clock, Tag, User, FileText, MessageSquare, Info } from "lucide-react
 
 export default function ActivityLogPanel({ onClose, logs = [] }) {
 
-  // ฟังก์ชันแปลงเวลาให้ดูง่าย
+  // เวลา
     const formatTime = (isoString) => {
         const date = new Date(isoString);
         return date.toLocaleString('en-GB', { 
@@ -12,7 +12,7 @@ export default function ActivityLogPanel({ onClose, logs = [] }) {
         });
     };
 
-    // เลือกไอคอนตามประเภทกิจกรรม
+    // ไอคอนของเเต่ละประเภท
     const getIcon = (type) => {
         switch (type) {
             case 'tag': return <Tag size={14} className="text-yellow-400" />;
@@ -25,7 +25,7 @@ export default function ActivityLogPanel({ onClose, logs = [] }) {
     };
 
     return (
-        <div className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 flex flex-col self-start">
+        <div className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 flex flex-col self-start">
     
         <div className="flex justify-between items-center mb-5">
             <h2 className="text-white text-2xl font-semibold">Activity Log</h2>
@@ -38,9 +38,9 @@ export default function ActivityLogPanel({ onClose, logs = [] }) {
             {logs.length === 0 ? (
                 <p className="text-white/30 text-center text-sm italic mt-10">No activity recorded yet.</p>
             ) : (
-                // วนลูปแสดง Log (เรียงจากใหม่ -> เก่า)
+                // ลูปแสดง Log เรียงจากใหม่ ไป เก่า
                 [...logs].reverse().map((log) => (
-                    <div key={log.id} className="bg-white/5 hover:bg-white/10 p-3 rounded-xl transition-colors border border-white/5">
+                    <div key={log.id} className="bg-[rgba(32,41,59,0.28)] hover:bg-white/10 p-3 rounded-xl transition-colors border border-white/5">
                     
                         {/* Header: Icon + Action Type + Time */}
                         <div className="flex justify-between items-start mb-1">
@@ -62,8 +62,8 @@ export default function ActivityLogPanel({ onClose, logs = [] }) {
                             {log.detail}
                         </p>
                     
-                        {/* User (Optional: ถ้ามีระบบ Login) */}
-                        <p className="text-white/40 text-[10px] ml-8 mt-1">
+                        {/* User */}
+                        <p className="text-white/40 text-[12px] ml-8 mt-1">
                             by {log.by || "System"}
                         </p>
                     </div>

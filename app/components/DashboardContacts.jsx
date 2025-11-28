@@ -23,7 +23,7 @@ const contacts = [
 export default function DashboardContacts() {
   return (
 
-    <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-4 h-90 w-193  flex flex-col">
+    <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-4 h-90 w-193  flex flex-col">
       
       <h2 className="text-white/90 text-sm pb-3 mb-4 border-b border-white/20">
         Contacts
@@ -38,8 +38,8 @@ export default function DashboardContacts() {
            
             <div className="flex items-start gap-3"> 
               
-              <div className="relative flex-shrink-0">
-                {/* 1. Avatar */}
+              <div className="relative shrink-0">
+                {/* Avatar */}
                 <Image
                   src={contact.avatar}
                   alt={contact.name}

@@ -15,16 +15,17 @@ import {
     Building2,
     Palette,
     Image as ImageIcon,
-    Facebook,
-    MessageSquare,
     Upload,
-    Monitor,
     Sun,
     Moon,
     Users,
     LogOut,
     Check,
-    X
+    X,
+    FileClock,
+    Bell,
+    Settings,
+    Sparkles
 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,7 +42,7 @@ export default function Sidebar() {
     // User State
     const [userName, setUserName] = useState("Loading...");
     const [userRole, setUserRole] = useState("Employee");
-    const [userTeam, setUserTeam] = useState("No Team"); // ✅ State สำหรับเก็บชื่อทีม
+    const [userTeam, setUserTeam] = useState("No Team");
     const [openUserMenu, setOpenUserMenu] = useState(false);
 
     // Notification State
@@ -59,47 +60,15 @@ export default function Sidebar() {
     const themes = [
         {
             id: 'light',
-            name: 'Light',
+            name: 'Light Mode',
             icon: Sun,
-            preview: (
-                <div className="w-full h-24 rounded-lg bg-white border border-gray-200 p-3 flex flex-col gap-2">
-                    <div className="flex gap-2">
-                        <div className="w-8 h-2 bg-gray-300 rounded"></div>
-                        <div className="w-8 h-2 bg-gray-300 rounded"></div>
-                        <div className="w-8 h-2 bg-gray-300 rounded"></div>
-                    </div>
-                    <div className="flex gap-2">
-                        <div className="w-1/3 h-full bg-gray-100 rounded border border-gray-200"></div>
-                        <div className="flex-1 flex flex-col gap-1">
-                            <div className="h-2 bg-gray-200 rounded"></div>
-                            <div className="h-2 bg-gray-200 rounded"></div>
-                            <div className="h-2 bg-gray-200 rounded w-3/4"></div>
-                        </div>
-                    </div>
-                </div>
-            )
+            description: "Clean & bright interface"
         },
         {
             id: 'dark',
-            name: 'Dark',
+            name: 'Dark Mode',
             icon: Moon,
-            preview: (
-                <div className="w-full h-24 rounded-lg bg-gray-900 border border-gray-700 p-3 flex flex-col gap-2">
-                    <div className="flex gap-2">
-                        <div className="w-8 h-2 bg-gray-700 rounded"></div>
-                        <div className="w-8 h-2 bg-gray-700 rounded"></div>
-                        <div className="w-8 h-2 bg-gray-700 rounded"></div>
-                    </div>
-                    <div className="flex gap-2">
-                        <div className="w-1/3 h-full bg-gray-800 rounded border border-gray-700"></div>
-                        <div className="flex-1 flex flex-col gap-1">
-                            <div className="h-2 bg-gray-700 rounded"></div>
-                            <div className="h-2 bg-gray-700 rounded"></div>
-                            <div className="h-2 bg-gray-700 rounded w-3/4"></div>
-                        </div>
-                    </div>
-                </div>
-            )
+            description: "Easy on the eyes"
         },
     ];
 
@@ -134,11 +103,10 @@ export default function Sidebar() {
         }
     };
 
-    // ✅ ฟังก์ชันโหลดข้อมูล User และค้นหา Team (แก้ไขใหม่)
     const loadUserData = () => {
         try {
             const storedUser = localStorage.getItem("currentUser");
-            const storedTeams = localStorage.getItem("teams"); // 1. ดึงข้อมูลทีมจาก LocalStorage
+            const storedTeams = localStorage.getItem("teams");
 
             if (storedUser) {
                 const user = JSON.parse(storedUser);
@@ -147,12 +115,10 @@ export default function Sidebar() {
                 setUserName(currentName);
                 setUserRole(user.role || "Employee");
 
-                // 2. Logic ค้นหาทีม
                 let myTeamName = "No Team";
                 if (storedTeams) {
                     try {
                         const teams = JSON.parse(storedTeams);
-                        // หา Team ที่สมาชิก (members) มีชื่อของ user คนปัจจุบันอยู่
                         const foundTeam = teams.find(t =>
                             t.members && Array.isArray(t.members) && t.members.includes(currentName)
                         );
@@ -164,7 +130,7 @@ export default function Sidebar() {
                         console.error("Error parsing teams:", e);
                     }
                 }
-                setUserTeam(myTeamName); // อัปเดต State
+                setUserTeam(myTeamName);
 
             } else {
                 setUserName("Guest");
@@ -176,9 +142,8 @@ export default function Sidebar() {
     };
 
     useEffect(() => {
-        loadUserData(); // โหลดครั้งแรก
+        loadUserData();
 
-        // โหลด Background
         const savedList = localStorage.getItem("backgroundList");
         if (savedList) {
             try {
@@ -197,15 +162,11 @@ export default function Sidebar() {
 
         loadNotifications();
 
-        // Listen events
         const handleChatUpdate = () => loadNotifications();
         window.addEventListener("chat-data-updated", handleChatUpdate);
-
-        // ✅ เพิ่ม Listener: ถ้ามีการ update user หรือ storage (เช่น สร้างทีมใหม่) ให้โหลดข้อมูลใหม่
         window.addEventListener("user_updated", loadUserData);
         window.addEventListener("storage", loadUserData);
 
-        // Interval check (กันพลาด)
         const intervalId = setInterval(loadUserData, 2000);
 
         return () => {
@@ -242,7 +203,6 @@ export default function Sidebar() {
         setShowBgModal(false);
     };
 
-    // Close Dropdown Outside Click
     const notiRef = useRef(null);
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -253,219 +213,239 @@ export default function Sidebar() {
     }, []);
 
     return (
-        <div className="flex p-3">
+        <div className="flex p-3 h-screen">
+            {/* Sidebar Container with Custom Theme #BE7EC7 */}
             <div
-                className="relative w-[250px] h-[98vh] rounded-3xl pt-6 pr-1 overflow-hidden flex flex-col justify-between"
+                className="relative w-[260px] h-full rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 shadow-2xl"
                 style={{
-                    background: "linear-gradient(180deg, rgba(190, 126, 199, 0.5), rgba(139, 90, 158, 0.5))",
-                    boxShadow: "0 64px 64px -32px rgba(41, 15, 0, 0.56)",
+                    // Gradient base with a hint of #BE7EC7 (Lilac)
+                    background: "linear-gradient(165deg, rgba(35, 25, 40, 0.95) 0%, rgba(10, 8, 16, 0.98) 100%)",
+                    border: "1px solid rgba(190, 126, 199, 0.1)", // Subtle lilac border
+                    boxShadow: "0 20px 40px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.03)"
                 }}
             >
-                <div className="absolute inset-0 backdrop-blur-[160px] bg-white/5"></div>
+                {/* Decorative Glows - Tuned to #BE7EC7 */}
+                <div className="absolute top-0 left-0 w-full h-48 bg-[#BE7EC7]/10 blur-[80px] pointer-events-none"></div>
+                <div className="absolute bottom-0 right-0 w-full h-40 bg-[#BE7EC7]/5 blur-[60px] pointer-events-none"></div>
 
-                {/* Sidebar content */}
-                <div className="relative z-10 flex px-6 flex-col flex-1 overflow-y-auto custom-scrollbar">
+                {/* Content */}
+                <div className="relative z-10 flex px-5 flex-col flex-1 overflow-y-auto custom-scrollbar pt-6">
 
-                    {/* Header icons */}
-                    <div className="flex items-center justify-between mb-5">
-                        <button
-                            onClick={() => setShowNotifications(true)}
-                            className="relative p-2 rounded-xl hover:bg-white/10 transition text-white"
-                            aria-label="Open notifications"
-                        >
-                            {notifications.length > 0 && (
-                                <div className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] bg-red-500 rounded-full animate-pulse px-1">
-                                    <span className="text-[10px] font-bold text-white">{notifications.length}</span>
+                    {/* Header: Notifications & User Profile */}
+                    <div className="flex items-center justify-between mb-8 gap-3">
+                        {/* Profile Section (Compact) */}
+                        <div className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer" onClick={() => setOpenUserMenu(!openUserMenu)}>
+                            <div className="relative">
+                                <div
+                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm border border-white/10 shadow-lg shrink-0 transition-transform group-hover:scale-105"
+                                    style={{
+                                        background: `linear-gradient(135deg, ${stringToColor(userName)}, ${stringToColor(userName + 'dark')})`,
+                                    }}
+                                >
+                                    {getInitials(userName)}
                                 </div>
-                            )}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                                <path d="M18.63 13A17.89 17.89 0 0 1 18 8" />
-                                <path d="M6.26 6.26A5.94 5.94 0 0 0 6 8c0 7-3 9-3 9h18" />
-                                <path d="M18 8a6 6 0 0 0-9.33-5" />
-                            </svg>
-                        </button>
-                    </div>
-
-                    {/* ✅ User Section (Updated Layout: Team under Name) */}
-                    <div className="flex items-center justify-between gap-3 mb-8 relative">
-                        <div className="flex items-center gap-3">
-                            {/* Avatar */}
-                            <div
-                                className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg border-2 border-white/20 shadow-md shrink-0"
-                                style={{ backgroundColor: stringToColor(userName) }}
-                            >
-                                {getInitials(userName)}
+                                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-[#1a1a2e] rounded-full flex items-center justify-center">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                </div>
                             </div>
-
-                            {/* Info Column */}
-                            <div className="flex flex-col items-start gap-0.5">
-                                {/* Role (Top) */}
-                                <p className="text-[10px] text-white/50 uppercase tracking-wide leading-none">
-                                    {userRole}
-                                </p>
-
-                                {/* Name (Middle) */}
-                                <p className="text-white font-bold text-sm leading-tight truncate max-w-[100px]" title={userName}>
+                            <div className="flex flex-col min-w-0">
+                                <p className="text-white text-sm font-semibold truncate group-hover:text-[#BE7EC7] transition-colors">
                                     {userName}
                                 </p>
-
-                                {/* Team (Bottom) - Moved here */}
-                                <div className="flex items-center gap-1.5 text-[10px] text-white/80 bg-white/10 px-2 py-0.5 rounded mt-1 border border-white/5">
-                                    <Users size={10} className="opacity-70" />
-                                    <span className="truncate max-w-[80px] font-medium" title={userTeam}>{userTeam}</span>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                    <p className="text-[10px] text-white/40 truncate">
+                                        {userRole}
+                                    </p>
+                                    {/* Team Indicator */}
+                                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/10 border border-white/5 text-[9px] text-white/70">
+                                        <Users size={10} />
+                                        <span className="truncate max-w-[50px]" title={userTeam}>{userTeam}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Options Button */}
+                        {/* Notification Bell */}
                         <button
-                            onClick={() => setOpenUserMenu(!openUserMenu)}
-                            className="text-white/80 hover:text-white px-2 py-1 rounded-lg hover:bg-white/10 transition self-start mt-1"
+                            onClick={() => setShowNotifications(true)}
+                            className="relative w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-[#BE7EC7]/10 border border-white/5 hover:border-[#BE7EC7]/30 transition-all text-white/70 hover:text-[#e0b8e6]"
                         >
-                            •••
+                            <Bell size={18} />
+                            {notifications.length > 0 && (
+                                <span className="absolute top-1.5 right-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+                            )}
+                            {notifications.length > 0 && (
+                                <span className="absolute top-1.5 right-2 w-2 h-2 bg-red-500 rounded-full border border-[#1a1a2e]"></span>
+                            )}
                         </button>
-
-                        {/* Dropdown Menu */}
-                        {openUserMenu && (
-                            <div className="absolute top-14 right-0 w-48 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-2 space-y-1 z-30">
-                                <Link href="/account/profile">
-                                    <button className="w-full text-left px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white rounded-lg text-sm">My Profile</button>
-                                </Link>
-                                <Link href="/account/password">
-                                    <button className="w-full text-left px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white rounded-lg text-sm">Change Password</button>
-                                </Link>
-                                <Link href="/account/notification">
-                                    <button className="w-full text-left px-3 py-2 text-white/80 hover:bg-white/10 hover:text-white rounded-lg text-sm">Notification Settings</button>
-                                </Link>
-                                <hr className="border-white/20" />
-                                <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-400 hover:bg-red-400/20 hover:text-red-300 rounded-lg text-sm flex items-center gap-2">
-                                    <LogOut size={14} /> Logout
-                                </button>
-                            </div>
-                        )}
                     </div>
 
-                    {/* Menu */}
-                    <div className="mb-4">
-                        <p className="text-xs text-white/50 uppercase tracking-wider mb-3">Main</p>
-                        <nav className="space-y-1">
+                    {/* User Menu Dropdown */}
+                    <AnimatePresence>
+                        {openUserMenu && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                className="absolute top-16 left-5 right-5 bg-[#1E1B29] border border-white/10 rounded-2xl shadow-xl p-2 z-50 overflow-hidden"
+                            >
+                                <div className="text-xs font-semibold text-white/40 px-3 py-2 uppercase tracking-wider">Account</div>
+                                <Link href="/account/profile" className="flex items-center gap-3 px-3 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                                    <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center"><Users size={14} /></div> Profile
+                                </Link>
+                                <Link href="/account/notification" className="flex items-center gap-3 px-3 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                                    <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center"><Bell size={14} /></div> Notifications
+                                </Link>
+                                <div className="h-px bg-white/5 my-1"></div>
+                                <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                                    <div className="w-6 h-6 rounded-md bg-red-500/10 flex items-center justify-center"><LogOut size={14} /></div> Logout
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                            <SidebarLink
-                                href="/overlay"
-                                icon={<Grid3x3 size={20} />}
-                                label="Overlay"
-                                pathname={pathname}
-                            />
+                    {/* Navigation Menu */}
+                    <div className="space-y-6">
+                        <div>
+                            <p className="text-[10px] text-[#BE7EC7]/60 font-bold uppercase tracking-widest px-2 mb-2">Main Menu</p>
+                            <nav className="space-y-1">
+                                <SidebarLink
+                                    href="/tutorial"
+                                    icon={<Sparkles size={18} />}
+                                    label="Tutorial"
+                                    pathname={pathname}
+                                />
+                                <DropdownMenu
+                                    title="Chat"
+                                    icon={<MessageCircle size={18} />}
+                                    isOpen={openDropdown === "Chat"}
+                                    onToggle={() => setOpenDropdown(openDropdown === "Chat" ? null : "Chat")}
+                                    links={[
+                                        { href: "/chat/allchat", label: "All Chat" },
+                                        { href: "/chat/customchat", label: "Custom Chat" },
+                                        { href: "/chat/facebook", label: "Facebook" },
+                                        { href: "/chat/line", label: "Line" },
+                                    ]}
+                                    pathname={pathname}
+                                />
+                                <SidebarLink
+                                    href="/dashboard"
+                                    icon={<LayoutDashboard size={18} />}
+                                    label="Dashboard"
+                                    pathname={pathname}
+                                />
+                            </nav>
+                        </div>
 
-                            <DropdownMenu
-                                title="Chat"
-                                icon={<MessageCircle size={20} />}
-                                isOpen={openDropdown === "Chat"}
-                                onToggle={() => setOpenDropdown(openDropdown === "Chat" ? null : "Chat")}
-                                links={[
-                                    { href: "/chat/allchat", label: "All Chat" },
-                                    { href: "/chat/customchat", label: "Custom Chat" },
-                                    { href: "/chat/facebook", label: "Facebook" },
-                                    { href: "/chat/line", label: "Line" },
-                                ]}
-                                pathname={pathname}
-                            />
-
-                            <SidebarLink
-                                href="/dashboard"
-                                icon={<LayoutDashboard size={20} />}
-                                label="Dashboard"
-                                pathname={pathname}
-                            />
-
-                            <p className="text-xs text-white/50 uppercase tracking-wider my-3 pt-2 border-t border-white/10">Admin Zone</p>
-
-                            <SidebarLink
-                                href="/contact"
-                                icon={<Contact size={20} />}
-                                label="Contact"
-                                pathname={pathname}
-                            />
-
-                            <SidebarLink
-                                href="/ai-support"
-                                icon={<Headphones size={20} />}
-                                label="AI Agent"
-                                pathname={pathname}
-                            />
-
-                            <DropdownMenu
-                                title="Report"
-                                icon={<Megaphone size={20} />}
-                                isOpen={openDropdown === "Report"}
-                                onToggle={() => setOpenDropdown(openDropdown === "Report" ? null : "Report")}
-                                links={[
-                                    { href: "/Report/contacts", label: "Contact Report" },
-                                    { href: "/Report/conversation", label: "Conversation Report" },
-                                    { href: "/Report/message", label: "Message Report" },
-                                    { href: "/Report/responses", label: "Responses Report" },
-                                    { href: "/Report/users", label: "Users Report" },
-                                    { href: "/Report/#", label: "Ai Token Report" },
-                                ]}
-                                pathname={pathname}
-                            />
-
-                            <DropdownMenu
-                                title="Admin Panel"
-                                icon={<Shield size={20} />}
-                                isOpen={openDropdown === "Admin"}
-                                onToggle={() => setOpenDropdown(openDropdown === "Admin" ? null : "Admin")}
-                                links={[
-                                    { href: "/admin/generalinfo", label: "General Info" },
-                                    { href: "/admin/channel", label: "Connect Platform" },
-                                    { href: "/admin/usersetting", label: "User Setting" },
-                                    { href: "/admin/teamsetting", label: "Team Setting" },
-                                    { href: "/admin/tag", label: "Tag Setting" },
-                                    { href: "/admin/aiprompt", label: "AI Prompt" },
-                                ]}
-                                pathname={pathname}
-                            />
-                        </nav>
+                        <div>
+                            <p className="text-[10px] text-[#BE7EC7]/60 font-bold uppercase tracking-widest px-2 mb-2">Management</p>
+                            <nav className="space-y-1">
+                                <SidebarLink
+                                    href="/contact"
+                                    icon={<Contact size={18} />}
+                                    label="Contacts"
+                                    pathname={pathname}
+                                />
+                                <SidebarLink
+                                    href="/ai-support"
+                                    icon={<Headphones size={18} />}
+                                    label="AI Agent"
+                                    pathname={pathname}
+                                />
+                                <SidebarLink
+                                    href="/log"
+                                    icon={<FileClock size={18} />}
+                                    label="System Logs"
+                                    pathname={pathname}
+                                />
+                                <DropdownMenu
+                                    title="Reports"
+                                    icon={<Megaphone size={18} />}
+                                    isOpen={openDropdown === "Report"}
+                                    onToggle={() => setOpenDropdown(openDropdown === "Report" ? null : "Report")}
+                                    links={[
+                                        { href: "/Report/contacts", label: "Contacts" },
+                                        { href: "/Report/conversation", label: "Conversations" },
+                                        { href: "/Report/message", label: "Messages" },
+                                        { href: "/Report/responses", label: "Responses" },
+                                        { href: "/Report/users", label: "Team Performance" },
+                                    ]}
+                                    pathname={pathname}
+                                />
+                                <DropdownMenu
+                                    title="Settings"
+                                    icon={<Settings size={18} />}
+                                    isOpen={openDropdown === "Admin"}
+                                    onToggle={() => setOpenDropdown(openDropdown === "Admin" ? null : "Admin")}
+                                    links={[
+                                        { href: "/admin/generalinfo", label: "General Info" },
+                                        { href: "/admin/channel", label: "Integrations" },
+                                        { href: "/admin/usersetting", label: "Users" },
+                                        { href: "/admin/teamsetting", label: "Teams" },
+                                        { href: "/admin/tag", label: "Tags" },
+                                        { href: "/admin/aiprompt", label: "AI Config" },
+                                    ]}
+                                    pathname={pathname}
+                                />
+                            </nav>
+                        </div>
                     </div>
                 </div>
 
-                {/* Workspace Selector (Bottom) */}
-                <div className="relative z-20 p-3 space-y-4 bg-black/10 backdrop-blur-sm">
-                    <div className="relative">
-                        <div className="flex items-center justify-end mb-2 gap-2 z-20">
-                            <button onClick={() => setShowThemeModal(true)} className="p-2 rounded-md bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all hover:scale-105" title="Change Theme"><Palette size={16} /></button>
-                            <button onClick={() => setShowBgModal(true)} className="p-2 rounded-md bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all hover:scale-105" title="Change Background"><ImageIcon size={16} /></button>
+                {/* Footer: Workspace & Brand */}
+                <div className="relative z-20 p-4 mt-auto">
+                    {/* Workspace Selector */}
+                    <div className="relative mb-4">
+                        <div className="flex items-center justify-between mb-2 px-1">
+                            <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Workspace</span>
+                            <div className="flex gap-1">
+                                <button onClick={() => setShowThemeModal(true)} className="p-1.5 rounded-lg text-white/40 hover:text-[#BE7EC7] hover:bg-white/10 transition-all"><Palette size={12} /></button>
+                                <button onClick={() => setShowBgModal(true)} className="p-1.5 rounded-lg text-white/40 hover:text-[#BE7EC7] hover:bg-white/10 transition-all"><ImageIcon size={12} /></button>
+                            </div>
                         </div>
 
                         <button
                             onClick={() => setIsOpenWorkspace(!isOpenWorkspace)}
-                            className="w-full flex items-center justify-between gap-3 border border-[rgba(254,253,253,0.3)] bg-white/5 text-white px-3 py-2.5 rounded-xl shadow-sm transition-all hover:bg-white/10"
+                            className="w-full flex items-center justify-between gap-3 bg-white/5 border border-white/5 hover:border-[#BE7EC7]/30 hover:bg-white/10 text-white p-2.5 rounded-xl transition-all group"
                         >
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 flex items-center justify-center bg-red-600 rounded-lg shadow-md">
-                                    <Building2 size={16} color="white" />
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-8 h-8 flex items-center justify-center bg-gradient-to-br from-[#BE7EC7] to-[#8a55b5] rounded-lg shadow-lg group-hover:shadow-[#BE7EC7]/30 transition-all">
+                                    <Building2 size={16} className="text-white" />
                                 </div>
-                                <span className="font-medium text-sm">{selectedWorkspace}</span>
+                                <span className="font-medium text-sm truncate">{selectedWorkspace}</span>
                             </div>
-                            <ChevronDown size={16} className={`transition-transform duration-300 ${isOpenWorkspace ? "rotate-180" : ""}`} />
+                            <ChevronDown size={14} className={`text-white/50 transition-transform duration-300 ${isOpenWorkspace ? "rotate-180" : ""}`} />
                         </button>
 
-                        <div className={`absolute bottom-full mb-2 w-full bg-[#1e1e2e] border border-white/10 rounded-xl shadow-xl overflow-hidden transition-all duration-300 ${isOpenWorkspace ? "max-h-60 opacity-100" : "max-h-0 opacity-0"}`}>
-                            {workspaces.map((ws) => (
-                                <button
-                                    key={ws}
-                                    onClick={() => { setSelectedWorkspace(ws); setIsOpenWorkspace(false); }}
-                                    className={`w-full text-left px-4 py-3 text-xs font-medium transition-colors border-b border-white/5 last:border-0 ${selectedWorkspace === ws ? "bg-purple-600 text-white" : "text-white/70 hover:bg-white/10"}`}
+                        <AnimatePresence>
+                            {isOpenWorkspace && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="absolute bottom-full mb-2 w-full bg-[#1E1B29] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
                                 >
-                                    {ws}
-                                </button>
-                            ))}
-                        </div>
+                                    <div className="max-h-48 overflow-y-auto custom-scrollbar p-1">
+                                        {workspaces.map((ws) => (
+                                            <button
+                                                key={ws}
+                                                onClick={() => { setSelectedWorkspace(ws); setIsOpenWorkspace(false); }}
+                                                className={`w-full text-left px-3 py-2 text-xs font-medium rounded-lg transition-colors flex items-center justify-between ${selectedWorkspace === ws ? "bg-[#BE7EC7] text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+                                            >
+                                                {ws}
+                                                {selectedWorkspace === ws && <Check size={12} />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
-                    <div className="Logo flex items-center justify-center mt-2 gap-2 opacity-40 hover:opacity-80 transition-opacity duration-300">
-                        <Image src="/images/LogoSidebar.png" alt="Talka Logo" width={24} height={24} className="object-contain" />
-                        <h1 className="text-lg font-bold cursor-default tracking-widest">T a l k a</h1>
+
+                    {/* Logo */}
+                    <div className="flex items-center justify-center gap-2 opacity-30 hover:opacity-100 transition-opacity duration-500 py-2 border-t border-white/5">
+                        <Image src="/images/LogoSidebar.png" alt="Talka" width={20} height={20} className="object-contain grayscale hover:grayscale-0 transition-all" />
+                        <span className="text-xs font-bold tracking-[0.2em] text-white">TALKA</span>
                     </div>
                 </div>
             </div>
@@ -473,123 +453,122 @@ export default function Sidebar() {
             {/* Notification Modal */}
             <AnimatePresence>
                 {showNotifications && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-[9999]">
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowNotifications(false)}></div>
-                        <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-[400px] max-h-[70vh] bg-[#1a1a2e] border border-white/10 rounded-2xl shadow-2xl p-5 overflow-y-auto z-10">
-                            <h2 className="text-lg text-white font-semibold mb-4 text-center border-b border-white/10 pb-2">Notifications</h2>
-                            <div className="space-y-2">
-                                {notifications.map((n) => (
-                                    <div
-                                        key={n.id}
-                                        // ✅ เพิ่ม onClick ให้กดแล้วไปหน้า Chat
-                                        onClick={() => {
-                                            router.push(`/chat/allchat?id=${n.id}`);
-                                            setShowNotifications(false);
-                                        }}
-                                        className="w-full flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer border border-white/5"
-                                    >
-                                        <img src={n.profile} className="w-10 h-10 rounded-full object-cover" />
+                    <div className="fixed inset-0 z-[100] flex items-start justify-end p-4 sm:p-6 pointer-events-none">
+                        <div className="absolute inset-0 bg-black/20 pointer-events-auto" onClick={() => setShowNotifications(false)}></div>
+                        <motion.div
+                            initial={{ x: 50, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: 50, opacity: 0 }}
+                            className="relative pointer-events-auto w-full max-w-sm bg-[#1E1B29]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden mt-10 mr-2"
+                        >
+                            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/5">
+                                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                                    <Bell size={14} className="text-[#BE7EC7]" /> Notifications
+                                </h3>
+                                <button onClick={() => setShowNotifications(false)} className="text-white/40 hover:text-white"><X size={16} /></button>
+                            </div>
+                            <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-2 space-y-1">
+                                {notifications.length > 0 ? notifications.map((n) => (
+                                    <div key={n.id} onClick={() => { router.push(`/chat/allchat?id=${n.id}`); setShowNotifications(false); }} className="group flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-white/5">
+                                        <img src={n.profile} className="w-10 h-10 rounded-full object-cover border border-white/10" />
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-white text-sm font-medium truncate">{n.name}</p>
-                                                <span className="text-[10px] text-white/40">{n.time}</span>
+                                            <div className="flex justify-between items-baseline mb-0.5">
+                                                <p className="text-sm font-medium text-white truncate">{n.name}</p>
+                                                <span className="text-[10px] text-white/30">{n.time}</span>
                                             </div>
-                                            <p className="text-white/60 text-xs line-clamp-2 mt-0.5">{n.message}</p>
-                                            <div className="mt-1 flex items-center gap-1 text-[10px] text-white/40">
-                                                <span>via {n.platform}</span>
+                                            <p className="text-xs text-white/60 line-clamp-1 group-hover:text-white/80 transition-colors">{n.message}</p>
+                                            <div className="mt-1.5 flex items-center gap-1.5">
+                                                <span className={`text-[9px] px-1.5 py-0.5 rounded border ${n.platform === 'Line' ? 'bg-[#06c755]/10 border-[#06c755]/20 text-[#06c755]' : 'bg-blue-500/10 border-blue-500/20 text-blue-400'}`}>
+                                                    {n.platform}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                )) : (
+                                    <div className="p-8 text-center text-white/30 text-xs">No new notifications</div>
+                                )}
                             </div>
-                            <button onClick={() => setShowNotifications(false)} className="w-full mt-4 py-2 bg-white/10 text-white text-sm rounded-lg hover:bg-white/20 transition">Close</button>
                         </motion.div>
-                    </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
 
-            {/* Background Modal */}
+            {/* Background & Theme Modals (Optimized) */}
             <AnimatePresence>
-                {showBgModal && (
-                    <motion.div key="bg-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-[9999]">
-                        <motion.div onClick={() => setShowBgModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-                        <motion.div key="bg-modal" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-[600px] max-h-[80vh] bg-[#1e1e2e] border border-white/10 rounded-2xl shadow-2xl p-6 overflow-y-auto z-20" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-bold text-white">Choose Background</h3>
-                                <button onClick={() => setShowBgModal(false)} className="text-white/50 hover:text-white"><X size={24} /></button>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4">
-                                {bgList.map((bg, idx) => (
-                                    <div key={idx} className={`relative rounded-xl overflow-hidden cursor-pointer border-2 aspect-video group ${selectedBg === bg ? "border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)]" : "border-transparent hover:border-white/30"}`}>
-                                        <img src={bg} alt={`bg-${idx}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <button onClick={() => applyBackground(bg)} className="bg-white text-black px-3 py-1 rounded-full text-xs font-bold transform translate-y-2 group-hover:translate-y-0 transition-transform">Apply</button>
+                {(showBgModal || showThemeModal) && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => { setShowBgModal(false); setShowThemeModal(false); }} />
+                        {showBgModal && (
+                            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative bg-[#1E1B29] border border-white/10 p-6 rounded-3xl shadow-2xl max-w-2xl w-full">
+                                <h3 className="text-xl font-bold text-white mb-4">Select Wallpaper</h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    {bgList.map((bg, idx) => (
+                                        <div key={idx} onClick={() => applyBackground(bg)} className={`aspect-video rounded-xl border-2 overflow-hidden cursor-pointer relative group ${selectedBg === bg ? "border-[#BE7EC7]" : "border-transparent hover:border-white/20"}`}>
+                                            <img src={bg} className="w-full h-full object-cover" />
+                                            {selectedBg === bg && <div className="absolute inset-0 bg-[#BE7EC7]/20 flex items-center justify-center"><Check className="text-white drop-shadow-md" /></div>}
                                         </div>
-                                        {selectedBg === bg && <div className="absolute top-2 right-2 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center"><Check size={12} color="white" /></div>}
-                                    </div>
-                                ))}
-                                <label className="flex flex-col items-center justify-center gap-2 rounded-xl bg-white/5 border-2 border-dashed border-white/20 cursor-pointer hover:bg-white/10 transition hover:border-white/40 aspect-video">
-                                    <Upload className="w-6 h-6 text-white/50" />
-                                    <span className="text-xs text-white/50 font-medium">Upload Image</span>
-                                    <input type="file" accept="image/*" onChange={handleUploadBg} className="hidden" />
-                                </label>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Theme Modal */}
-            <AnimatePresence>
-                {showThemeModal && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-[9999] p-4">
-                        <motion.div onClick={() => setShowThemeModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-                        <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-md bg-[#1e1e2e] border border-white/10 rounded-2xl shadow-2xl p-6 z-20" onClick={(e) => e.stopPropagation()}>
-                            <h3 className="text-xl font-bold text-white mb-6">Choose Theme</h3>
-                            <div className="space-y-3">
-                                {themes.map((theme) => {
-                                    const Icon = theme.icon;
-                                    const isSelected = selectedTheme === theme.id;
-                                    return (
-                                        <button key={theme.id} onClick={() => handleThemeChange(theme.id)} className={`w-full relative p-4 rounded-xl border-2 transition-all text-left group flex items-center gap-4 ${isSelected ? "border-purple-500 bg-purple-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"}`}>
-                                            <div className={`p-2 rounded-lg ${isSelected ? "bg-purple-500 text-white" : "bg-white/10 text-white/50 group-hover:text-white"}`}><Icon size={20} /></div>
-                                            <div>
-                                                <h4 className={`font-semibold ${isSelected ? "text-white" : "text-white/70 group-hover:text-white"}`}>{theme.name}</h4>
-                                                <p className="text-xs text-white/40">Switch to {theme.name.toLowerCase()} mode</p>
+                                    ))}
+                                    <label className="aspect-video rounded-xl border-2 border-dashed border-white/10 hover:border-white/30 hover:bg-white/5 flex flex-col items-center justify-center cursor-pointer transition">
+                                        <Upload size={20} className="text-white/50 mb-2" />
+                                        <span className="text-xs text-white/50">Upload</span>
+                                        <input type="file" accept="image/*" onChange={handleUploadBg} className="hidden" />
+                                    </label>
+                                </div>
+                            </motion.div>
+                        )}
+                        {showThemeModal && (
+                            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative bg-[#1E1B29] border border-white/10 p-6 rounded-3xl shadow-2xl max-w-md w-full">
+                                <h3 className="text-xl font-bold text-white mb-4">Appearance</h3>
+                                <div className="space-y-3">
+                                    {themes.map(t => (
+                                        <button key={t.id} onClick={() => handleThemeChange(t.id)} className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all ${selectedTheme === t.id ? "bg-[#BE7EC7] border-[#BE7EC7] text-white" : "bg-white/5 border-white/5 text-white/60 hover:bg-white/10"}`}>
+                                            <t.icon size={24} />
+                                            <div className="text-left">
+                                                <p className="font-bold text-sm">{t.name}</p>
+                                                <p className="text-xs opacity-70">{t.description}</p>
                                             </div>
-                                            {isSelected && <div className="absolute top-1/2 -translate-y-1/2 right-4 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center"><Check size={12} color="white" /></div>}
+                                            {selectedTheme === t.id && <Check size={18} className="ml-auto" />}
                                         </button>
-                                    );
-                                })}
-                            </div>
-                        </motion.div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
-
         </div>
     );
 }
 
-// --------------------------------------------------------
-// ✅ Helper Components
-// --------------------------------------------------------
+// Reusable Components with Enhanced Styles
 
 function SidebarLink({ href, icon, label, pathname }) {
     const isActive = pathname.startsWith(href);
     return (
         <Link
             href={href}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${isActive
-                ? "bg-white/20 text-white shadow-lg"
-                : "text-white/70 hover:bg-white/10 hover:text-white"
+            className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 overflow-hidden ${isActive
+                    ? "text-white shadow-[0_0_20px_rgba(190,126,199,0.2)]"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
                 }`}
         >
-            {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-purple-400 rounded-r-full shadow-[0_0_10px_#a855f7]"></div>}
-            <div className={`transition-transform duration-200 ${isActive ? "scale-110 text-purple-200" : "group-hover:scale-110"}`}>
+            {/* Active Background with Gradient */}
+            {isActive && (
+                <div className="absolute inset-0 bg-gradient-to-r from-[#BE7EC7]/80 to-[#8a55b5]/80 opacity-100 z-0"></div>
+            )}
+
+            {/* Hover Glow (Only when inactive) */}
+            {!isActive && (
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity z-0"></div>
+            )}
+
+            <div className={`relative z-10 transition-transform duration-300 ${isActive ? "scale-110" : "group-hover:scale-110"}`}>
                 {icon}
             </div>
-            <span className="text-sm font-medium">{label}</span>
+            <span className={`relative z-10 text-sm font-medium tracking-wide ${isActive ? "font-semibold" : ""}`}>{label}</span>
+
+            {/* Active Indicator Dot */}
+            {isActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white shadow-lg z-10"></div>}
         </Link>
     );
 }
@@ -598,52 +577,56 @@ function DropdownMenu({ title, icon, links, isOpen, onToggle, pathname }) {
     const isParentActive = links.some(link => pathname === link.href);
 
     return (
-        <div>
+        <div className="mb-1">
             <button
                 onClick={onToggle}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isOpen || isParentActive
-                    ? "bg-white/10 text-white"
-                    : "text-white/70 hover:bg-white/10 hover:text-white"
+                className={`w-full group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${isOpen || isParentActive
+                        ? "bg-white/10 text-white"
+                        : "text-white/60 hover:text-white hover:bg-white/5"
                     }`}
             >
-                <div className={`transition-transform duration-200 ${isOpen || isParentActive ? "scale-110 text-purple-300" : "group-hover:scale-110"}`}>
+                <div className={`transition-transform duration-300 ${isOpen || isParentActive ? "text-[#BE7EC7] scale-110" : "group-hover:scale-110"}`}>
                     {icon}
                 </div>
-                <span className="text-sm font-medium">{title}</span>
+                <span className={`text-sm font-medium tracking-wide ${isParentActive ? "text-white" : ""}`}>{title}</span>
                 <ChevronDown
-                    size={16}
-                    className={`ml-auto transition-transform duration-300 opacity-50 ${isOpen ? "rotate-180 opacity-100" : ""
-                        }`}
+                    size={14}
+                    className={`ml-auto transition-transform duration-300 opacity-50 ${isOpen ? "rotate-180 opacity-100 text-[#BE7EC7]" : ""}`}
                 />
             </button>
 
-            <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"
-                    }`}
-            >
-                <div className="ml-4 border-l border-white/10 pl-2 space-y-1 py-1">
-                    {links.map((link) => {
-                        const isLinkActive = pathname === link.href;
-                        return (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={`block w-full text-left px-4 py-2 rounded-lg text-sm transition-all duration-200 ${isLinkActive
-                                    ? "bg-white/15 text-white font-medium translate-x-1"
-                                    : "text-white/60 hover:bg-white/5 hover:text-white hover:translate-x-1"
-                                    }`}
-                            >
-                                {link.label}
-                            </Link>
-                        )
-                    })}
-                </div>
-            </div>
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="ml-5 pl-3 border-l border-white/10 space-y-1 py-1 mt-1">
+                            {links.map((link) => {
+                                const isLinkActive = pathname === link.href;
+                                return (
+                                    <Link
+                                        key={link.href}
+                                        href={link.href}
+                                        className={`block w-full text-left px-3 py-2 rounded-lg text-xs transition-all duration-200 ${isLinkActive
+                                                ? "bg-[#BE7EC7]/20 text-[#e0b8e6] font-medium translate-x-1"
+                                                : "text-white/50 hover:text-white hover:translate-x-1"
+                                            }`}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                )
+                            })}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
 
-// Utils
 function getInitials(name) {
     if (!name) return "?";
     const parts = name.trim().split(" ");

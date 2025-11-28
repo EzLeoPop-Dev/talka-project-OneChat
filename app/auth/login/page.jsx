@@ -61,7 +61,7 @@ export default function LoginPage() {
       );
     }
 
-   
+
     setTimeout(() => setPopup((p) => ({ ...p, show: false })), 2000);
 
     if (isSuccess) {
@@ -75,7 +75,7 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex justify-center items-center min-h-screen">
-   
+
       <motion.div
         className="absolute inset-0 z-0"
         animate={{
@@ -99,8 +99,8 @@ export default function LoginPage() {
         transition={{ duration: 14, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
       />
 
-   
-      <div className="flex w-[1280px] h-[800px] bg-[rgba(152,85,120,0.4)] border border-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
+
+      <div className="flex w-[1100px] h-[700px] bg-[rgba(152,85,120,0.4)] border border-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
         <div className="flex flex-col justify-center pl-16 w-1/2 text-white relative z-10 font-inter">
           <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">WELCOME</h1>
           <h2 className="text-[32px] font-light mb-4 text-[#E8E3F2]">To Talka</h2>
@@ -113,7 +113,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-     
+
         <div className="flex justify-center items-center w-1/2 z-20">
           <div className="w-[460px] bg-gradient-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
             <h1 className="text-[28px] font-semibold text-gray-800 mb-1">LOGIN</h1>
@@ -152,7 +152,7 @@ export default function LoginPage() {
                 {errorPass && <p className="absolute text-red-500 text-xs left-3 top-full mt-1">โปรดกรอกรหัสผ่าน</p>}
               </div>
 
-      
+
               <div className="pt-2 space-y-3">
                 <button type="submit" style={{ background: "#5d3d99", backgroundImage: "linear-gradient(140deg, rgba(93, 61, 153, 1) 0%, rgba(201, 117, 173, 1) 100%)" }} className="w-full text-white py-2.5 rounded-full hover:opacity-90 transition shadow-md">เข้าสู่ระบบ</button>
                 <Link href="/auth/register">
@@ -160,7 +160,7 @@ export default function LoginPage() {
                 </Link>
               </div>
 
-         
+
               <div className="flex flex-col items-center mt-4">
                 <div className="flex items-center w-full mb-4">
                   <div className="grow h-px bg-gray-300" />
@@ -178,7 +178,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-     
+
       <AnimatePresence>
         {popup.show && (
           <motion.div
@@ -197,7 +197,7 @@ export default function LoginPage() {
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
-             
+
               <button
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors hover:rotate-90 duration-300"
                 onClick={closePopup}
@@ -206,13 +206,12 @@ export default function LoginPage() {
               </button>
 
               <motion.div
-         
+
                 className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg mb-2
-                ${
-                  popup.success
+                ${popup.success
                     ? "bg-green-100 text-green-600"
                     : "bg-red-100 text-red-500"
-                }`}
+                  }`}
               >
                 {popup.success ? (
                   <CheckCircle size={48} strokeWidth={2.5} />
@@ -221,7 +220,7 @@ export default function LoginPage() {
                 )}
               </motion.div>
 
-             
+
               <div className="space-y-2 z-10">
                 <h2 className="text-2xl font-bold tracking-tight text-gray-800">
                   {popup.success ? "Success!" : "Failed"}

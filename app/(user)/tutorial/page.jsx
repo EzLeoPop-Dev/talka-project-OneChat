@@ -197,20 +197,19 @@ export default function Page() {
 
     return (
         // Container หลัก: เปลี่ยนจากกล่อง fix ความสูง เป็นเต็มจอและใช้สีเข้ม
-        <div className="h-fit w-full overflow-hidden backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl text-white relative flex flex-col items-center py-10">
+        <div className="h-fit w-full overflow-hidden bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl text-white relative flex flex-col items-center py-10">
 
             <div className="fixed inset-0 pointer-events-none">
 
                 <div className="absolute inset-0 bg-[radial-linear(ellipse_at_top,var(--tw-gradient-stops))] from-[#1a1c3a] via-[#090a1a] to-[#000000]"></div>
-
+                {/* ดาว */}
                 <div className='absolute inset-0 opacity-40' style={{
                     backgroundImage: 'radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 5px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px), radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 4px)',
                     backgroundSize: '550px 550px, 350px 350px, 250px 250px',
                     backgroundPosition: '0 0, 40px 60px, 130px 270px',
-                    animation: 'starsAnimation 120s linear infinite' // เพิ่ม keyframe ใน global css ถ้าต้องการให้เคลื่อนที่
+                    animation: 'starsAnimation 120s linear infinite'
                 }}></div>
 
-                {/* 3. Central Epic Glow (แสงออร่าหลัง Carousel) */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[150px] mix-blend-screen z-0"></div>
                 <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] mix-blend-screen z-0"></div>
             </div>
@@ -223,14 +222,14 @@ export default function Page() {
                 className="text-center mb-10 relative z-10 mt-10"
             >
                 <motion.div variants={textVariants} className="inline-block relative">
-                    {/* เพิ่มไอคอน Sparkles เล็กๆ */}
+                    {/* ไอคอน */}
                     <Sparkles className="absolute -top-6 -left-8 w-8 h-8 text-purple-400 animate-pulse" />
                     <h1 className="text-[50px] font-bold leading-tight">
-                        <span className="block bg-clip-text text-transparent bg-linear-to-r from-white via-purple-200 to-blue-200 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+                        <span className="block bg-clip-text text-transparent bg-linear-to-r from-white via-purple-200 to-blue-200 drop-shadow-[0_0_15px_rgba(190, 126, 199, 0.8)]">
                             Welcome, "{userName}"
                         </span>
                         <span className="block text-[28px] font-light text-purple-200/80 mt-2">
-                            เข้าสู่โลกแห่ง Talka
+                            ยินดีต้อนรับเข้าสู้ Talka
                         </span>
                     </h1>
                     <Sparkles className="absolute -bottom-4 -right-8 w-6 h-6 text-blue-400 animate-pulse delay-75" />
@@ -318,7 +317,7 @@ export default function Page() {
                                             rotateY: 0,
                                             z: 40,
                                             // เพิ่มเงาแสงสีม่วงเวลา Hover
-                                            boxShadow: "0 50px 120px -20px rgba(168, 85, 247, 0.5), 0 0 30px rgba(255,255,255,0.2) inset",
+                                            boxShadow: "0 1px 100px -20px rgba(190, 126, 199, 0.8), 0 0 30px rgba(255,255,255,0.2) inset",
                                             transition: {
                                                 duration: 0.5,
                                                 type: "spring",

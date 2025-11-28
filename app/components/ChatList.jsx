@@ -5,7 +5,7 @@ export default function ChatList({ chats, onSelectChat, selectedId, availableTag
     return (
         <div className="w-[425px] flex items-center mt-3">
             <div className="w-[425px] max-w-md h-[85vh]">
-                <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
+                <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
                     <h1 className="text-white text-2xl font-bold mb-6">Chat List</h1>
 
                     {(!chats || chats.length === 0) && (

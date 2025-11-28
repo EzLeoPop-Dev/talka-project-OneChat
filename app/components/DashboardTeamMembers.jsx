@@ -47,13 +47,13 @@ export default function DashboardTeamMembers() {
   const isDataPage = currentItems.length > 0;
 
   return (
-    <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-4 h-90 w-193 ml-3 flex flex-col">
+    <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-4 h-90 w-193 ml-3 flex flex-col">
       
-      <h2 className="text-white/90 text-sm pb-3 mb-4 border-b border-white/20 flex-shrink-0">
+      <h2 className="text-white/90 text-sm pb-3 mb-4 border-b border-white/20 shrink-0">
         Team Members
       </h2>
       
-      <div className="flex flex-col gap-y-4 flex-grow">
+      <div className="flex flex-col gap-y-4 grow">
         
         <div className={`transition-opacity duration-150 ${isChanging ? 'opacity-0' : 'opacity-100'}`}>
           
@@ -61,7 +61,7 @@ export default function DashboardTeamMembers() {
             <div key={member.id} className="flex items-center justify-between w-full py-4"> 
               
               <div className="flex items-center gap-3">
-                <div className="relative flex-shrink-0">
+                <div className="relative shrink-0">
                   <Image
                     src={member.avatar}
                     alt={member.name}
@@ -90,7 +90,7 @@ export default function DashboardTeamMembers() {
         
       </div>
 
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/20 flex-shrink-0 ">
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/20 shrink-0 ">
         <div className="flex items-center gap-3">
           
           <span 

@@ -142,7 +142,7 @@ export default function ProfilePage() {
                             </button>
                             <button
                                 type="submit"
-                                className="flex items-center gap-2 rounded-xl px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg shadow-purple-600/20 hover:shadow-purple-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                className="flex items-center gap-2 rounded-xl px-8 py-3 bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg shadow-purple-600/20 hover:shadow-purple-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
                             >
                                 <Save size={18} />
                                 Save Changes

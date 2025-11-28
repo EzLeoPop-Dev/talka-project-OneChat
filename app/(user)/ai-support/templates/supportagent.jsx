@@ -44,7 +44,7 @@ function InputItem({ label, type = "text", placeholder }) {
   return (
     <div>
       <p className="text-xs text-white/50">{label}</p>
-      <div className="bg-[rgba(255,255,255,0.22)] shadow-2xl rounded-2xl py-2 px-4 mt-1">
+      <div className="bg-[rgba(32,41,59,0.37)] shadow-2xl rounded-2xl py-2 px-4 mt-1">
         <input
           type={type}
           className="text-white outline-0 bg-transparent w-full"

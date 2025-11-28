@@ -27,9 +27,7 @@ import { unifiedMockData } from '@/app/data/mockData';
 import { DEFAULT_TAGS } from "@/app/data/defaultTags";
 import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
 
-// -----------------------------------------------------------------------------
-// 2. Constants & Initial Data Helper
-// -----------------------------------------------------------------------------
+
 const ALL_AVAILABLE_STATUS = ["New Chat", "Open", "Pending", "Closed"];
 
 const DEFAULT_AI_AGENTS = [

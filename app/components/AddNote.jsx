@@ -31,7 +31,7 @@ const formatDate = (isoString) => {
 };
 
 return (
-    <div className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 flex flex-col self-start overflow-hidden">
+    <div className="w-[320px] max-h-[85vh] mt-3 ml-3 bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 flex flex-col self-start overflow-hidden">
 
     <h2 className="text-white text-2xl font-semibold mb-4 shrink-0">Add Note</h2>
 

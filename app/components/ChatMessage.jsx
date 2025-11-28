@@ -119,7 +119,7 @@ export default function ChatMessage({ chat, availableAgents, onSelectAiAgent, ai
     };
 
     return (
-        <div className="flex-1 min-w-0 h-[85vh] bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-5 mt-3 ml-3 flex flex-col">
+        <div className="flex-1 min-w-0 h-[85vh] bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-5 mt-3 ml-3 flex flex-col">
             
             {/* --- Header --- */}
             <div className="flex flex-wrap md:flex-nowrap items-center justify-between border-b border-white/20 pb-3 mb-3 gap-3 relative">

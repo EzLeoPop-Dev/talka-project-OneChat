@@ -59,12 +59,12 @@ export default function GeneralInfoPage() {
 
   return (
     <div className="w-full h-[94vh] p-2 md:p-4">
-      <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
+      <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
         
         {/* Header */}
         <div className="relative max-w-3xl p-8 pb-0">
-          <div className="flex items-center gap-3 mb-8">
-            <Home className="text-white" size={48} />
+          <div className="flex items-center gap-3 mb-8 ">
+            <Home className="text-white p-2 bg-white/5 rounded-xl border border-white/10" size={50}  />
             <div>
               <h1 className="text-xl font-semibold text-white">General Info</h1>
               <p className="text-sm text-white/70">
@@ -73,6 +73,8 @@ export default function GeneralInfoPage() {
             </div>
           </div>
         </div>
+
+        
 
         <div className="border-t border-white/28 mx-7 mb-4"></div>
         

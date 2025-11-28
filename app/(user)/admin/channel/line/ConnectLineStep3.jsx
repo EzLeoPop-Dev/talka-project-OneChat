@@ -6,7 +6,7 @@ export default function ConnectLineStep3({ onBack, onComplete }) {
   const [checked, setChecked] = useState(false);
 
   return (
-    <div className="w-full h-[94vh] bg-[rgba(32,41,59,0.25)] border border-white/20 backdrop-blur-xl rounded-3xl shadow-2xl p-10 text-white relative">
+    <div className="w-full h-[94vh] bg-[rgba(32,41,59,0.37)] border border-white/20 backdrop-blur-xl rounded-3xl shadow-2xl p-10 text-white relative">
       <button
         onClick={onBack}
         className="absolute top-6 left-6 flex items-center gap-2 text-white/70 hover:text-white transition-colors cursor-pointer"

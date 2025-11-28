@@ -21,7 +21,7 @@ function ToggleCircle({ enabled, setEnabled }) {
 /*--------------------ACTION ITEM BLOCK--------------------*/
 function ActionItem({ title, enabled, setEnabled, placeholder }) {
   return (
-    <div className="mb-5 bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="mb-5 rgba(32,41,59,0.37) border border-white/10 rounded-xl p-4 backdrop-blur-sm">
       {/* header */}
       <div className="flex items-center justify-between">
         <p className="font-medium text-white">{title}</p>
