@@ -42,7 +42,11 @@ export default function Sidebar() {
     // User State
     const [userName, setUserName] = useState("Loading...");
     const [userRole, setUserRole] = useState("Employee");
+<<<<<<< HEAD
     const [userTeam, setUserTeam] = useState("No Team");
+=======
+    const [userTeam, setUserTeam] = useState("No Team"); 
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     const [openUserMenu, setOpenUserMenu] = useState(false);
 
     // Notification State
@@ -56,7 +60,7 @@ export default function Sidebar() {
     const [showThemeModal, setShowThemeModal] = useState(false);
     const [selectedTheme, setSelectedTheme] = useState("dark");
 
-    // --- Themes Data ---
+    // Themes Data
     const themes = [
         {
             id: 'light',
@@ -103,6 +107,10 @@ export default function Sidebar() {
         }
     };
 
+<<<<<<< HEAD
+=======
+    // ฟังก์ชันโหลดข้อมูล User และค้นหา Team
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     const loadUserData = () => {
         try {
             const storedUser = localStorage.getItem("currentUser");
@@ -130,7 +138,11 @@ export default function Sidebar() {
                         console.error("Error parsing teams:", e);
                     }
                 }
+<<<<<<< HEAD
                 setUserTeam(myTeamName);
+=======
+                setUserTeam(myTeamName); 
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
 
             } else {
                 setUserName("Guest");
@@ -164,6 +176,10 @@ export default function Sidebar() {
 
         const handleChatUpdate = () => loadNotifications();
         window.addEventListener("chat-data-updated", handleChatUpdate);
+<<<<<<< HEAD
+=======
+
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
         window.addEventListener("user_updated", loadUserData);
         window.addEventListener("storage", loadUserData);
 
@@ -247,11 +263,34 @@ export default function Sidebar() {
                                 <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-[#1a1a2e] rounded-full flex items-center justify-center">
                                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                 </div>
+<<<<<<< HEAD
+=======
+                            )}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                                <path d="M18.63 13A17.89 17.89 0 0 1 18 8" />
+                                <path d="M6.26 6.26A5.94 5.94 0 0 0 6 8c0 7-3 9-3 9h18" />
+                                <path d="M18 8a6 6 0 0 0-9.33-5" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* User Section */}
+                    <div className="flex items-center justify-between gap-3 mb-8 relative">
+                        <div className="flex items-center gap-3">
+                            {/* Avatar */}
+                            <div
+                                className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg border-2 border-white/20 shadow-md shrink-0"
+                                style={{ backgroundColor: stringToColor(userName) }}
+                            >
+                                {getInitials(userName)}
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                             </div>
                             <div className="flex flex-col min-w-0">
                                 <p className="text-white text-sm font-semibold truncate group-hover:text-[#BE7EC7] transition-colors">
                                     {userName}
                                 </p>
+<<<<<<< HEAD
                                 <div className="flex items-center gap-1.5 mt-0.5">
                                     <p className="text-[10px] text-white/40 truncate">
                                         {userRole}
@@ -261,6 +300,13 @@ export default function Sidebar() {
                                         <Users size={10} />
                                         <span className="truncate max-w-[50px]" title={userTeam}>{userTeam}</span>
                                     </div>
+=======
+
+                                {/* Team (Bottom) */}
+                                <div className="flex items-center gap-1.5 text-[10px] text-white/80 bg-white/10 px-2 py-0.5 rounded mt-1 border border-white/5">
+                                    <Users size={10} className="opacity-70" />
+                                    <span className="truncate max-w-20 font-medium" title={userTeam}>{userTeam}</span>
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                                 </div>
                             </div>
                         </div>
@@ -453,6 +499,7 @@ export default function Sidebar() {
             {/* Notification Modal */}
             <AnimatePresence>
                 {showNotifications && (
+<<<<<<< HEAD
                     <div className="fixed inset-0 z-[100] flex items-start justify-end p-4 sm:p-6 pointer-events-none">
                         <div className="absolute inset-0 bg-black/20 pointer-events-auto" onClick={() => setShowNotifications(false)}></div>
                         <motion.div
@@ -471,6 +518,23 @@ export default function Sidebar() {
                                 {notifications.length > 0 ? notifications.map((n) => (
                                     <div key={n.id} onClick={() => { router.push(`/chat/allchat?id=${n.id}`); setShowNotifications(false); }} className="group flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-white/5">
                                         <img src={n.profile} className="w-10 h-10 rounded-full object-cover border border-white/10" />
+=======
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-9999">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowNotifications(false)}></div>
+                        <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-[400px] max-h-[70vh] bg-[#1a1a2e] border border-white/10 rounded-2xl shadow-2xl p-5 overflow-y-auto z-10">
+                            <h2 className="text-lg text-white font-semibold mb-4 text-center border-b border-white/10 pb-2">Notifications</h2>
+                            <div className="space-y-2">
+                                {notifications.map((n) => (
+                                    <div
+                                        key={n.id}
+                                        onClick={() => {
+                                            router.push(`/chat/allchat?id=${n.id}`);
+                                            setShowNotifications(false);
+                                        }}
+                                        className="w-full flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer border border-white/5"
+                                    >
+                                        <img src={n.profile} className="w-10 h-10 rounded-full object-cover" />
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-baseline mb-0.5">
                                                 <p className="text-sm font-medium text-white truncate">{n.name}</p>
@@ -495,6 +559,7 @@ export default function Sidebar() {
 
             {/* Background & Theme Modals (Optimized) */}
             <AnimatePresence>
+<<<<<<< HEAD
                 {(showBgModal || showThemeModal) && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                         <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => { setShowBgModal(false); setShowThemeModal(false); }} />
@@ -526,6 +591,54 @@ export default function Sidebar() {
                                             <div className="text-left">
                                                 <p className="font-bold text-sm">{t.name}</p>
                                                 <p className="text-xs opacity-70">{t.description}</p>
+=======
+                {showBgModal && (
+                    <motion.div key="bg-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-9999">
+                        <motion.div onClick={() => setShowBgModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+                        <motion.div key="bg-modal" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-[600px] max-h-[80vh] bg-[#1e1e2e] border border-white/10 rounded-2xl shadow-2xl p-6 overflow-y-auto z-20" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-white">Choose Background</h3>
+                                <button onClick={() => setShowBgModal(false)} className="text-white/50 hover:text-white"><X size={24} /></button>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4">
+                                {bgList.map((bg, idx) => (
+                                    <div key={idx} className={`relative rounded-xl overflow-hidden cursor-pointer border-2 aspect-video group ${selectedBg === bg ? "border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)]" : "border-transparent hover:border-white/30"}`}>
+                                        <img src={bg} alt={`bg-${idx}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button onClick={() => applyBackground(bg)} className="bg-white text-black px-3 py-1 rounded-full text-xs font-bold transform translate-y-2 group-hover:translate-y-0 transition-transform">Apply</button>
+                                        </div>
+                                        {selectedBg === bg && <div className="absolute top-2 right-2 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center"><Check size={12} color="white" /></div>}
+                                    </div>
+                                ))}
+                                <label className="flex flex-col items-center justify-center gap-2 rounded-xl bg-white/5 border-2 border-dashed border-white/20 cursor-pointer hover:bg-white/10 transition hover:border-white/40 aspect-video">
+                                    <Upload className="w-6 h-6 text-white/50" />
+                                    <span className="text-xs text-white/50 font-medium">Upload Image</span>
+                                    <input type="file" accept="image/*" onChange={handleUploadBg} className="hidden" />
+                                </label>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Theme Modal */}
+            <AnimatePresence>
+                {showThemeModal && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-9999 p-4">
+                        <motion.div onClick={() => setShowThemeModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+                        <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-md bg-[#1e1e2e] border border-white/10 rounded-2xl shadow-2xl p-6 z-20" onClick={(e) => e.stopPropagation()}>
+                            <h3 className="text-xl font-bold text-white mb-6">Choose Theme</h3>
+                            <div className="space-y-3">
+                                {themes.map((theme) => {
+                                    const Icon = theme.icon;
+                                    const isSelected = selectedTheme === theme.id;
+                                    return (
+                                        <button key={theme.id} onClick={() => handleThemeChange(theme.id)} className={`w-full relative p-4 rounded-xl border-2 transition-all text-left group flex items-center gap-4 ${isSelected ? "border-purple-500 bg-purple-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"}`}>
+                                            <div className={`p-2 rounded-lg ${isSelected ? "bg-purple-500 text-white" : "bg-white/10 text-white/50 group-hover:text-white"}`}><Icon size={20} /></div>
+                                            <div>
+                                                <h4 className={`font-semibold ${isSelected ? "text-white" : "text-white/70 group-hover:text-white"}`}>{theme.name}</h4>
+                                                <p className="text-xs text-white/40">Switch to {theme.name.toLowerCase()} mode</p>
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                                             </div>
                                             {selectedTheme === t.id && <Check size={18} className="ml-auto" />}
                                         </button>
@@ -540,7 +653,11 @@ export default function Sidebar() {
     );
 }
 
+<<<<<<< HEAD
 // Reusable Components with Enhanced Styles
+=======
+// Helper Components
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
 
 function SidebarLink({ href, icon, label, pathname }) {
     const isActive = pathname.startsWith(href);

@@ -6,7 +6,6 @@ export default function Page() {
     const router = useRouter()
 
     const handleGoBack = () => {
-        // ลองกลับหน้าก่อนหน้า ถ้าไม่ได้ให้ไปหน้าแรก
         if (window.history.length > 1) {
             router.back()
         } else {

@@ -78,7 +78,7 @@ export default function AiAssistantPanel({ onClose, availableAgents = [] }) {
         // Container หลัก
         <div className="w-[320px] h-[550px] max-h-[80vh] bg-[rgba(32,41,59,0.95)] border border-[rgba(254,253,253,0.3)] backdrop-blur-xl rounded-3xl shadow-2xl flex flex-col overflow-hidden absolute bottom-24 right-5 z-40 animate-fade-in-up origin-bottom-right">
 
-        {/* --- Header: เลือก Model --- */}
+        {/* Header: เลือก Model */}
         <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5 relative">
         
             <div className="relative" ref={dropdownRef}>
@@ -133,7 +133,7 @@ export default function AiAssistantPanel({ onClose, availableAgents = [] }) {
             </button>
         </div>
 
-        {/* --- Chat Area --- */}
+        {/* Chat Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-black/10">
             {messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -169,7 +169,7 @@ export default function AiAssistantPanel({ onClose, availableAgents = [] }) {
             <div ref={messagesEndRef} />
         </div>
 
-        {/* --- Input Area --- */}
+        {/* Input Area */}
         <div className="p-3 bg-white/5 border-t border-white/10">
             <div className="flex items-center gap-2 bg-black/20 rounded-xl px-3 py-2 border border-white/5 focus-within:border-purple-500/50 transition">
             <input

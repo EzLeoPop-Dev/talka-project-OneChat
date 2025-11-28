@@ -55,28 +55,26 @@ export default function SendToBoardModal({ onClose, chat }) {
 
             localStorage.setItem("app_board_chats", JSON.stringify(boardChats));
 
-            // ✅ เพิ่มส่วนนี้: บันทึก Activity Log
+            // บันทึก Activity Log
             const savedLogs = localStorage.getItem("onechat_activity_logs");
             const activityLogs = savedLogs ? JSON.parse(savedLogs) : [];
             const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
             
-            // หาชื่อ List ที่ส่งไป เพื่อใส่ใน Log ให้ละเอียด
             const targetCol = columns.find(c => c.id === selectedColId);
             const colName = targetCol ? targetCol.title : "Board";
 
             const newLog = {
                 id: Date.now(),
                 chatId: chat.id,
-                type: 'status', // ใช้ type 'status' จะได้ขึ้นไอคอนนาฬิกาสีฟ้า หรือจะใช้ type อื่นก็ได้
+                type: 'status', 
                 detail: `Moved chat to list: "${colName}"`,
                 timestamp: new Date().toISOString(),
-                by: currentUser.username || currentUser.name || "Admin" // ดึงชื่อ User
+                by: currentUser.username || currentUser.name || "Admin" 
             };
 
             activityLogs.push(newLog);
             localStorage.setItem("onechat_activity_logs", JSON.stringify(activityLogs));
 
-            // ส่งสัญญาณให้หน้าอื่น (และหน้า Activity Log) รีเฟรชข้อมูล
             window.dispatchEvent(new Event("storage"));
             
             setTimeout(() => {

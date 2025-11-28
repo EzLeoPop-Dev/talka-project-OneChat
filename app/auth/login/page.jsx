@@ -99,8 +99,13 @@ export default function LoginPage() {
         transition={{ duration: 14, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
       />
 
+<<<<<<< HEAD
 
       <div className="flex w-[1100px] h-[700px] bg-[rgba(152,85,120,0.4)] border border-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
+=======
+   
+      <div className="flex w-7xl h-[800px] bg-[rgba(152,85,120,0.4)] border border-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
         <div className="flex flex-col justify-center pl-16 w-1/2 text-white relative z-10 font-inter">
           <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">WELCOME</h1>
           <h2 className="text-[32px] font-light mb-4 text-[#E8E3F2]">To Talka</h2>
@@ -115,7 +120,7 @@ export default function LoginPage() {
 
 
         <div className="flex justify-center items-center w-1/2 z-20">
-          <div className="w-[460px] bg-gradient-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
+          <div className="w-[460px] bg-linear-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
             <h1 className="text-[28px] font-semibold text-gray-800 mb-1">LOGIN</h1>
             <p className="text-gray-500 mb-8 text-sm">เข้าสู่ระบบเพื่อใช้งาน</p>
 

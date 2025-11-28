@@ -1,34 +1,34 @@
-import Image from "next/image";
-
-const contacts = [
-  {
-    id: 1,
-    name: "เฮียจิน",
-    status: "Hello",
-    avatar: "/Customer.jpg", 
-    tag: "VIP",
-    isOnline: true,
-    avatarSize: 45,
-    channel: "Facebook",
-    manager: {
-      name: "Andrew Smith",
-      avatar: "/Manager.jpg", 
-      avatarSize: 30 
-    }
-  },
-];
-
-// ------------------------------------
+"use client";
+import React, { useState, useEffect } from "react";
 
 export default function DashboardContacts() {
+  const [contacts, setContacts] = useState([]);
+
+  // ดึงข้อมูลจาก Local Storage
+  useEffect(() => {
+    const savedData = localStorage.getItem("onechat_data");
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setContacts(parsedData); 
+      } catch (error) {
+        console.error("Error loading contacts:", error);
+      }
+    }
+  }, []);
   return (
 
+<<<<<<< HEAD
     <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-4 h-90 w-193  flex flex-col">
+=======
+    <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-4 h-90 w-195 flex flex-col">
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
       
       <h2 className="text-white/90 text-sm pb-3 mb-4 border-b border-white/20">
         Contacts
       </h2>
       
+<<<<<<< HEAD
       <div className="flex flex-col gap-y-4">
         
         {contacts.map((contact) => (
@@ -51,43 +51,66 @@ export default function DashboardContacts() {
               
               
               <div className="flex flex-col">
+=======
+      <div className="flex flex-col gap-y-4 overflow-y-auto custom-scrollbar pr-2">
+        {contacts.length === 0 ? (
+            <p className="text-white/40 text-xs text-center py-4">No contacts found.</p>
+        ) : (
+            contacts.map((contact) => (
+            <div key={contact.id} className="flex items-center justify-between w-full">
                 
+                <div className="flex items-start gap-3"> 
                 
-                <p className="text-white font-medium text-sm">{contact.name}</p>
+                {/* 1. Avatar */}
+                <div className="relative shrink-0 w-[45px] h-[45px]">
+                    {contact.imgUrl ? (
+                        <img
+                            src={contact.imgUrl}
+                            alt={contact.name}
+                            className="w-full h-full rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-linear-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {contact.name?.charAt(0) || "?"}
+                        </div>
+                    )}
+                </div>
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                 
-                <div className="flex items-center gap-2">
-                  
-                  {contact.channel === 'Facebook' && <i className="fa-brands fa-facebook text-blue-500 text-xs"></i>}
-                  
-                  {contact.status && (
-                    <p className="text-white/60 text-xs">{contact.status}</p>
-                  )}
+                {/* 2. Info */}
+                <div className="flex flex-col">
+                    <p className="text-white font-medium text-sm">{contact.name}</p>
+                    
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        
+                        {/* Channel Icon */}
+                        {contact.channel === 'Facebook' && <i className="fa-brands fa-facebook text-blue-500 text-xs"></i>}
+                        {contact.channel === 'Line' && <i className="fa-brands fa-line text-green-500 text-xs"></i>}
+                        
+                        {/* Status (ดึงจาก field status ใน data) */}
+                        <p className="text-white/60 text-[10px]">{contact.status}</p>
 
-                  {contact.tag && (
-                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-yellow-500/30 text-yellow-300">
-                      {contact.tag}
-                    </span>
-                  )}
+                        {/* Tags (รองรับทั้ง Array และ String) */}
+                        {(() => {
+                            let tagsArray = [];
+                            if (Array.isArray(contact.tags)) tagsArray = contact.tags;
+                            else if (contact.tags) tagsArray = [contact.tags];
+
+                            return tagsArray.slice(0, 2).map((tag, idx) => (
+                                <span key={idx} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                                    {tag}
+                                </span>
+                            ));
+                        })()}
+                    </div>
+                    
                 </div>
-                
                 </div>
+
+
             </div>
-
-            {contact.manager && (
-              <div className="flex items-center gap-2">
-                <Image
-                  src={contact.manager.avatar}
-                  alt={contact.manager.name}
-                  width={contact.manager.avatarSize}
-                  height={contact.manager.avatarSize}
-                  className="rounded-full"
-                />
-                <p className="text-white/80 font-medium text-sm">{contact.manager.name}</p>
-              </div>
-            )}
-
-          </div>
-        ))}
+            ))
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,6 @@
 import { Info, X, Trash2, Edit, UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
 
-// Modal สำหรับ Add / Edit Team
 function TeamModal({
   isOpen,
   title,
@@ -121,11 +120,15 @@ function TeamModal({
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-medium flex items-center gap-2">
+<<<<<<< HEAD
                       {user.name}
                       {/* แสดงป้าย You ถ้าเป็นตัวเอง */}
                       {user.isMe && <span className="bg-purple-500 text-[10px] px-1.5 rounded text-white">You</span>}
+=======
+                        {user.name}
+                        {user.isMe && <span className="bg-purple-500 text-[10px] px-1.5 rounded text-white">You</span>}
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                     </span>
-                    {/* แสดง Role จริงๆ */}
                     <span className="text-xs text-white/50">{user.role}</span>
                   </div>
                 </label>
@@ -147,7 +150,7 @@ function TeamModal({
   );
 }
 
-// Modal ยืนยันการลบทีม
+// Confirm Delete Team Modal
 function ConfirmDeleteModal({ isOpen, teamName, onClose, onConfirm }) {
   if (!isOpen) return null;
   return (
@@ -185,13 +188,23 @@ export default function TeamSettingPage() {
 
   const [userOptions, setUserOptions] = useState([]);
 
-  //  โหลด User Options (รวมตัวเอง + คนอื่น)
   useEffect(() => {
     const storedUsers = localStorage.getItem("app_users");
     const storedCurrentUser = localStorage.getItem("currentUser");
 
     let allUsers = [];
 
+<<<<<<< HEAD
+=======
+    
+    if (storedCurrentUser) {
+        const me = JSON.parse(storedCurrentUser);
+        
+        
+        const myRole = me.role || me.permission || 'Owner'; 
+        
+        const myName = me.name || me.username || "My Name";
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
 
     if (storedCurrentUser) {
       const me = JSON.parse(storedCurrentUser);
@@ -205,19 +218,30 @@ export default function TeamSettingPage() {
 
       allUsers.push({ id: me.id, name: myName, role: myRole, isMe: true });
     } else {
+<<<<<<< HEAD
       // Mock ถ้าไม่มี Login จริง
       allUsers.push({ id: 999, name: "My Name", role: 'Owner', isMe: true });
+=======
+        allUsers.push({ id: 999, name: "My Name", role: 'Owner', isMe: true });
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     }
 
-    // 2. ใส่คนอื่นตามมา
     if (storedUsers) {
       const parsedUsers = JSON.parse(storedUsers);
+<<<<<<< HEAD
       // คนอื่นใช้ field 'permission' เป็นหลักตาม UserSettingPage แต่ถ้าไม่มีก็ลองดู role
       const others = parsedUsers.map(u => ({
         id: u.id,
         name: u.name,
         role: u.permission || u.role || "Member",
         isMe: false
+=======
+      const others = parsedUsers.map(u => ({ 
+          id: u.id, 
+          name: u.name, 
+          role: u.permission || u.role || "Member", 
+          isMe: false 
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
       }));
       allUsers = [...allUsers, ...others];
     }
@@ -403,7 +427,6 @@ export default function TeamSettingPage() {
                     <div>
                       <h3 className="text-lg font-semibold flex items-center gap-3">
                         {team.name}
-                        {/* ไอคอน Platform (เอาวงกลมพื้นหลังออกตามคำขอ) */}
                         <div className="flex gap-2">
                           {team.platforms?.includes('line') && <i className="fa-brands fa-line text-[#06c755] text-2xl"></i>}
                           {team.platforms?.includes('facebook') && <i className="fa-brands fa-facebook text-[#1877f2] text-2xl"></i>}

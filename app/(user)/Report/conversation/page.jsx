@@ -13,7 +13,6 @@ import {
 import { Info, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { calenderData } from "../../../data/calenderData";
 
-// react-date-range
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
@@ -28,7 +27,7 @@ const Button = ({ children, className = "", ...props }) => (
   </button>
 );
 
-// Card Wrapper
+// Card 
 const Card = ({ title, children }) => (
   <div className="border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 text-white relative z-10">
     <h2 className="text-lg font-semibold mb-4">{title}</h2>
@@ -36,7 +35,7 @@ const Card = ({ title, children }) => (
   </div>
 );
 
-// Table Wrapper
+// Table 
 const Table = ({ headers, children }) => (
   <div className="overflow-x-auto">
     <table className="min-w-full border-collapse text-gray-300 text-sm">
@@ -54,7 +53,7 @@ const Table = ({ headers, children }) => (
   </div>
 );
 
-// Pagination (ไม่มี Items per page)
+// Pagination
 const PaginationControls = ({
   totalItems,
   itemsPerPage,
@@ -249,7 +248,7 @@ export default function ConversationsReport() {
         </ResponsiveContainer>
       </div>
 
-      {/* 🔹 Conversations Closed */}
+      {/* Conversations Closed */}
       <div className={`${blockClass}`}>
         <h2 className="text-lg font-semibold flex items-center mb-4">
           Conversations Closed <InfoTooltip text="จำนวนแชทที่ถูกปิดหรือจบการสนทนาในช่วงเวลาที่เลือก" />
@@ -265,7 +264,7 @@ export default function ConversationsReport() {
         </ResponsiveContainer>
       </div>
 
-      {/* ✅ Conversations List (ไม่มีข้อมูล) */}
+      {/* Conversations List */}
       <Card title="Conversations List">
         <Table
           headers={[

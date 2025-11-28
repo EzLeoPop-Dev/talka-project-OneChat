@@ -10,11 +10,11 @@ export default function PageTransition({ children }) {
     const [overlayKey, setOverlayKey] = useState(pathname);
 
     useEffect(() => {
-        setShowChildren(false); // เริ่ม overlay
+        setShowChildren(false); 
         const timer = setTimeout(() => {
-            setOverlayKey(pathname); // เปลี่ยน content
+            setOverlayKey(pathname);
             setShowChildren(true);
-        }, 600); // ระยะเวลา overlay
+        }, 600); 
         return () => clearTimeout(timer);
     }, [pathname]);
 
@@ -42,7 +42,7 @@ export default function PageTransition({ children }) {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }} // ลดเวลา fade-in
+                        transition={{ duration: 0.3, ease: "easeInOut" }} 
                         className="relative z-10"
                     >
                         {children}

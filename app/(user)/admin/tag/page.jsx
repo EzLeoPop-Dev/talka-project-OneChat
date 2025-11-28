@@ -28,7 +28,7 @@ export default function TagsPage() {
     "#00CED1", "#1E90FF", "#BA55D3", "#FF69B4",
   ];
 
-  // สร้างแท็กใหม่
+  // Create Tag
   const handleCreateTag = () => {
     if (!newTag.name || !newTag.color)
       return alert("Please fill name and color");
@@ -37,29 +37,26 @@ export default function TagsPage() {
     setIsModalOpen(false);
   };
 
-  // เปิด modal ลบ
+  // Open delete modal
   const handleOpenDeleteModal = (tag) => {
     setDeleteTag(tag);
   };
 
-  // ปิด modal ลบ
+  // Close delete modal
   const handleCloseDeleteModal = () => {
     setDeleteTag(null);
   };
 
-  //แก้ไขฟังก์ชันนี้: ลบ Tag ออกจากรายการหลัก และไล่ลบออกจากแชททั้งหมดด้วย
   const confirmDeleteTag = () => {
     if (!deleteTag) return;
 
-    // 1. ลบออกจากรายการ Tags หลัก (UI ปัจจุบัน)
     const updatedTags = tags.filter((t) => t.id !== deleteTag.id);
     setTags(updatedTags);
 
-    // 2. อัปเดต LocalStorage ของ Tags ทันที (เพื่อให้แน่ใจว่ามันหายไปจริงๆ)
     localStorage.setItem("onechat_tags", JSON.stringify(updatedTags));
 
-    // 3. เพิ่มส่วนนี้: ไปไล่ลบ Tag นี้ออกจากแชททุกอันในระบบ
     try {
+<<<<<<< HEAD
       const savedChats = localStorage.getItem("app_board_chats");
       if (savedChats) {
         const chats = JSON.parse(savedChats);
@@ -72,24 +69,35 @@ export default function TagsPage() {
         // บันทึกแชทเวอร์ชันอัปเดตกลับลงไป
         localStorage.setItem("app_board_chats", JSON.stringify(updatedChats));
       }
+=======
+        const savedChats = localStorage.getItem("app_board_chats");
+        if (savedChats) {
+            const chats = JSON.parse(savedChats);
+            const updatedChats = chats.map(chat => ({
+                ...chat,
+                tags: (chat.tags || []).filter(tName => tName !== deleteTag.name)
+            }));
+            
+            localStorage.setItem("app_board_chats", JSON.stringify(updatedChats));
+        }
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     } catch (e) {
       console.error("Error removing tag from chats:", e);
     }
 
-    // 4. ส่งสัญญาณบอกทุกหน้าว่าข้อมูลเปลี่ยนแล้ว
     window.dispatchEvent(new Event("storage"));
 
     handleCloseDeleteModal();
   };
 
-  // แก้ไขสีแท็ก
+  // Edit Tag Color
   const handleEditColor = (id, color) => {
     setTags(tags.map((tag) => (tag.id === id ? { ...tag, color } : tag)));
     setIsEditModalOpen(false);
     setEditTag(null);
   };
 
-  // 1. Load Tags
+  // Load Tags
   useEffect(() => {
     const savedTags = localStorage.getItem("onechat_tags");
     if (savedTags) {
@@ -101,7 +109,7 @@ export default function TagsPage() {
     setIsLoaded(true);
   }, []);
 
-  // 2. Save Tags (เมื่อมีการเพิ่ม/แก้ไข)
+  // Save Tags (when added/edited)
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem("onechat_tags", JSON.stringify(tags));

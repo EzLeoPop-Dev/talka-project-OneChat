@@ -37,7 +37,7 @@ return (
 
     <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
         
-        {/* --- INPUT SECTION --- */}
+        {/* INPUT SECTION */}
         <div className="flex flex-col gap-4">
             <div>
             <label className="text-white/60 text-xs mb-1 block">Title</label>
@@ -68,7 +68,7 @@ return (
             Save Note
         </button>
 
-        {/* --- LIST SECTION  --- */}
+        {/* LIST SECTION */}
         <div className="border-t border-white/10 pt-4">
             <h3 className="text-white/80 font-semibold mb-3 text-sm">
                 History ({currentNotes.length})

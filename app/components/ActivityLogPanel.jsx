@@ -4,7 +4,11 @@ import { X, Clock, Tag, User, FileText, MessageSquare, Info } from "lucide-react
 
 export default function ActivityLogPanel({ onClose, logs = [] }) {
 
+<<<<<<< HEAD
   // เวลา
+=======
+  // แปลงเวลา
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     const formatTime = (isoString) => {
         const date = new Date(isoString);
         return date.toLocaleString('en-GB', { 
@@ -12,7 +16,11 @@ export default function ActivityLogPanel({ onClose, logs = [] }) {
         });
     };
 
+<<<<<<< HEAD
     // ไอคอนของเเต่ละประเภท
+=======
+    // ไอคอน Activity Log 
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     const getIcon = (type) => {
         switch (type) {
             case 'tag': return <Tag size={14} className="text-yellow-400" />;
@@ -63,7 +71,11 @@ export default function ActivityLogPanel({ onClose, logs = [] }) {
                         </p>
                     
                         {/* User */}
+<<<<<<< HEAD
                         <p className="text-white/40 text-[12px] ml-8 mt-1">
+=======
+                        <p className="text-white/40 text-[10px] ml-8 mt-1">
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                             by {log.by || "System"}
                         </p>
                     </div>

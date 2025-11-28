@@ -105,7 +105,11 @@ export default function RegisterPage() {
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       />
 
+<<<<<<< HEAD
       <div className="flex w-[1100px] h-[800px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
+=======
+      <div className="flex w-7xl h-[800px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
         <div className="flex flex-col justify-center pl-16 w-1/2 text-white relative z-10 font-inter">
           <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">
             JOIN US

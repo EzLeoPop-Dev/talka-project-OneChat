@@ -16,9 +16,8 @@ export default function UserSettingPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // --- 1. โหลดข้อมูลและ Normalization ---
+  // โหลดข้อมูล
   useEffect(() => {
-    // 1.1 ดึงข้อมูล Current User
     let storedCurrentUser = localStorage.getItem("currentUser");
     let parsedCurrentUser = null;
 
@@ -28,41 +27,50 @@ export default function UserSettingPage() {
       console.error("Error parsing user", e);
     }
 
-    //  Checkpoint: ถ้าไม่มีข้อมูลจริงๆ ค่อยสร้าง Mockup
+    // ถ้าไม่มีข้อมูล ค่อยสร้าง Mockup
     if (!parsedCurrentUser) {
       parsedCurrentUser = {
         id: 999,
         name: "Somchai Admin",
-        username: "Somchai Admin", // เพิ่มกันเหนียว
+        username: "Somchai Admin", 
         email: "me@example.com",
         permission: "Owner",
         role: "Owner"
       };
       localStorage.setItem("currentUser", JSON.stringify(parsedCurrentUser));
     } else {
-      //  ซ่อมแซมข้อมูลเก่า (ถ้าขาด field ไหนให้เติม)
       let isUpdated = false;
 
       if (!parsedCurrentUser.id) { parsedCurrentUser.id = 999; isUpdated = true; }
       if (!parsedCurrentUser.name) { parsedCurrentUser.name = parsedCurrentUser.username || "My Name"; isUpdated = true; }
       if (!parsedCurrentUser.permission) { parsedCurrentUser.permission = parsedCurrentUser.role || "Owner"; isUpdated = true; }
       if (!parsedCurrentUser.role) { parsedCurrentUser.role = parsedCurrentUser.permission; isUpdated = true; }
+<<<<<<< HEAD
 
       //  เพิ่ม: ถ้าไม่มี email ให้ตั้งค่าเริ่มต้น (เพื่อให้แสดงผลตามที่ขอ)
       if (!parsedCurrentUser.email) {
         parsedCurrentUser.email = "me@example.com";
         isUpdated = true;
+=======
+      
+      if (!parsedCurrentUser.email) { 
+          parsedCurrentUser.email = "me@example.com"; 
+          isUpdated = true; 
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
       }
 
       if (isUpdated) {
         localStorage.setItem("currentUser", JSON.stringify(parsedCurrentUser));
       }
     }
+<<<<<<< HEAD
 
     // อัปเดต State Current User
+=======
+    
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     setCurrentUser(parsedCurrentUser);
 
-    // ✅ 1.2 เพิ่มส่วนนี้: โหลด Users อื่นๆ จาก LocalStorage ด้วย (แก้ปัญหา User หาย)
     const storedUsers = localStorage.getItem("app_users");
     if (storedUsers) {
       try {
@@ -73,13 +81,11 @@ export default function UserSettingPage() {
       }
     }
 
-    // โหลดเสร็จแล้วค่อยอนุญาตให้ Save
     setIsLoaded(true);
   }, []);
 
-  // --- 2. บันทึกข้อมูล ---
+  // บันทึกข้อมูล
   useEffect(() => {
-    // จะบันทึกก็ต่อเมื่อโหลดข้อมูลเสร็จแล้วเท่านั้น (ป้องกันการบันทึกทับด้วย array ว่าง)
     if (isLoaded) {
       localStorage.setItem("app_users", JSON.stringify(users));
     }
@@ -87,7 +93,7 @@ export default function UserSettingPage() {
 
   const displayUsers = currentUser ? [currentUser, ...users] : users;
 
-  // ... (Modal Functions คงเดิม)
+  
   const openAddModal = () => {
     setMode("add");
     setEmail("");
@@ -99,7 +105,7 @@ export default function UserSettingPage() {
     setMode("edit");
     setEditId(user.id);
     setEmail(user.email);
-    setRole(user.permission || user.role); // ใช้ permission หรือ role
+    setRole(user.permission || user.role); 
     setIsOpen(true);
   };
 
@@ -121,7 +127,7 @@ export default function UserSettingPage() {
       name: email.split("@")[0],
       email,
       permission: role,
-      role: role, // เพิ่ม field role ให้เหมือนกัน
+      role: role, 
     };
     setUsers((prev) => [...prev, newUser]);
     setIsOpen(false);
@@ -129,12 +135,15 @@ export default function UserSettingPage() {
 
   const handleEditUser = () => {
     if (currentUser && editId === currentUser.id) {
-      // Update ทั้ง permission และ role เพื่อความชัวร์
-      const updatedMe = { ...currentUser, email: email, permission: role, role: role }; // อัปเดต email ด้วย
+      const updatedMe = { ...currentUser, email: email, permission: role, role: role }; 
       setCurrentUser(updatedMe);
       localStorage.setItem("currentUser", JSON.stringify(updatedMe));
+<<<<<<< HEAD
       // ส่ง event บอก component อื่น (เช่น sidebar) ว่า user เปลี่ยนแล้ว
       window.dispatchEvent(new Event("user_updated"));
+=======
+      window.dispatchEvent(new Event("user_updated")); 
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     } else {
       setUsers((prev) =>
         prev.map((user) =>
@@ -228,15 +237,26 @@ export default function UserSettingPage() {
               </div>
             </div>
 
+<<<<<<< HEAD
             <div className="flex flex-col gap-3 w-full overflow-y-auto px-2 pb-4">
               {displayUsers.map((user) => {
                 const isMe = currentUser && user.id === currentUser.id;
+=======
+          <div className="flex flex-col gap-3 w-full overflow-y-auto px-2 pb-4">
+            {displayUsers.map((user) => {
+              const isMe = currentUser && user.id === currentUser.id;
+              
+              const displayName = user.name || user.username || "Unknown User";
+              const displayRole = user.permission || user.role || "No Role";
+              const displayEmail = user.email; 
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
 
                 //  Logic การดึงชื่อและ Role ที่ฉลาดขึ้น
                 const displayName = user.name || user.username || "Unknown User";
                 const displayRole = user.permission || user.role || "No Role";
                 const displayEmail = user.email;
 
+<<<<<<< HEAD
                 return (
                   <div
                     key={user.id}
@@ -256,6 +276,16 @@ export default function UserSettingPage() {
                           {displayRole} {displayEmail ? `- ${displayEmail}` : ""}
                         </span>
                       </div>
+=======
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="text-white font-semibold">{displayName}</span>
+                        {isMe && <span className="text-[10px] bg-purple-500 text-white px-2 py-0.5 rounded-full">You</span>}
+                      </div>
+                      <span className="text-white/70 text-sm">
+                        {displayRole} {displayEmail ? `- ${displayEmail}` : ""}
+                      </span>
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -274,8 +304,19 @@ export default function UserSettingPage() {
                         <button onClick={() => openEditModal(user)} className="flex items-center gap-1 bg-white/20 border border-white/40 text-white rounded-lg px-3 py-1 text-sm hover:bg-white/30 transition cursor-pointer">
                           <Edit size={16} /> Edit
                         </button>
+<<<<<<< HEAD
                       )}
                     </div>
+=======
+                      </>
+                    )}
+                    {/* Edit Me Button */}
+                    {isMe && (
+                        <button onClick={() => openEditModal(user)} className="flex items-center gap-1 bg-white/20 border border-white/40 text-white rounded-lg px-3 py-1 text-sm hover:bg-white/30 transition cursor-pointer">
+                          <Edit size={16} /> Edit
+                        </button>
+                    )}
+>>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                   </div>
                 );
               })}

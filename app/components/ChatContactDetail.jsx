@@ -30,8 +30,6 @@ export default function ContactDetails({ onClose, contact, onUpdateContact }) {
     );
   }
 
-  const isVip = contact.tags && contact.tags.includes("VIP");
-
   const handleSave = (field) => {
     if (typeof onUpdateContact !== 'function') {
       console.error("onUpdateContact is not a function. Check page.jsx");
@@ -75,13 +73,8 @@ export default function ContactDetails({ onClose, contact, onUpdateContact }) {
         
         <div>
           <h3 className="text-white font-semibold text-lg truncate">{contact.name}</h3>
-          {isVip && (
-            <span className="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full">
-              VIP
-            </span>
-          )}
+          
         </div>
-        <i className="fa-brands fa-facebook text-blue-500 ml-auto text-xl"></i>
       </div>
 
       {/* Contact Fields */}
@@ -116,7 +109,7 @@ export default function ContactDetails({ onClose, contact, onUpdateContact }) {
           )}
         </div>
 
-        {/* --- Email Address --- */}
+        {/* Email Address */}
         <div>
           <label className="text-white/50 text-[10px] uppercase tracking-wider mb-1 block">Email Address</label>
           {isEditingEmail ? (
@@ -144,7 +137,7 @@ export default function ContactDetails({ onClose, contact, onUpdateContact }) {
           )}
         </div>
 
-        {/* --- Country --- */}
+        {/* Country */}
         <div>
           <label className="text-white/50 text-[10px] uppercase tracking-wider mb-1 block">Country</label>
           {isEditingCountry ? (

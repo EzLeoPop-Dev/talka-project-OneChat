@@ -13,12 +13,11 @@ import {
 import { Info, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { calenderData } from "../../../data/calenderData";
 
-// react-date-range
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-// ✅ ปุ่ม Custom
+// ปุ่ม Custom
 const Button = ({ children, className = "", ...props }) => (
   <button
     className={`px-3 py-2 rounded-md border border-[rgba(254,253,253,0.5)] text-white hover:bg-[rgba(255,255,255,0.1)] transition ${className}`}
@@ -28,7 +27,7 @@ const Button = ({ children, className = "", ...props }) => (
   </button>
 );
 
-// ✅ Card Wrapper
+// Card 
 const Card = ({ title, children }) => (
   <div className="border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 text-white relative z-10">
     <h2 className="text-lg font-semibold mb-4">{title}</h2>
@@ -36,7 +35,7 @@ const Card = ({ title, children }) => (
   </div>
 );
 
-// ✅ Table Wrapper
+// Table 
 const Table = ({ headers, children }) => (
   <div className="overflow-x-auto">
     <table className="min-w-full border-collapse text-gray-300 text-sm">
@@ -54,7 +53,7 @@ const Table = ({ headers, children }) => (
   </div>
 );
 
-// ✅ Pagination Component
+// Pagination Component
 const PaginationControls = ({ totalItems, itemsPerPage, currentPage, setCurrentPage }) => {
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
@@ -86,7 +85,7 @@ const PaginationControls = ({ totalItems, itemsPerPage, currentPage, setCurrentP
   );
 };
 
-// ✅ Tooltip Info
+// Tooltip Info
 const InfoTooltip = ({ text }) => {
   const [show, setShow] = useState(false);
   return (
@@ -106,7 +105,6 @@ const InfoTooltip = ({ text }) => {
 };
 
 export default function ContactsReport() {
-  // ใช้ react-date-range
   const defaultStart = calenderData?.[calenderData.length - 5]?.date || "2025-10-26";
   const defaultEnd = calenderData?.[calenderData.length - 1]?.date || "2025-11-02";
 
@@ -168,7 +166,7 @@ export default function ContactsReport() {
 
   return (
     <div className="bg-[rgba(32,41,59,0.25)] backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-white space-y-8">
-      {/* 🔹 Calendar */}
+      {/* Calendar */}
       <div className="relative mb-6" ref={calendarRef}>
         <Button
           onClick={() => setShowCalendar((s) => !s)}
@@ -198,7 +196,7 @@ export default function ContactsReport() {
         )}
       </div>
 
-      {/* 🔹 Contacts Overview */}
+      {/* Contacts Overview */}
       <div className={`${blockClass} w-full`}>
         <h2 className="text-lg font-semibold flex items-center mb-4">
           Contacts Overview <InfoTooltip text="จำนวนผู้ติดต่อทั้งหมดในช่วงเวลาที่เลือก" />
@@ -234,7 +232,7 @@ export default function ContactsReport() {
         </ResponsiveContainer>
       </div>
 
-      {/* 🔹 Contacts Added Chart */}
+      {/* Contacts Added Chart */}
       <div className={`${blockClass} w-full`}>
         <h2 className="text-lg font-semibold flex items-center mb-4">
           Contacts Added <InfoTooltip text="จำนวนผู้ติดต่อที่ถูกเพิ่มใหม่ในช่วงเวลาที่เลือก" />
@@ -250,7 +248,7 @@ export default function ContactsReport() {
         </ResponsiveContainer>
       </div>
 
-      {/* 🔹 Contacts Deleted Chart */}
+      {/* Contacts Deleted Chart */}
       <div className={`${blockClass} w-full`}>
         <h2 className="text-lg font-semibold flex items-center mb-4">
           Contacts Deleted <InfoTooltip text="จำนวนผู้ติดต่อที่ถูกลบออกในช่วงเวลาที่เลือก" />
@@ -266,7 +264,7 @@ export default function ContactsReport() {
         </ResponsiveContainer>
       </div>
 
-      {/* ✅ Contact Added Log */}
+      {/* Contact Added Log */}
       <Card title="Contact Added Log">
         <Table headers={["Timestamp", "Contact ID", "Contact Name", "Channel"]}>
           <tr>
@@ -283,7 +281,7 @@ export default function ContactsReport() {
         />
       </Card>
 
-      {/* ✅ Contact Deleted Log */}
+      {/* Contact Deleted Log */}
       <Card title="Contact Deleted Log">
         <Table headers={["Timestamp", "Contact ID", "Contact Name", "Channel"]}>
           <tr>

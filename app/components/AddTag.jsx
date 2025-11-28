@@ -4,15 +4,12 @@ import { useState, useEffect } from "react";
 
 export default function AddTag({ onClose, availableTags = [], currentTargets = [], onToggleTag }) {
   
-  // ใช้ State เพื่อจัดการรายการ Tag ภายใน Modal
   const [tagsList, setTagsList] = useState(availableTags);
-
-  //  Sync State กับ Props: ถ้า Parent (หน้าแชท) ส่งค่าใหม่มา ให้ใช้ค่าใหม่ทันที
   useEffect(() => {
     setTagsList(availableTags);
   }, [availableTags]);
 
-  //  Load & Listen: โหลดจาก LocalStorage เองด้วย และดักจับการเปลี่ยนแปลงแบบ Real-time
+
   useEffect(() => {
     const loadLatestTags = () => {
         const savedTags = localStorage.getItem("onechat_tags");
@@ -26,10 +23,8 @@ export default function AddTag({ onClose, availableTags = [], currentTargets = [
         }
     };
     
-    // โหลดครั้งแรกตอนเปิด Modal (กันพลาดกรณี Props ยังเป็นค่าเก่า)
     loadLatestTags();
 
-    // ดักจับ Event ถ้ามีการแก้ Tag จากหน้าอื่น (เช่น ลบ Tag) ให้โหลดใหม่ทันที
     const handleStorageChange = () => {
         loadLatestTags();
     };

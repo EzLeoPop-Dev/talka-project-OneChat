@@ -9,7 +9,7 @@ import { DEFAULT_TAGS } from "@/app/data/defaultTags";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-const AVAILABLE_STATUSES = ["Open", "Closed"];
+const AVAILABLE_STATUSES = ["New Chat", "Open", "Pending", "Closed"];
 
 export default function ContactList() {
     const [contacts, setContacts] = useState([]); 
