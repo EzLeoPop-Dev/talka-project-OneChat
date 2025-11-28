@@ -1,7 +1,6 @@
 "use client";
 
-
-import { useState, useEffect, useMemo } from "react"; 
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 import ChatList from "@/app/components/ChatList.jsx";
@@ -9,10 +8,10 @@ import ChatMessage from '@/app/components/ChatMessage.jsx';
 import ChatFitter from "@/app/components/ChatFitter";
 import ControlPanel from "@/app/components/ControlPanel";
 import AddTag from "@/app/components/AddTag";
-import ContactDetails from "@/app/components/ChatContactDetail"; 
+import ContactDetails from "@/app/components/ChatContactDetail";
 import AddNote from "@/app/components/AddNote";
 import AiSuppBtn from "@/app/components/AiSuppBtn";
-import ChangeStatus from "@/app/components/Changestatus"; 
+import ChangeStatus from "@/app/components/Changestatus";
 import AiAssistantPanel from "@/app/components/AiAssistantPanel";
 import ActivityLogPanel from "@/app/components/ActivityLogPanel";
 import SendToBoardModal from "@/app/components/SendToBoardModal";
@@ -44,14 +43,15 @@ const processInitialData = (data) => {
     }));
 };
 
-export default function ChatPage() {
+// 1. แยก Logic หลักมาไว้ใน Sub-Component
+function ChatPageContent() {
     const searchParams = useSearchParams();
-    
+
     // State: Chat Data
     const [chats, setChats] = useState(() => processInitialData(unifiedMockData));
     const [selectedChatId, setSelectedChatId] = useState(null);
     const selectedChat = chats.find(chat => chat.id === selectedChatId);
-    const [isLoaded, setIsLoaded] = useState(false); 
+    const [isLoaded, setIsLoaded] = useState(false);
 
     // State: UI / Modals
     const [isAddTagModalOpen, setIsAddTagModalOpen] = useState(false);
@@ -68,7 +68,7 @@ export default function ChatPage() {
     const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "Admin", avatar: "A" });
 
     // State: Dynamic Data (From LocalStorage)
-    const [activityLogs, setActivityLogs] = useState([]); 
+    const [activityLogs, setActivityLogs] = useState([]);
     const [activePrompts, setActivePrompts] = useState([]);
     const [availableAgents, setAvailableAgents] = useState([]);
     const [availableTags, setAvailableTags] = useState([]);
@@ -91,15 +91,15 @@ export default function ChatPage() {
 
     // โหลด/เซฟ Chat Data
     useEffect(() => {
-        const savedChats = localStorage.getItem("onechat_data"); 
+        const savedChats = localStorage.getItem("onechat_data");
         if (savedChats) {
-            try { setChats(JSON.parse(savedChats)); } 
+            try { setChats(JSON.parse(savedChats)); }
             catch (e) { console.error("Error loading chat data:", e); }
         } else {
             setChats(processInitialData(unifiedMockData));
             localStorage.setItem("onechat_data", JSON.stringify(processInitialData(unifiedMockData)));
         }
-        setIsLoaded(true); 
+        setIsLoaded(true);
     }, []);
 
     useEffect(() => {
@@ -147,7 +147,7 @@ export default function ChatPage() {
     useEffect(() => {
         const savedTags = localStorage.getItem("onechat_tags");
         if (savedTags) {
-            setAvailableTags(JSON.parse(savedTags)); 
+            setAvailableTags(JSON.parse(savedTags));
         } else {
             setAvailableTags(DEFAULT_TAGS);
             localStorage.setItem("onechat_tags", JSON.stringify(DEFAULT_TAGS));
@@ -160,12 +160,12 @@ export default function ChatPage() {
             if (urlId) {
                 const idNum = parseInt(urlId);
                 const targetChat = chats.find(c => c.id === idNum);
-            
+
                 if (targetChat) {
                     setSelectedChatId(idNum);
 
                     if (targetChat.status === 'New Chat') {
-                        setChats(prev => prev.map(c => 
+                        setChats(prev => prev.map(c =>
                             c.id === idNum ? { ...c, status: 'Open', unreadCount: 0 } : c
                         ));
                     }
@@ -177,11 +177,11 @@ export default function ChatPage() {
     useEffect(() => {
         if (isLoaded && selectedChatId) {
             const currentChat = chats.find(c => c.id === selectedChatId);
-            
+
             if (currentChat && currentChat.status === "New Chat") {
-                setChats(prevChats => 
-                    prevChats.map(chat => 
-                        chat.id === selectedChatId 
+                setChats(prevChats =>
+                    prevChats.map(chat =>
+                        chat.id === selectedChatId
                             ? { ...chat, status: "Open", unreadCount: 0 }
                             : chat
                     )
@@ -193,10 +193,10 @@ export default function ChatPage() {
     const addLog = (chatId, type, detail) => {
         if (!chatId) return;
         const newLog = {
-            id: Date.now() + Math.random(), 
-            chatId, 
-            type,     
-            detail, 
+            id: Date.now() + Math.random(),
+            chatId,
+            type,
+            detail,
             timestamp: new Date().toISOString(),
             by: currentUser.name
         };
@@ -208,37 +208,37 @@ export default function ChatPage() {
         setIsContactDetailsOpen(false);
         setIsAddNoteOpen(false);
         setIsChangeStatusOpen(false);
-        setIsActivityLogOpen(false); 
-        setIsSendToBoardOpen(false); 
+        setIsActivityLogOpen(false);
+        setIsSendToBoardOpen(false);
     };
 
     // Panel Open/Close Handlers
     const handleOpenTagModal = () => {
-        if (selectedChatId) { closeAllPanels(); setIsAddTagModalOpen(true); } 
+        if (selectedChatId) { closeAllPanels(); setIsAddTagModalOpen(true); }
         else { alert("Please select a chat first."); }
     };
     const handleCloseTagModal = () => setIsAddTagModalOpen(false);
 
     const handleOpenContactDetails = () => {
-        if (selectedChatId) { closeAllPanels(); setIsContactDetailsOpen(true); } 
+        if (selectedChatId) { closeAllPanels(); setIsContactDetailsOpen(true); }
         else { alert("Please select a chat first."); }
     };
     const handleCloseContactDetails = () => setIsContactDetailsOpen(false);
 
     const handleOpenAddNote = () => {
-        if (selectedChatId) { closeAllPanels(); setIsAddNoteOpen(true); } 
+        if (selectedChatId) { closeAllPanels(); setIsAddNoteOpen(true); }
         else { alert("Please select a chat first."); }
     };
     const handleCloseAddNote = () => setIsAddNoteOpen(false);
 
     const handleOpenChangeStatus = () => {
-        if (selectedChatId) { closeAllPanels(); setIsChangeStatusOpen(true); } 
+        if (selectedChatId) { closeAllPanels(); setIsChangeStatusOpen(true); }
         else { alert("Please select a chat first."); }
     };
     const handleCloseChangeStatus = () => setIsChangeStatusOpen(false);
 
     const handleOpenActivityLog = () => {
-        if (selectedChatId) { closeAllPanels(); setIsActivityLogOpen(true); } 
+        if (selectedChatId) { closeAllPanels(); setIsActivityLogOpen(true); }
         else { alert("Please select a chat first."); }
     };
     const handleCloseActivityLog = () => setIsActivityLogOpen(false);
@@ -261,13 +261,13 @@ export default function ChatPage() {
                 if (chat.id === selectedChat.id) {
                     const currentTags = Array.isArray(chat.tags) ? chat.tags : [];
                     const isSelected = currentTags.includes(tagName);
-                    
+
                     addLog(chat.id, 'tag', isSelected ? `Removed tag "${tagName}"` : `Changed tag to "${tagName}"`);
-                    
+
                     const newTags = isSelected ? [] : [tagName];
-                    return { ...chat, tags: newTags }; 
+                    return { ...chat, tags: newTags };
                 }
-                return chat; 
+                return chat;
             })
         );
     };
@@ -279,7 +279,7 @@ export default function ChatPage() {
             addLog(selectedChat.id, 'status', `Changed status from "${selectedChat.status}" to "${newStatus}"`);
         }
         setChats(currentChats =>
-            currentChats.map(chat => 
+            currentChats.map(chat =>
                 chat.id === selectedChat.id ? { ...chat, status: newStatus } : chat
             )
         );
@@ -291,7 +291,7 @@ export default function ChatPage() {
         const value = updatedInfo[key];
         addLog(contactId, 'contact', `Updated ${key} to "${value}"`);
         setChats(currentChats =>
-            currentChats.map(chat => 
+            currentChats.map(chat =>
                 chat.id === contactId ? { ...chat, ...updatedInfo } : chat
             )
         );
@@ -341,12 +341,12 @@ export default function ChatPage() {
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     };
                     const updatedMessages = chat.messages ? [...chat.messages, newMessage] : [newMessage];
-                    
-                    return { 
-                        ...chat, 
+
+                    return {
+                        ...chat,
                         messages: updatedMessages,
-                        message: text, 
-                        time: newMessage.time 
+                        message: text,
+                        time: newMessage.time
                     };
                 }
                 return chat;
@@ -358,7 +358,7 @@ export default function ChatPage() {
     const handleSelectAiAgent = (chatId, agent) => {
         if (!chatId) return;
         setChats(currentChats =>
-            currentChats.map(chat => 
+            currentChats.map(chat =>
                 chat.id === chatId ? { ...chat, activeAiAgent: agent, isAiMode: !!agent } : chat
             )
         );
@@ -372,12 +372,12 @@ export default function ChatPage() {
     }, [chats]);
 
     const statusPriority = { "New Chat": 1, "Open": 2, "Pending": 2, "Closed": 3 };
-    
+
     const filteredChats = chats
         .filter(chat => {
             const statusMatch = activeFilter === "All" || chat.status === activeFilter;
             const companyMatch = !activeCompanyFilter || chat.company === activeCompanyFilter;
-            return statusMatch && companyMatch; 
+            return statusMatch && companyMatch;
         })
         .sort((a, b) => {
             const priorityA = statusPriority[a.status] || 2;
@@ -393,39 +393,39 @@ export default function ChatPage() {
 
     return (
         <div className="container mx-auto">
-            
+
             {/* Top Bar Filter */}
-            <ChatFitter 
-                onFilterChange={handleFilterChange} 
+            <ChatFitter
+                onFilterChange={handleFilterChange}
                 availableCompanies={availableCompanies}
                 onCompanyChange={setActiveCompanyFilter}
             />
 
             <div className="flex">
                 {/* Left: Chat List */}
-                <ChatList 
-                    chats={filteredChats} 
+                <ChatList
+                    chats={filteredChats}
                     onSelectChat={(chat) => setSelectedChatId(chat.id)}
-                    selectedId={selectedChatId} 
+                    selectedId={selectedChatId}
                     availableTags={availableTags}
                 />
 
                 {/* Center: Chat Message Area */}
-                <ChatMessage 
+                <ChatMessage
                     chat={selectedChat}
-                    availableAgents={availableAgents} 
+                    availableAgents={availableAgents}
                     onSelectAiAgent={handleSelectAiAgent}
-                    aiPrompts={activePrompts} 
+                    aiPrompts={activePrompts}
                     currentUser={currentUser}
                     onSendMessage={handleSendMessage}
                     availableTags={availableTags}
                 />
-                
+
                 {/* Right: Dynamic Panels */}
                 {isAddTagModalOpen && (
-                    <AddTag 
+                    <AddTag
                         onClose={handleCloseTagModal}
-                        availableTags={availableTags} 
+                        availableTags={availableTags}
                         currentTargets={selectedChat ? selectedChat.tags : []}
                         onToggleTag={handleToggleTag}
                     />
@@ -435,7 +435,7 @@ export default function ChatPage() {
                     <ContactDetails
                         onClose={handleCloseContactDetails}
                         contact={selectedChat}
-                        onUpdateContact={handleUpdateContactInfo} 
+                        onUpdateContact={handleUpdateContactInfo}
                     />
                 )}
 
@@ -452,53 +452,62 @@ export default function ChatPage() {
                     <ChangeStatus
                         onClose={handleCloseChangeStatus}
                         availableStatus={ALL_AVAILABLE_STATUS}
-                        currentTargets={selectedChat?.status ? [selectedChat.status] : []} 
+                        currentTargets={selectedChat?.status ? [selectedChat.status] : []}
                         onToggleStatus={handleUpdateStatus}
                     />
                 )}
 
                 {isActivityLogOpen && (
-                    <ActivityLogPanel 
+                    <ActivityLogPanel
                         onClose={handleCloseActivityLog}
                         logs={activityLogs.filter(log => log.chatId === selectedChatId)}
                     />
                 )}
-                
+
                 {/* Control Panel (Right Side) */}
                 {selectedChatId && (
-                    <ControlPanel 
-                        onOpenAddTagModal={handleOpenTagModal} 
-                        onOpenContactDetails={handleOpenContactDetails} 
-                        onOpenAddNote={handleOpenAddNote} 
+                    <ControlPanel
+                        onOpenAddTagModal={handleOpenTagModal}
+                        onOpenContactDetails={handleOpenContactDetails}
+                        onOpenAddNote={handleOpenAddNote}
                         onOpenChangeStatus={handleOpenChangeStatus}
                         onOpenActivityLog={handleOpenActivityLog}
-                        onOpenSendToBoard={handleOpenSendToBoard} 
+                        onOpenSendToBoard={handleOpenSendToBoard}
                     />
                 )}
 
                 {/* AI Assistant (Bottom Right) */}
                 {isAiAssistantOpen && (
-                    <AiAssistantPanel 
+                    <AiAssistantPanel
                         onClose={() => setIsAiAssistantOpen(false)}
-                        availableAgents={availableAgents} 
+                        availableAgents={availableAgents}
                     />
                 )}
 
                 {/* AI Toggle Button */}
-                <AiSuppBtn 
-                    onClick={() => setIsAiAssistantOpen(!isAiAssistantOpen)} 
-                    isOpen={isAiAssistantOpen} 
+                <AiSuppBtn
+                    onClick={() => setIsAiAssistantOpen(!isAiAssistantOpen)}
+                    isOpen={isAiAssistantOpen}
                 />
             </div>
 
 
             {isSendToBoardOpen && selectedChat && (
-                <SendToBoardModal 
-                    onClose={() => setIsSendToBoardOpen(false)} 
-                    chat={selectedChat} 
+                <SendToBoardModal
+                    onClose={() => setIsSendToBoardOpen(false)}
+                    chat={selectedChat}
                 />
             )}
-            
+
         </div>
+    );
+}
+
+// 2. ห่อหุ้มด้วย Suspense ใน Main Export
+export default function ChatPage() {
+    return (
+        <Suspense fallback={<div className="text-white text-center mt-20 animate-pulse">Loading Chat Data...</div>}>
+            <ChatPageContent />
+        </Suspense>
     );
 }
