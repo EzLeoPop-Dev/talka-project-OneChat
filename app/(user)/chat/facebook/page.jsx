@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react"; 
+import { useState, useEffect, useMemo, Suspense } from "react"; 
 import { useSearchParams } from "next/navigation";
-
 
 import ChatList from "@/app/components/ChatList.jsx";
 import ChatMessage from '@/app/components/ChatMessage.jsx';
@@ -43,7 +42,7 @@ const processInitialData = (data) => {
     }));
 };
 
-export default function FacebookChatPage() {
+function FacebookChatContent() {
     const searchParams = useSearchParams();
     
     //States
@@ -381,5 +380,13 @@ export default function FacebookChatPage() {
                 <AiSuppBtn onClick={() => setIsAiAssistantOpen(!isAiAssistantOpen)} isOpen={isAiAssistantOpen} />
             </div>
         </div>
+    );
+}
+
+export default function FacebookChatPage() {
+    return (
+        <Suspense fallback={<div className="text-white text-center mt-20 animate-pulse">Loading Chat...</div>}>
+            <FacebookChatContent />
+        </Suspense>
     );
 }
