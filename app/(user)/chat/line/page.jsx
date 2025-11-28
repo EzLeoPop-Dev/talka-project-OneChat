@@ -1,10 +1,8 @@
 "use client";
 
-
 // Imports
-import { useState, useEffect, useMemo } from "react"; 
+import { useState, useEffect, useMemo, Suspense } from "react"; // เพิ่ม Suspense
 import { useSearchParams } from "next/navigation";
-
 
 import ChatList from "@/app/components/ChatList.jsx";
 import ChatMessage from '@/app/components/ChatMessage.jsx';
@@ -48,9 +46,10 @@ const processInitialData = (data) => {
     }));
 };
 
-// Main Component
-
-export default function FacebookChatPage() {
+// ==================================================================================
+// Component ย่อย: เก็บ Logic การทำงานทั้งหมด (แยกออกมาเพื่อให้ใช้ Suspense ได้)
+// ==================================================================================
+function LineChatContent() {
     const searchParams = useSearchParams();
     
     // States
@@ -75,8 +74,6 @@ export default function FacebookChatPage() {
     const [availableAgents, setAvailableAgents] = useState([]);
     const [availableTags, setAvailableTags] = useState([]);
     const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "Admin", avatar: "A" });
-
-
 
     // 4. Effects (Data Loading)
 
@@ -396,5 +393,16 @@ export default function FacebookChatPage() {
                 <AiSuppBtn onClick={() => setIsAiAssistantOpen(!isAiAssistantOpen)} isOpen={isAiAssistantOpen} />
             </div>
         </div>
+    );
+}
+
+// ==================================================================================
+// 3. Main Export (ครอบด้วย Suspense)
+// ==================================================================================
+export default function LineChatPage() {
+    return (
+        <Suspense fallback={<div className="text-white text-center mt-20 animate-pulse">Loading Chat...</div>}>
+            <LineChatContent />
+        </Suspense>
     );
 }
