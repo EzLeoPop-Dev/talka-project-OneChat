@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <PageTransition>{children}</PageTransition>
+        {children}
       </body>
     </html>
   );
