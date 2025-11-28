@@ -4,7 +4,7 @@ import { X, Clock, Tag, User, FileText, MessageSquare, Info } from "lucide-react
 
 export default function ActivityLogPanel({ onClose, logs = [] }) {
 
-  // ฟังก์ชันแปลงเวลาให้ดูง่าย
+  // แปลงเวลา
     const formatTime = (isoString) => {
         const date = new Date(isoString);
         return date.toLocaleString('en-GB', { 
@@ -12,7 +12,7 @@ export default function ActivityLogPanel({ onClose, logs = [] }) {
         });
     };
 
-    // เลือกไอคอนตามประเภทกิจกรรม
+    // ไอคอน Activity Log 
     const getIcon = (type) => {
         switch (type) {
             case 'tag': return <Tag size={14} className="text-yellow-400" />;
@@ -62,7 +62,7 @@ export default function ActivityLogPanel({ onClose, logs = [] }) {
                             {log.detail}
                         </p>
                     
-                        {/* User (Optional: ถ้ามีระบบ Login) */}
+                        {/* User */}
                         <p className="text-white/40 text-[10px] ml-8 mt-1">
                             by {log.by || "System"}
                         </p>

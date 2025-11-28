@@ -41,7 +41,7 @@ export default function Sidebar() {
     // User State
     const [userName, setUserName] = useState("Loading...");
     const [userRole, setUserRole] = useState("Employee");
-    const [userTeam, setUserTeam] = useState("No Team"); // ✅ State สำหรับเก็บชื่อทีม
+    const [userTeam, setUserTeam] = useState("No Team"); 
     const [openUserMenu, setOpenUserMenu] = useState(false);
 
     // Notification State
@@ -55,7 +55,7 @@ export default function Sidebar() {
     const [showThemeModal, setShowThemeModal] = useState(false);
     const [selectedTheme, setSelectedTheme] = useState("dark");
 
-    // --- Themes Data ---
+    // Themes Data
     const themes = [
         {
             id: 'light',
@@ -134,11 +134,11 @@ export default function Sidebar() {
         }
     };
 
-    // ✅ ฟังก์ชันโหลดข้อมูล User และค้นหา Team (แก้ไขใหม่)
+    // ฟังก์ชันโหลดข้อมูล User และค้นหา Team
     const loadUserData = () => {
         try {
             const storedUser = localStorage.getItem("currentUser");
-            const storedTeams = localStorage.getItem("teams"); // 1. ดึงข้อมูลทีมจาก LocalStorage
+            const storedTeams = localStorage.getItem("teams");
 
             if (storedUser) {
                 const user = JSON.parse(storedUser);
@@ -147,12 +147,10 @@ export default function Sidebar() {
                 setUserName(currentName);
                 setUserRole(user.role || "Employee");
 
-                // 2. Logic ค้นหาทีม
                 let myTeamName = "No Team";
                 if (storedTeams) {
                     try {
                         const teams = JSON.parse(storedTeams);
-                        // หา Team ที่สมาชิก (members) มีชื่อของ user คนปัจจุบันอยู่
                         const foundTeam = teams.find(t =>
                             t.members && Array.isArray(t.members) && t.members.includes(currentName)
                         );
@@ -164,7 +162,7 @@ export default function Sidebar() {
                         console.error("Error parsing teams:", e);
                     }
                 }
-                setUserTeam(myTeamName); // อัปเดต State
+                setUserTeam(myTeamName); 
 
             } else {
                 setUserName("Guest");
@@ -176,9 +174,8 @@ export default function Sidebar() {
     };
 
     useEffect(() => {
-        loadUserData(); // โหลดครั้งแรก
+        loadUserData();
 
-        // โหลด Background
         const savedList = localStorage.getItem("backgroundList");
         if (savedList) {
             try {
@@ -197,15 +194,12 @@ export default function Sidebar() {
 
         loadNotifications();
 
-        // Listen events
         const handleChatUpdate = () => loadNotifications();
         window.addEventListener("chat-data-updated", handleChatUpdate);
 
-        // ✅ เพิ่ม Listener: ถ้ามีการ update user หรือ storage (เช่น สร้างทีมใหม่) ให้โหลดข้อมูลใหม่
         window.addEventListener("user_updated", loadUserData);
         window.addEventListener("storage", loadUserData);
 
-        // Interval check (กันพลาด)
         const intervalId = setInterval(loadUserData, 2000);
 
         return () => {
@@ -287,7 +281,7 @@ export default function Sidebar() {
                         </button>
                     </div>
 
-                    {/* ✅ User Section (Updated Layout: Team under Name) */}
+                    {/* User Section */}
                     <div className="flex items-center justify-between gap-3 mb-8 relative">
                         <div className="flex items-center gap-3">
                             {/* Avatar */}
@@ -310,10 +304,10 @@ export default function Sidebar() {
                                     {userName}
                                 </p>
 
-                                {/* Team (Bottom) - Moved here */}
+                                {/* Team (Bottom) */}
                                 <div className="flex items-center gap-1.5 text-[10px] text-white/80 bg-white/10 px-2 py-0.5 rounded mt-1 border border-white/5">
                                     <Users size={10} className="opacity-70" />
-                                    <span className="truncate max-w-[80px] font-medium" title={userTeam}>{userTeam}</span>
+                                    <span className="truncate max-w-20 font-medium" title={userTeam}>{userTeam}</span>
                                 </div>
                             </div>
                         </div>
@@ -473,7 +467,7 @@ export default function Sidebar() {
             {/* Notification Modal */}
             <AnimatePresence>
                 {showNotifications && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-[9999]">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-9999">
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowNotifications(false)}></div>
                         <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-[400px] max-h-[70vh] bg-[#1a1a2e] border border-white/10 rounded-2xl shadow-2xl p-5 overflow-y-auto z-10">
                             <h2 className="text-lg text-white font-semibold mb-4 text-center border-b border-white/10 pb-2">Notifications</h2>
@@ -481,7 +475,6 @@ export default function Sidebar() {
                                 {notifications.map((n) => (
                                     <div
                                         key={n.id}
-                                        // ✅ เพิ่ม onClick ให้กดแล้วไปหน้า Chat
                                         onClick={() => {
                                             router.push(`/chat/allchat?id=${n.id}`);
                                             setShowNotifications(false);
@@ -511,7 +504,7 @@ export default function Sidebar() {
             {/* Background Modal */}
             <AnimatePresence>
                 {showBgModal && (
-                    <motion.div key="bg-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-[9999]">
+                    <motion.div key="bg-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-9999">
                         <motion.div onClick={() => setShowBgModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
                         <motion.div key="bg-modal" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-[600px] max-h-[80vh] bg-[#1e1e2e] border border-white/10 rounded-2xl shadow-2xl p-6 overflow-y-auto z-20" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-between mb-6">
@@ -542,7 +535,7 @@ export default function Sidebar() {
             {/* Theme Modal */}
             <AnimatePresence>
                 {showThemeModal && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-[9999] p-4">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-9999 p-4">
                         <motion.div onClick={() => setShowThemeModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
                         <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-md bg-[#1e1e2e] border border-white/10 rounded-2xl shadow-2xl p-6 z-20" onClick={(e) => e.stopPropagation()}>
                             <h3 className="text-xl font-bold text-white mb-6">Choose Theme</h3>
@@ -571,9 +564,7 @@ export default function Sidebar() {
     );
 }
 
-// --------------------------------------------------------
-// ✅ Helper Components
-// --------------------------------------------------------
+// Helper Components
 
 function SidebarLink({ href, icon, label, pathname }) {
     const isActive = pathname.startsWith(href);

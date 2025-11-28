@@ -9,7 +9,6 @@ export default function ChangePasswordPage() {
     const [newPass, setNewPass] = useState("");
     const [confirm, setConfirm] = useState("");
 
-    // State for toggling password visibility
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);

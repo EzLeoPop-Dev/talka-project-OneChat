@@ -15,12 +15,11 @@ import "./Responses.css";
 
 import { calenderData } from "../../../data/calenderData";
 
-// react-date-range
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-// ------------------- UI Helpers -------------------
+// UI Helpers
 const Button = ({ children, className = "", ...props }) => (
   <button
     className={`px-3 py-2 rounded-md border border-[rgba(254,253,253,0.5)] text-white hover:bg-[rgba(255,255,255,0.1)] transition ${className}`}
@@ -48,7 +47,6 @@ const InfoTooltip = ({ text }) => {
   );
 };
 
-// ------------------- Helpers -------------------
 const formatTime = (sec) => {
   const h = Math.floor(sec / 3600).toString().padStart(2, "0");
   const m = Math.floor((sec % 3600) / 60).toString().padStart(2, "0");
@@ -63,7 +61,7 @@ const formatDateText = (date) =>
     year: "numeric",
   });
 
-// ------------------- Main Component -------------------
+// Main Component
 export default function ResponsesReport() {
   const defaultStart = calenderData?.[calenderData.length - 5]?.date || "2025-10-26";
   const defaultEnd = calenderData?.[calenderData.length - 1]?.date || "2025-11-02";
@@ -137,7 +135,7 @@ export default function ResponsesReport() {
 
   return (
     <div className="bg-[rgba(32,41,59,0.25)] backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-white space-y-8">
-      {/* ปุ่มปฏิทิน (ตอนนี้ใช้ react-date-range เหมือนหน้า message) */}
+      {/* ปุ่มปฏิทิน */}
       <div className="relative mb-6" ref={calendarRef}>
         <Button
           onClick={() => setShowCalendar((s) => !s)}

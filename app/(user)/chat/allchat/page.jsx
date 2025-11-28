@@ -1,13 +1,9 @@
 "use client";
 
-// -----------------------------------------------------------------------------
-// 1. Imports
-// -----------------------------------------------------------------------------
-// React & Hooks
+
 import { useState, useEffect, useMemo } from "react"; 
 import { useSearchParams } from "next/navigation";
 
-// Components
 import ChatList from "@/app/components/ChatList.jsx";
 import ChatMessage from '@/app/components/ChatMessage.jsx';
 import ChatFitter from "@/app/components/ChatFitter";
@@ -21,15 +17,12 @@ import AiAssistantPanel from "@/app/components/AiAssistantPanel";
 import ActivityLogPanel from "@/app/components/ActivityLogPanel";
 import SendToBoardModal from "@/app/components/SendToBoardModal";
 
-// Data & Styles
 import "@/app/assets/css/other.css";
 import { unifiedMockData } from '@/app/data/mockData';
 import { DEFAULT_TAGS } from "@/app/data/defaultTags";
 import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
 
-// -----------------------------------------------------------------------------
-// 2. Constants & Initial Data Helper
-// -----------------------------------------------------------------------------
+
 const ALL_AVAILABLE_STATUS = ["New Chat", "Open", "Pending", "Closed"];
 
 const DEFAULT_AI_AGENTS = [
@@ -51,41 +44,35 @@ const processInitialData = (data) => {
     }));
 };
 
-// -----------------------------------------------------------------------------
-// 3. Main Component
-// -----------------------------------------------------------------------------
 export default function ChatPage() {
     const searchParams = useSearchParams();
     
-    // --- State: Chat Data ---
+    // State: Chat Data
     const [chats, setChats] = useState(() => processInitialData(unifiedMockData));
     const [selectedChatId, setSelectedChatId] = useState(null);
     const selectedChat = chats.find(chat => chat.id === selectedChatId);
     const [isLoaded, setIsLoaded] = useState(false); 
 
-    // --- State: UI / Modals ---
+    // State: UI / Modals
     const [isAddTagModalOpen, setIsAddTagModalOpen] = useState(false);
     const [isContactDetailsOpen, setIsContactDetailsOpen] = useState(false);
     const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
     const [isChangeStatusOpen, setIsChangeStatusOpen] = useState(false);
     const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
     const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
-    const [isSendToBoardOpen, setIsSendToBoardOpen] = useState(false); // ✅ State สำหรับ Modal Board
+    const [isSendToBoardOpen, setIsSendToBoardOpen] = useState(false);
 
-    // --- State: Filters & Settings ---
+    // State: Filters & Settings
     const [activeFilter, setActiveFilter] = useState("All");
     const [activeCompanyFilter, setActiveCompanyFilter] = useState(null);
     const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "Admin", avatar: "A" });
 
-    // --- State: Dynamic Data (From LocalStorage) ---
+    // State: Dynamic Data (From LocalStorage)
     const [activityLogs, setActivityLogs] = useState([]); 
     const [activePrompts, setActivePrompts] = useState([]);
     const [availableAgents, setAvailableAgents] = useState([]);
     const [availableTags, setAvailableTags] = useState([]);
 
-    // -------------------------------------------------------------------------
-    // 4. Effects (Data Loading & Saving)
-    // -------------------------------------------------------------------------
 
     // โหลดข้อมูล User
     useEffect(() => {
@@ -203,11 +190,6 @@ export default function ChatPage() {
         }
     }, [selectedChatId, isLoaded, chats]);
 
-    // -------------------------------------------------------------------------
-    // 5. Handlers (Logic Functions)
-    // -------------------------------------------------------------------------
-
-    // --- Helper Functions ---
     const addLog = (chatId, type, detail) => {
         if (!chatId) return;
         const newLog = {
@@ -230,7 +212,7 @@ export default function ChatPage() {
         setIsSendToBoardOpen(false); 
     };
 
-    // --- Panel Open/Close ---
+    // Panel Open/Close Handlers
     const handleOpenTagModal = () => {
         if (selectedChatId) { closeAllPanels(); setIsAddTagModalOpen(true); } 
         else { alert("Please select a chat first."); }
@@ -261,7 +243,6 @@ export default function ChatPage() {
     };
     const handleCloseActivityLog = () => setIsActivityLogOpen(false);
 
-    // ✅ ฟังก์ชันเปิด Modal Send To Board
     const handleOpenSendToBoard = () => {
         if (selectedChatId) {
             closeAllPanels();
@@ -271,9 +252,8 @@ export default function ChatPage() {
         }
     };
 
-    // --- Data Updates ---
-    
-    // เปลี่ยน Tag (เลือกได้แค่อันเดียว)
+
+    // เปลี่ยน Tag 
     const handleToggleTag = (tagName) => {
         if (!selectedChat) return;
         setChats(currentChats =>
@@ -384,9 +364,7 @@ export default function ChatPage() {
         );
     };
 
-    // -------------------------------------------------------------------------
-    // 6. Data Processing (Filter & Sort)
-    // -------------------------------------------------------------------------
+    // เรียงลำดับ status
     const handleFilterChange = (filterValue) => setActiveFilter(filterValue);
 
     const availableCompanies = useMemo(() => {
@@ -407,9 +385,6 @@ export default function ChatPage() {
             return priorityA - priorityB;
         });
 
-    // -------------------------------------------------------------------------
-    // 7. Render UI
-    // -------------------------------------------------------------------------
 
     // Loading Check
     if (!isLoaded) {
@@ -497,7 +472,7 @@ export default function ChatPage() {
                         onOpenAddNote={handleOpenAddNote} 
                         onOpenChangeStatus={handleOpenChangeStatus}
                         onOpenActivityLog={handleOpenActivityLog}
-                        onOpenSendToBoard={handleOpenSendToBoard} // ✅ ส่งฟังก์ชันนี้ไป
+                        onOpenSendToBoard={handleOpenSendToBoard} 
                     />
                 )}
 

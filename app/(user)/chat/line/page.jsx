@@ -1,13 +1,10 @@
 "use client";
 
-// -----------------------------------------------------------------------------
-// 1. Imports
-// -----------------------------------------------------------------------------
+
 import { useState, useEffect, useMemo } from "react"; 
 import { useSearchParams } from "next/navigation";
 
 
-// Components
 import ChatList from "@/app/components/ChatList.jsx";
 import ChatMessage from '@/app/components/ChatMessage.jsx';
 import ChatFitter from "@/app/components/ChatFitter";
@@ -20,15 +17,12 @@ import ChangeStatus from "@/app/components/Changestatus";
 import AiAssistantPanel from "@/app/components/AiAssistantPanel";
 import ActivityLogPanel from "@/app/components/ActivityLogPanel";
 
-// Data & Styles
 import "@/app/assets/css/other.css";
 import { unifiedMockData } from '@/app/data/mockData';
 import { DEFAULT_TAGS } from "@/app/data/defaultTags";
 import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
 
-// -----------------------------------------------------------------------------
-// 2. Constants & Config
-// -----------------------------------------------------------------------------
+
 const CHANNEL_FILTER = "Line"; 
 const ALL_AVAILABLE_STATUS = ["New Chat", "Open", "Pending", "Closed"];
 
@@ -51,19 +45,16 @@ const processInitialData = (data) => {
     }));
 };
 
-// -----------------------------------------------------------------------------
-// 3. Main Component
-// -----------------------------------------------------------------------------
 export default function FacebookChatPage() {
     const searchParams = useSearchParams();
     
-    // --- States ---
+    // States
     const [chats, setChats] = useState(() => processInitialData(unifiedMockData));
     const [selectedChatId, setSelectedChatId] = useState(null);
     const selectedChat = chats.find(chat => chat.id === selectedChatId);
     const [isLoaded, setIsLoaded] = useState(false); 
 
-    // --- Panels ---
+    // Panels 
     const [isAddTagModalOpen, setIsAddTagModalOpen] = useState(false);
     const [isContactDetailsOpen, setIsContactDetailsOpen] = useState(false);
     const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
@@ -71,7 +62,7 @@ export default function FacebookChatPage() {
     const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
     const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
 
-    // --- Filters & Data ---
+    // Filters & Data 
     const [activeFilter, setActiveFilter] = useState("All");
     const [activeCompanyFilter, setActiveCompanyFilter] = useState(null);
     const [activityLogs, setActivityLogs] = useState([]); 
@@ -81,9 +72,6 @@ export default function FacebookChatPage() {
     const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "Admin", avatar: "A" });
 
 
-    // -------------------------------------------------------------------------
-    // 4. Effects (Data Loading)
-    // -------------------------------------------------------------------------
 
     // Load User
     useEffect(() => {
@@ -189,10 +177,6 @@ export default function FacebookChatPage() {
     }, [selectedChatId, isLoaded, chats]);
 
 
-    // -------------------------------------------------------------------------
-    // 5. Handlers
-    // -------------------------------------------------------------------------
-
     const addLog = (chatId, type, detail) => {
         if (!chatId) return;
         const newLog = {
@@ -212,7 +196,7 @@ export default function FacebookChatPage() {
         setIsActivityLogOpen(false); 
     };
 
-    // --- Open/Close Modals ---
+    // Open/Close Modals
     const handleOpenTagModal = () => { if(selectedChatId) { closeAllPanels(); setIsAddTagModalOpen(true); } else alert("Select a chat first."); };
     const handleCloseTagModal = () => setIsAddTagModalOpen(false);
 
@@ -229,7 +213,7 @@ export default function FacebookChatPage() {
     const handleCloseActivityLog = () => setIsActivityLogOpen(false);
 
 
-    // --- Logic Updates ---
+    // Logic Updates    
     const handleToggleTag = (tagName) => {
         if (!selectedChat) return;
         setChats(prev => prev.map(chat => {
@@ -299,15 +283,14 @@ export default function FacebookChatPage() {
     };
 
 
-    // -------------------------------------------------------------------------
-    // 6. Filtering & Sorting
-    // -------------------------------------------------------------------------
+    //  Filtering & Sorting
+
     const availableCompanies = useMemo(() => [...new Set(chats.map(c => c.company).filter(Boolean))], [chats]);
 
-    // 1. Filter by Channel (Facebook)
+    // Filter by Channel (Facebook)
     const channelFilteredChats = chats.filter(chat => chat.channel === CHANNEL_FILTER);
 
-    // 2. Filter by Status & Company
+    // Filter by Status & Company
     const finalFilteredChats = channelFilteredChats
         .filter(chat => {
             const statusMatch = activeFilter === "All" || chat.status === activeFilter;
@@ -320,9 +303,6 @@ export default function FacebookChatPage() {
         });
 
 
-    // -------------------------------------------------------------------------
-    // 7. Render
-    // -------------------------------------------------------------------------
     if (!isLoaded) return <div className="text-white text-center mt-20 animate-pulse">Loading...</div>;
 
     return (
@@ -353,11 +333,47 @@ export default function FacebookChatPage() {
                 />
                 
                 {/* Panels */}
-                {isAddTagModalOpen && <AddTag onClose={handleCloseTagModal} availableTags={availableTags} currentTargets={selectedChat ? selectedChat.tags : []} onToggleTag={handleToggleTag} />}
-                {isContactDetailsOpen && <ContactDetails onClose={handleCloseContactDetails} contact={selectedChat} onUpdateContact={handleUpdateContactInfo} />}
-                {isAddNoteOpen && <AddNote onClose={handleCloseAddNote} onSaveNote={handleAddNote} currentNotes={selectedChat ? selectedChat.notes : []} onDeleteNote={handleDeleteNote} />}
-                {isChangeStatusOpen && <ChangeStatus onClose={handleCloseChangeStatus} availableStatus={ALL_AVAILABLE_STATUS} currentTargets={selectedChat?.status ? [selectedChat.status] : []} onToggleStatus={handleUpdateStatus} />}
-                {isActivityLogOpen && <ActivityLogPanel onClose={handleCloseActivityLog} logs={activityLogs.filter(log => log.chatId === selectedChatId)} />}
+                {isAddTagModalOpen && 
+                    <AddTag 
+                        onClose={handleCloseTagModal} 
+                        availableTags={availableTags} 
+                        currentTargets={selectedChat ? selectedChat.tags : []} 
+                        onToggleTag={handleToggleTag} 
+                    />
+                }
+
+                {isContactDetailsOpen && 
+                    <ContactDetails 
+                        onClose={handleCloseContactDetails} 
+                        contact={selectedChat} 
+                        onUpdateContact={handleUpdateContactInfo} 
+                    />
+                }
+
+                {isAddNoteOpen && 
+                    <AddNote 
+                        onClose={handleCloseAddNote} 
+                        onSaveNote={handleAddNote} 
+                        currentNotes={selectedChat ? selectedChat.notes : []} 
+                        onDeleteNote={handleDeleteNote} 
+                    />
+                }
+
+                {isChangeStatusOpen && 
+                    <ChangeStatus 
+                        onClose={handleCloseChangeStatus} 
+                        availableStatus={ALL_AVAILABLE_STATUS} 
+                        currentTargets={selectedChat?.status ? [selectedChat.status] : []} 
+                        onToggleStatus={handleUpdateStatus} 
+                    />
+                }
+
+                {isActivityLogOpen && 
+                    <ActivityLogPanel 
+                        onClose={handleCloseActivityLog} 
+                        logs={activityLogs.filter(log => log.chatId === selectedChatId)} 
+                    />
+                }
                 
                 {selectedChatId && (
                     <ControlPanel 

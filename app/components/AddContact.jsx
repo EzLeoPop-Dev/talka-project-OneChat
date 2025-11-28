@@ -30,7 +30,6 @@ export default function AddContactModal({
     const [showCompanyList, setShowCompanyList] = useState(false);
     const companyWrapperRef = useRef(null); 
 
-    // ปิด Company Dropdown เมื่อคลิกข้างนอก
     useEffect(() => {
         function handleClickOutside(event) {
             if (companyWrapperRef.current && !companyWrapperRef.current.contains(event.target)) {

@@ -56,7 +56,6 @@ export default function ChannelPage() {
           }}
         />
       )}
-       {/* ✅ เพิ่ม Modal ตรงนี้ (ก่อนปิด </div> หลักสุดท้าย) */}
       {showCompleteModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
           <div className="bg-[rgba(32,41,59,0.95)] p-8 rounded-2xl border border-white/20 shadow-2xl text-center max-w-md">
