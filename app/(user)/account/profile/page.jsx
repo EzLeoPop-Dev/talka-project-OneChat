@@ -177,7 +177,6 @@ export default function ProfilePage() {
                             </div>
                         </div>
                         <div className="pt-6 border-t border-white/5 flex items-center justify-end gap-4">
-<<<<<<< HEAD
                             <button type="button" className="text-sm text-white/50 hover:text-white transition-colors px-4 py-2">
                                 Cancel
                             </button>
@@ -185,9 +184,6 @@ export default function ProfilePage() {
                                 type="submit"
                                 className="flex items-center gap-2 rounded-xl px-8 py-3 bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg shadow-purple-600/20 hover:shadow-purple-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
                             >
-=======
-                            <button type="submit" className="flex items-center gap-2 rounded-xl px-8 py-3 bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg shadow-purple-600/20 hover:shadow-purple-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all">
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                                 <Save size={18} />
                                 Save Changes
                             </button>
