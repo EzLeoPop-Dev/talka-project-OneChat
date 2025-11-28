@@ -50,14 +50,8 @@ return (
     <div className="w-full"> 
     
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-1">
-<<<<<<< HEAD
           
             <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-3 "> 
-=======
-        
-            {/* New Customers */}
-            <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-3 "> 
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                 <div className="flex justify-between items-center">
                     <span className="text-sm text-white/80">New Customers</span>
                     <a href="#" className="text-xs text-white/60 hover:text-white">More</a> 
@@ -65,12 +59,7 @@ return (
                 <p className="text-3xl font-bold text-white mt-1">{stats.newCustomers}</p> 
             </div>
 
-<<<<<<< HEAD
             <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-3 "> 
-=======
-            {/* Unreplied */}
-            <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-3 "> 
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                 <div className="flex justify-between items-center">
                     <span className="text-sm text-white/80">Unreplied</span>
                     <a href="#" className="text-xs text-white/60 hover:text-white">More</a>
@@ -81,12 +70,7 @@ return (
                 </div>
             </div>
 
-<<<<<<< HEAD
             <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-3 "> 
-=======
-            {/* Incoming Message */}
-            <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-3 "> 
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                 <div className="flex justify-between items-center">
                     <span className="text-sm text-white/80">Incoming Message</span>
                 </div>
@@ -96,12 +80,7 @@ return (
                 </div>
             </div>
 
-<<<<<<< HEAD
             <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-3 "> 
-=======
-            {/* Close Chat */}
-            <div className="bg-[rgba(32,41,59,0.25)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-3 "> 
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                 <span className="text-sm text-white/80">Close Chat</span>
                 <p className="text-3xl font-bold text-white mt-1">{stats.closedChatPercent}%</p> 
             </div>

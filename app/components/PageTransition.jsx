@@ -1,54 +1,54 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 
 export default function PageTransition({ children }) {
     const pathname = usePathname();
-    const [showChildren, setShowChildren] = useState(true);
-    const [overlayKey, setOverlayKey] = useState(pathname);
 
-    useEffect(() => {
-        setShowChildren(false); 
-        const timer = setTimeout(() => {
-            setOverlayKey(pathname);
-            setShowChildren(true);
-        }, 600); 
-        return () => clearTimeout(timer);
-    }, [pathname]);
+    // ตั้งค่า Animation ให้ดูพรีเมียม
+    const variants = {
+        initial: {
+            opacity: 0,
+            y: 15, // เริ่มต้นต่ำลงนิดหน่อย
+            filter: "blur(10px)" // เบลอตอนเริ่ม เพื่อความนวล
+        },
+        enter: {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            transition: {
+                duration: 0.4,
+                ease: "easeOut"
+            }
+        },
+        exit: {
+            opacity: 0,
+            y: -15, // ลอยขึ้นตอนหายไป
+            filter: "blur(10px)",
+            transition: {
+                duration: 0.3,
+                ease: "easeIn"
+            }
+        }
+    };
 
     return (
-        <div className="relative w-full min-h-screen overflow-hidden">
-            {/* Overlay สีดำเต็มจอ */}
+        <div className="w-full min-h-screen overflow-hidden bg-transparent">
+            {/* mode="wait" รอให้หน้าเก่าหายไปก่อน หน้าใหม่ค่อยมา */}
             <AnimatePresence mode="wait">
-                {!showChildren && (
-                    <motion.div
-                        key="overlay"
-                        initial={{ x: "100%" }}
-                        animate={{ x: "0%" }}
-                        exit={{ x: "-100%" }}
-                        transition={{ duration: 0.5, ease: "easeInOut" }}
-                        className="absolute top-0 left-0 w-full h-full bg-black z-50"
-                    />
-                )}
-            </AnimatePresence>
-
-            {/* Content หน้าใหม่ */}
-            <AnimatePresence mode="wait">
-                {showChildren && (
-                    <motion.div
-                        key={overlayKey}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }} 
-                        className="relative z-10"
-                    >
-                        {children}
-                    </motion.div>
-
-                )}
+                <motion.div
+                    key={pathname} // key สำคัญมาก! ถ้าเปลี่ยน path อนิเมชั่นจะทำงานใหม่
+                    variants={variants}
+                    initial="initial"
+                    animate="enter"
+                    exit="exit"
+                    className="w-full h-full"
+                    onAnimationComplete={() => window.scrollTo(0, 0)} // ดีดหน้าจอไปบนสุดเมื่อเปลี่ยนหน้าเสร็จ
+                >
+                    {children}
+                </motion.div>
             </AnimatePresence>
         </div>
     );

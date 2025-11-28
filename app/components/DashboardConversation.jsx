@@ -105,10 +105,7 @@ export default function DashboardConversation() {
   return (
     <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-4 flex flex-col min-h-[400px]">
       
-<<<<<<< HEAD
      
-=======
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
       <div className="flex justify-between items-center shrink-0 relative z-10">
         <div className="flex items-center gap-2">
           <h2 className="text-white/90 text-sm">Conversations Overview</h2>
@@ -142,11 +139,7 @@ export default function DashboardConversation() {
       
       </div>
 
-<<<<<<< HEAD
       {/* --- Stats --- */}
-=======
-      {/*  Stats  */}
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
       <div className="flex gap-8 mt-4 shrink-0">
         <div>
           <p className="text-sm text-white/80">Opened</p>
@@ -176,11 +169,7 @@ export default function DashboardConversation() {
         </div>
       </div>
 
-<<<<<<< HEAD
       {/* --- Graph --- */}
-=======
-      {/*  Graph  */}
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
       <div className="grow mt-4 min-h-[200px] relative z-0">
         <ResponsiveContainer width="100%" minHeight={250}>
           <LineChart

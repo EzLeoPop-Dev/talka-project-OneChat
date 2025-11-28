@@ -120,14 +120,9 @@ function TeamModal({
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-medium flex items-center gap-2">
-<<<<<<< HEAD
                       {user.name}
                       {/* แสดงป้าย You ถ้าเป็นตัวเอง */}
                       {user.isMe && <span className="bg-purple-500 text-[10px] px-1.5 rounded text-white">You</span>}
-=======
-                        {user.name}
-                        {user.isMe && <span className="bg-purple-500 text-[10px] px-1.5 rounded text-white">You</span>}
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
                     </span>
                     <span className="text-xs text-white/50">{user.role}</span>
                   </div>
@@ -194,17 +189,6 @@ export default function TeamSettingPage() {
 
     let allUsers = [];
 
-<<<<<<< HEAD
-=======
-    
-    if (storedCurrentUser) {
-        const me = JSON.parse(storedCurrentUser);
-        
-        
-        const myRole = me.role || me.permission || 'Owner'; 
-        
-        const myName = me.name || me.username || "My Name";
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
 
     if (storedCurrentUser) {
       const me = JSON.parse(storedCurrentUser);
@@ -218,30 +202,18 @@ export default function TeamSettingPage() {
 
       allUsers.push({ id: me.id, name: myName, role: myRole, isMe: true });
     } else {
-<<<<<<< HEAD
       // Mock ถ้าไม่มี Login จริง
       allUsers.push({ id: 999, name: "My Name", role: 'Owner', isMe: true });
-=======
-        allUsers.push({ id: 999, name: "My Name", role: 'Owner', isMe: true });
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     }
 
     if (storedUsers) {
       const parsedUsers = JSON.parse(storedUsers);
-<<<<<<< HEAD
       // คนอื่นใช้ field 'permission' เป็นหลักตาม UserSettingPage แต่ถ้าไม่มีก็ลองดู role
       const others = parsedUsers.map(u => ({
         id: u.id,
         name: u.name,
         role: u.permission || u.role || "Member",
         isMe: false
-=======
-      const others = parsedUsers.map(u => ({ 
-          id: u.id, 
-          name: u.name, 
-          role: u.permission || u.role || "Member", 
-          isMe: false 
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
       }));
       allUsers = [...allUsers, ...others];
     }

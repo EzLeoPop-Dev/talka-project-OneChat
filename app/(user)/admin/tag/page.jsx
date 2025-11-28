@@ -56,7 +56,6 @@ export default function TagsPage() {
     localStorage.setItem("onechat_tags", JSON.stringify(updatedTags));
 
     try {
-<<<<<<< HEAD
       const savedChats = localStorage.getItem("app_board_chats");
       if (savedChats) {
         const chats = JSON.parse(savedChats);
@@ -69,18 +68,6 @@ export default function TagsPage() {
         // บันทึกแชทเวอร์ชันอัปเดตกลับลงไป
         localStorage.setItem("app_board_chats", JSON.stringify(updatedChats));
       }
-=======
-        const savedChats = localStorage.getItem("app_board_chats");
-        if (savedChats) {
-            const chats = JSON.parse(savedChats);
-            const updatedChats = chats.map(chat => ({
-                ...chat,
-                tags: (chat.tags || []).filter(tName => tName !== deleteTag.name)
-            }));
-            
-            localStorage.setItem("app_board_chats", JSON.stringify(updatedChats));
-        }
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     } catch (e) {
       console.error("Error removing tag from chats:", e);
     }

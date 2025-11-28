@@ -20,13 +20,8 @@ export default function AiPromptsPage() {
       setPrompts(DEFAULT_AI_PROMPTS);
     }
   }, []);
-<<<<<<< HEAD
 
   // 4. useEffect: บันทึกข้อมูลทุกครั้งที่ prompts เปลี่ยนแปลง (Add/Edit/Delete/Toggle)
-=======
-  
-  //บันทึกข้อมูลทุกครั้งที่ prompts เปลี่ยนแปลง (Add/Edit/Delete/Toggle)
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
   useEffect(() => {
     if (prompts.length > 0) {
       localStorage.setItem("onechat_prompts", JSON.stringify(prompts));

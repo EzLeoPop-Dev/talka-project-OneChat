@@ -1,10 +1,7 @@
 "use client";
 
 
-<<<<<<< HEAD
 // Imports
-=======
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
 import { useState, useEffect, useMemo } from "react"; 
 import { useSearchParams } from "next/navigation";
 
@@ -27,11 +24,8 @@ import { DEFAULT_TAGS } from "@/app/data/defaultTags";
 import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
 
 
-<<<<<<< HEAD
 //Constants & Config
 
-=======
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
 const CHANNEL_FILTER = "Line"; 
 const ALL_AVAILABLE_STATUS = ["New Chat", "Open", "Pending", "Closed"];
 
@@ -54,11 +48,8 @@ const processInitialData = (data) => {
     }));
 };
 
-<<<<<<< HEAD
 // Main Component
 
-=======
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
 export default function FacebookChatPage() {
     const searchParams = useSearchParams();
     
@@ -76,11 +67,7 @@ export default function FacebookChatPage() {
     const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
     const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
 
-<<<<<<< HEAD
     // Filters & Data
-=======
-    // Filters & Data 
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
     const [activeFilter, setActiveFilter] = useState("All");
     const [activeCompanyFilter, setActiveCompanyFilter] = useState(null);
     const [activityLogs, setActivityLogs] = useState([]); 
@@ -90,11 +77,8 @@ export default function FacebookChatPage() {
     const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "Admin", avatar: "A" });
 
 
-<<<<<<< HEAD
 
     // 4. Effects (Data Loading)
-=======
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
 
     // Load User
     useEffect(() => {

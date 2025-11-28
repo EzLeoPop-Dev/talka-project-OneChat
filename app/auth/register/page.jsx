@@ -10,7 +10,7 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,16 +32,16 @@ export default function RegisterPage() {
     e.preventDefault();
     let hasError = false;
 
-
+   
     if (!username.trim()) {
       setErrorUser("โปรดกรอกชื่อผู้ใช้");
       hasError = true;
     } else setErrorUser("");
 
-
+   
     if (!email.trim()) {
-      setErrorEmail("โปรดกรอกอีเมล");
-      hasError = true;
+        setErrorEmail("โปรดกรอกอีเมล");
+        hasError = true;
     } else setErrorEmail("");
 
 
@@ -105,11 +105,7 @@ export default function RegisterPage() {
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       />
 
-<<<<<<< HEAD
-      <div className="flex w-[1100px] h-[800px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
-=======
-      <div className="flex w-7xl h-[800px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
+      <div className="flex w-[1280px] h-[800px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
         <div className="flex flex-col justify-center pl-16 w-1/2 text-white relative z-10 font-inter">
           <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">
             JOIN US
@@ -124,22 +120,23 @@ export default function RegisterPage() {
         </div>
 
         <div className="flex justify-center items-center w-1/2 z-20">
-          <div className="w-[460px] bg-linear-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
+          <div className="w-[460px] bg-gradient-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
             <h1 className="text-[28px] font-semibold text-gray-800 mb-1">
               REGISTER
             </h1>
             <p className="text-gray-500 mb-2 text-sm">สมัครสมาชิกเพื่อใช้งาน</p>
 
             <form className="w-full space-y-5" onSubmit={handleRegister}>
-
+              
               {/* Username */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Username
                 </label>
                 <div
-                  className={`flex items-center border rounded-full px-3 py-2.5 ${errorUser ? "border-red-500" : "border-gray-300"
-                    } focus-within:ring-1 focus-within:ring-purple-400`}
+                  className={`flex items-center border rounded-full px-3 py-2.5 ${
+                    errorUser ? "border-red-500" : "border-gray-300"
+                  } focus-within:ring-1 focus-within:ring-purple-400`}
                 >
                   <User className="text-purple-600 mr-2" size={18} />
                   <input
@@ -163,8 +160,9 @@ export default function RegisterPage() {
                   Email
                 </label>
                 <div
-                  className={`flex items-center border rounded-full px-3 py-2.5 ${errorEmail ? "border-red-500" : "border-gray-300"
-                    } focus-within:ring-1 focus-within:ring-purple-400`}
+                  className={`flex items-center border rounded-full px-3 py-2.5 ${
+                    errorEmail ? "border-red-500" : "border-gray-300"
+                  } focus-within:ring-1 focus-within:ring-purple-400`}
                 >
                   <Mail className="text-purple-600 mr-2" size={18} />
                   <input
@@ -188,8 +186,9 @@ export default function RegisterPage() {
                   Password
                 </label>
                 <div
-                  className={`flex items-center border rounded-full px-3 py-2.5 ${errorPass ? "border-red-500" : "border-gray-300"
-                    } focus-within:ring-1 focus-within:ring-purple-400`}
+                  className={`flex items-center border rounded-full px-3 py-2.5 ${
+                    errorPass ? "border-red-500" : "border-gray-300"
+                  } focus-within:ring-1 focus-within:ring-purple-400`}
                 >
                   <Lock className="text-purple-600 mr-2" size={18} />
                   <input
@@ -208,7 +207,7 @@ export default function RegisterPage() {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-
+                
                 {errorPass && (
                   <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">
                     {errorPass}
@@ -222,8 +221,9 @@ export default function RegisterPage() {
                   Confirm Password
                 </label>
                 <div
-                  className={`flex items-center border rounded-full px-3 py-2.5 ${errorConfirm ? "border-red-500" : "border-gray-300"
-                    } focus-within:ring-1 focus-within:ring-purple-400`}
+                  className={`flex items-center border rounded-full px-3 py-2.5 ${
+                    errorConfirm ? "border-red-500" : "border-gray-300"
+                  } focus-within:ring-1 focus-within:ring-purple-400`}
                 >
                   <Lock className="text-purple-600 mr-2" size={18} />
                   <input
@@ -312,10 +312,11 @@ export default function RegisterPage() {
               <motion.div
 
                 className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg mb-2
-                ${popup.success
+                ${
+                  popup.success
                     ? "bg-green-100 text-green-600"
                     : "bg-red-100 text-red-500"
-                  }`}
+                }`}
               >
                 {popup.success ? (
                   <CheckCircle size={48} strokeWidth={2.5} />

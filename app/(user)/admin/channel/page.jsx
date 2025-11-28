@@ -56,10 +56,7 @@ export default function ChannelPage() {
           }}
         />
       )}
-<<<<<<< HEAD
        {/* Modal */}
-=======
->>>>>>> b14c07393c3c6b62e34935119de00688eec9ddea
       {showCompleteModal && (
         <div className="fixed inset-0 flex items-center justify-center rgba(32,41,59,0.37) backdrop-blur-sm z-50">
           <div className="bg-[rgba(32,41,59,0.95)] p-8 rounded-2xl border border-white/20 shadow-2xl text-center max-w-md">
