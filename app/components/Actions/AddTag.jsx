@@ -5,33 +5,34 @@ import { useState, useEffect } from "react";
 export default function AddTag({ onClose, availableTags = [], currentTargets = [], onToggleTag }) {
   
   const [tagsList, setTagsList] = useState(availableTags);
+  
   useEffect(() => {
     setTagsList(availableTags);
   }, [availableTags]);
 
-
+  // 🟢 [BACKEND NOTE]: เปลี่ยนจากการอ่าน localStorage เป็นการดึงข้อมูลจาก API (หากต้องการให้ Component นี้โหลดข้อมูลเอง)
   useEffect(() => {
-    const loadLatestTags = () => {
-        const savedTags = localStorage.getItem("onechat_tags");
-        if (savedTags) {
-            try {
-                const parsedTags = JSON.parse(savedTags);
-                setTagsList(parsedTags);
-            } catch(e) {
-                console.error("Error loading tags in modal:", e);
-            }
+    const loadLatestTags = async () => {
+        try {
+            // 🟢 [API CALL]: โค้ดตัวอย่างการยิง API เพื่อดึง Tags ล่าสุด
+            // const response = await fetch('/api/tags');
+            // const data = await response.json();
+            // setTagsList(data);
+
+            // หมายเหตุ: โดยปกติหาก Parent Component มีการดึงข้อมูลที่อัปเดตล่าสุด 
+            // และส่งผ่านมาทาง Props `availableTags` อยู่แล้ว Component นี้ก็อาจจะไม่ต้อง Fetch เองซ้ำครับ
+        } catch(e) {
+            console.error("Error loading tags from API:", e);
         }
     };
     
-    loadLatestTags();
+    // loadLatestTags();
 
-    const handleStorageChange = () => {
-        loadLatestTags();
-    };
-    
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    // 🟢 [BACKEND NOTE]: เดิมทีระบบใช้ window.addEventListener("storage", ...) เพื่อซิงค์ข้อมูลระหว่าง Tab
+    // ในระบบที่มี Backend แนะนำให้เปลี่ยนไปใช้ State Management อย่าง React Query / SWR (มีฟีเจอร์ Refetch on Focus)
+    // หรือถ้าต้องการ Real-time สดๆ ข้ามเครื่อง ให้ใช้ WebSocket (เช่น Socket.io, Pusher) แทนครับ
   }, []); 
+
 
   return (
     <div 

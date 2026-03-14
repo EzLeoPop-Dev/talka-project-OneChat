@@ -165,6 +165,9 @@ function ConfirmDeleteModal({ isOpen, teamName, onClose, onConfirm }) {
   );
 }
 
+// ==========================================================
+// Main Component
+// ==========================================================
 export default function TeamSettingPage() {
   const [teams, setTeams] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -183,58 +186,46 @@ export default function TeamSettingPage() {
 
   const [userOptions, setUserOptions] = useState([]);
 
+  // 🟢 [BACKEND NOTE]: โหลดรายชื่อ Users และ Teams จาก API
   useEffect(() => {
-    const storedUsers = localStorage.getItem("app_users");
-    const storedCurrentUser = localStorage.getItem("currentUser");
+    const fetchData = async () => {
+      try {
+        // 🟢 โค้ดตัวอย่างสำหรับการดึง Users และข้อมูลตัวเอง
+        // const [usersRes, meRes, teamsRes] = await Promise.all([
+        //   fetch('/api/users'),
+        //   fetch('/api/users/me'),
+        //   fetch('/api/teams')
+        // ]);
+        // const usersData = await usersRes.json();
+        // const meData = await meRes.json();
+        // const teamsData = await teamsRes.json();
 
-    let allUsers = [];
+        // 🟢 จัดการข้อมูล User Options เพื่อแสดงใน Checkbox
+        // let allUsers = [{ id: meData.id, name: meData.name, role: meData.role, isMe: true }];
+        // const others = usersData.map(u => ({ id: u.id, name: u.name, role: u.role, isMe: false }));
+        // setUserOptions([...allUsers, ...others]);
 
+        // 🟢 เซ็ตข้อมูล Teams
+        // setTeams(teamsData);
 
-    if (storedCurrentUser) {
-      const me = JSON.parse(storedCurrentUser);
+        // ======================================================
+        // [Mock Processing]: สร้างข้อมูลจำลองเพื่อให้ UI ทำงานได้
+        const mockMe = { id: 999, name: "My Name", role: 'Owner', isMe: true };
+        const mockOthers = [{ id: 1, name: "Employee A", role: "Employee", isMe: false }];
+        setUserOptions([mockMe, ...mockOthers]);
+        setTeams([]); 
+        // ======================================================
 
-      // เช็คทั้ง role และ permission
-      // ถ้า me.role มีค่า ให้ใช้ role, ถ้าไม่มี ให้ลอง permission, ถ้าไม่มีอีก ให้เป็น Owner
-      const myRole = me.role || me.permission || 'Owner';
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
 
-      // ชื่อเหมือนกัน เช็คทั้ง name และ username
-      const myName = me.name || me.username || "My Name";
+    fetchData();
+  }, [isAddOpen, isEditOpen]); // ดึงข้อมูลผู้ใช้ใหม่ทุกครั้งที่เปิด Modal
 
-      allUsers.push({ id: me.id, name: myName, role: myRole, isMe: true });
-    } else {
-      // Mock ถ้าไม่มี Login จริง
-      allUsers.push({ id: 999, name: "My Name", role: 'Owner', isMe: true });
-    }
-
-    if (storedUsers) {
-      const parsedUsers = JSON.parse(storedUsers);
-      // คนอื่นใช้ field 'permission' เป็นหลักตาม UserSettingPage แต่ถ้าไม่มีก็ลองดู role
-      const others = parsedUsers.map(u => ({
-        id: u.id,
-        name: u.name,
-        role: u.permission || u.role || "Member",
-        isMe: false
-      }));
-      allUsers = [...allUsers, ...others];
-    }
-
-    setUserOptions(allUsers);
-  }, [isAddOpen, isEditOpen]);
-
-  // Load Teams
-  useEffect(() => {
-    const storedTeams = localStorage.getItem("teams");
-    if (storedTeams) {
-      setTeams(JSON.parse(storedTeams));
-    }
-    setIsLoaded(true);
-  }, []);
-
-  // Save Teams
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("teams", JSON.stringify(teams));
-  }, [teams, isLoaded]);
 
   const resetForm = () => {
     setTeamName("");
@@ -264,25 +255,78 @@ export default function TeamSettingPage() {
     return true;
   };
 
-  const handleAddTeam = () => {
+  // 🟢 [BACKEND NOTE]: สร้างทีมใหม่ผ่าน API
+  const handleAddTeam = async () => {
     if (!validateTeam()) return;
-    const newTeam = {
-      id: crypto.randomUUID(),
+    
+    const newTeamPayload = {
       name: teamName.trim(),
       desc: teamDesc.trim(),
       members: teamMembers,
       platforms: platforms,
-      createdAt: new Date().toISOString(),
     };
-    setTeams((prev) => [...prev, newTeam]);
-    resetForm();
-    setIsAddOpen(false);
+
+    try {
+        // 🟢 [API CALL]:
+        // const response = await fetch('/api/teams', {
+        //    method: 'POST',
+        //    body: JSON.stringify(newTeamPayload)
+        // });
+        // const createdTeam = await response.json();
+
+        // สมมติว่าได้ response กลับมา
+        const newTeam = { ...newTeamPayload, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+        
+        setTeams((prev) => [...prev, newTeam]);
+        resetForm();
+        setIsAddOpen(false);
+    } catch (error) {
+        console.error("Error adding team", error);
+    }
   };
 
-  const handleDelete = (id) => {
-    setTeams((prev) => prev.filter((team) => team.id !== id));
-    setIsDeleteOpen(false);
+  // 🟢 [BACKEND NOTE]: แก้ไขทีมผ่าน API
+  const handleSaveEdit = async () => {
+    if (!validateTeam(true)) return;
+
+    const updatePayload = {
+        name: teamName.trim(),
+        desc: teamDesc.trim(),
+        members: teamMembers,
+        platforms: platforms,
+    };
+
+    try {
+        // 🟢 [API CALL]:
+        // await fetch(`/api/teams/${editTeam.id}`, {
+        //    method: 'PUT',
+        //    body: JSON.stringify(updatePayload)
+        // });
+
+        setTeams((prev) =>
+          prev.map((t) => (t.id === editTeam.id ? { ...t, ...updatePayload } : t))
+        );
+        resetForm();
+        setEditTeam(null);
+        setIsEditOpen(false);
+    } catch (error) {
+        console.error("Error updating team", error);
+    }
   };
+
+  // 🟢 [BACKEND NOTE]: ลบทีมผ่าน API
+  const handleDelete = async (id) => {
+    try {
+        // 🟢 [API CALL]:
+        // await fetch(`/api/teams/${id}`, { method: 'DELETE' });
+
+        setTeams((prev) => prev.filter((team) => team.id !== id));
+        setIsDeleteOpen(false);
+    } catch (error) {
+         console.error("Error deleting team", error);
+    }
+  };
+
 
   const handleOpenDelete = (team) => {
     setDeleteTeam(team);
@@ -298,26 +342,10 @@ export default function TeamSettingPage() {
     setIsEditOpen(true);
   };
 
-  const handleSaveEdit = () => {
-    if (!validateTeam(true)) return;
-    setTeams((prev) =>
-      prev.map((t) =>
-        t.id === editTeam.id
-          ? {
-            ...t,
-            name: teamName.trim(),
-            desc: teamDesc.trim(),
-            members: teamMembers,
-            platforms: platforms,
-          }
-          : t
-      )
-    );
-    resetForm();
-    setEditTeam(null);
-    setIsEditOpen(false);
-  };
 
+  // ==========================================================
+  // UI ส่วนล่างนี้ไม่มีการดัดแปลงใดๆ โครงสร้าง Component ยังอยู่ครบ 100%
+  // ==========================================================
   return (
     <>
       <TeamModal

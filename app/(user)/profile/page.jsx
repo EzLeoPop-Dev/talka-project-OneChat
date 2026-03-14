@@ -1,6 +1,6 @@
 "use client";
 
-import PageWrapper from "@/app/components/PageWrapper";
+import PageWrapper from "@/app/components/Shared/PageWrapper";
 
 export default function MyProfile() {
     return (

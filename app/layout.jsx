@@ -1,6 +1,6 @@
 import "./assets/css/globals.css"
 import "./assets/css/other.css"
-import PageTransition from "./components/PageTransition.jsx"
+import PageTransition from "./components/Shared/PageTransition.jsx"
 
 export const metadata = {
   title: "Talka",

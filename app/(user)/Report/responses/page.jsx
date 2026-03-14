@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -13,13 +13,13 @@ import {
 import { Info, Calendar } from "lucide-react";
 import "./Responses.css";
 
+// 🟢 [BACKEND NOTE]: ลบ import ไฟล์ mock data นี้ออกเมื่อทำการต่อ API จริง
 import { calenderData } from "../../../data/calenderData";
 
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-// UI Helpers
 const Button = ({ children, className = "", ...props }) => (
   <button
     className={`px-3 py-2 rounded-md border border-[rgba(254,253,253,0.5)] text-white hover:bg-[rgba(255,255,255,0.1)] transition ${className}`}
@@ -61,16 +61,26 @@ const formatDateText = (date) =>
     year: "numeric",
   });
 
-// Main Component
+
+
 export default function ResponsesReport() {
-  const defaultStart = calenderData?.[calenderData.length - 5]?.date || "2025-10-26";
-  const defaultEnd = calenderData?.[calenderData.length - 1]?.date || "2025-11-02";
+  const defaultStart = "2025-10-26";
+  const defaultEnd = "2025-11-02";
 
   const [range, setRange] = useState([
     { startDate: new Date(defaultStart), endDate: new Date(defaultEnd), key: "selection" },
   ]);
   const [showCalendar, setShowCalendar] = useState(false);
   const calendarRef = useRef(null);
+
+  // 🟢 [BACKEND NOTE]: สร้าง State รับข้อมูลที่มาจาก API 
+  const [filteredData, setFilteredData] = useState([]);
+  const [avgTime, setAvgTime] = useState(0);
+  const [avgResponse, setAvgResponse] = useState(0);
+  const [avgResponsePercent, setAvgResponsePercent] = useState(0);
+  const [timeBreakdown, setTimeBreakdown] = useState([]);
+  const [responseBreakdown, setResponseBreakdown] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -80,45 +90,76 @@ export default function ResponsesReport() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // compute filteredData using range
-  const filteredData = useMemo(() => {
-    const s = new Date(range[0].startDate);
-    const e = new Date(range[0].endDate);
-    e.setHours(23, 59, 59, 999);
-    return calenderData
-      .filter((d) => {
-        const dd = new Date(d.date);
-        return dd >= s && dd <= e;
-      })
-      .map((d) => ({
-        date: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        avgTime: d.avgTime,
-        avgResponse: d.avgResponse,
-      }));
+  // 🟢 [BACKEND NOTE]: useEffect ตัวนี้ทำงานเมื่อ range เปลี่ยน เพื่อไปขอข้อมูลจาก Server
+  useEffect(() => {
+    const fetchResponseReport = async () => {
+      setIsLoading(true);
+      try {
+        const s = new Date(range[0].startDate);
+        const e = new Date(range[0].endDate);
+        e.setHours(23, 59, 59, 999);
+
+        // 🟢 โค้ดตัวอย่างการยิง API
+        // const response = await fetch(`/api/reports/responses?start=${s.toISOString()}&end=${e.toISOString()}`);
+        // const data = await response.json();
+        // 
+        // setFilteredData(data.chartData);
+        // setAvgTime(data.averageTimeSeconds);
+        // setAvgResponse(data.averageResponseCount);
+        // setAvgResponsePercent(data.averageResponsePercent);
+        // setTimeBreakdown(data.timeBreakdownTable);
+        // setResponseBreakdown(data.responseBreakdownTable);
+
+        // =========================================================
+        // [Mock Processing]: ประมวลผลข้อมูลจำลองระหว่างรอ Backend (ลบออกเมื่อเชื่อม API)
+        const mockFiltered = calenderData
+          .filter((d) => {
+            const dd = new Date(d.date);
+            return dd >= s && dd <= e;
+          })
+          .map((d) => ({
+            date: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+            avgTime: d.avgTime,
+            avgResponse: d.avgResponse,
+          }));
+
+        setFilteredData(mockFiltered);
+
+        const len = mockFiltered.length || 1;
+        const calculatedAvgTime = mockFiltered.reduce((sum, item) => sum + item.avgTime, 0) / len;
+        const calculatedAvgRes = mockFiltered.reduce((sum, item) => sum + item.avgResponse, 0) / len;
+        
+        setAvgTime(calculatedAvgTime);
+        setAvgResponse(calculatedAvgRes);
+
+        const maxResponse = Math.max(...mockFiltered.map((item) => item.avgResponse), 1);
+        setAvgResponsePercent((calculatedAvgRes / maxResponse) * 100);
+
+        // จำลองข้อมูลตาราง breakdown
+        const mockTable = [
+          { label: "< 30s", value: `${Math.round(Math.random() * 10)}%` },
+          { label: "30s - 2m", value: `${Math.round(Math.random() * 10)}%` },
+          { label: "2m - 5m", value: `${Math.round(Math.random() * 10)}%` },
+          { label: "5m - 10m", value: `${Math.round(Math.random() * 10)}%` },
+          { label: "10m - 30m", value: `${Math.round(Math.random() * 10)}%` },
+          { label: "30m - 1h", value: `${Math.round(Math.random() * 10)}%` },
+          { label: "> 1h", value: `${Math.round(Math.random() * 10)}%` },
+        ];
+        setTimeBreakdown(mockTable);
+        setResponseBreakdown(mockTable); 
+
+      } catch (error) {
+        console.error("Error fetching responses report:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchResponseReport();
   }, [range]);
 
+
   const safeData = filteredData.length > 0 ? filteredData : [{ date: "", avgTime: 0, avgResponse: 0 }];
-
-  const avgTime =
-    filteredData.reduce((sum, item) => sum + item.avgTime, 0) /
-    (filteredData.length || 1);
-
-  const avgResponse =
-    filteredData.reduce((sum, item) => sum + item.avgResponse, 0) /
-    (filteredData.length || 1);
-
-  const maxResponse = Math.max(...filteredData.map((item) => item.avgResponse), 1);
-  const avgResponsePercent = (avgResponse / maxResponse) * 100;
-
-  const breakdown = [
-    { label: "< 30s", value: `${Math.round(Math.random() * 10)}%` },
-    { label: "30s - 2m", value: `${Math.round(Math.random() * 10)}%` },
-    { label: "2m - 5m", value: `${Math.round(Math.random() * 10)}%` },
-    { label: "5m - 10m", value: `${Math.round(Math.random() * 10)}%` },
-    { label: "10m - 30m", value: `${Math.round(Math.random() * 10)}%` },
-    { label: "30m - 1h", value: `${Math.round(Math.random() * 10)}%` },
-    { label: "> 1h", value: `${Math.round(Math.random() * 10)}%` },
-  ];
 
   const infoText = {
     avgTime: "เวลาตอบกลับเฉลี่ยของทุกการสนทนาในช่วงเวลาที่เลือก",
@@ -227,7 +268,7 @@ export default function ResponsesReport() {
                 </tr>
               </thead>
               <tbody>
-                {breakdown.map((item, i) => (
+                {timeBreakdown.map((item, i) => (
                   <tr key={i} className="border-b border-gray-500/20">
                     <td className="py-2 px-4">{item.label}</td>
                     <td className="text-right py-2 px-4">{item.value}</td>
@@ -295,7 +336,7 @@ export default function ResponsesReport() {
                 </tr>
               </thead>
               <tbody>
-                {breakdown.map((item, i) => (
+                {responseBreakdown.map((item, i) => (
                   <tr key={i} className="border-b border-gray-500/20">
                     <td className="py-2 px-4">{item.label}</td>
                     <td className="text-right py-2 px-4">{item.value}</td>

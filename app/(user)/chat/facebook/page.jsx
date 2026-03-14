@@ -3,19 +3,21 @@
 import { useState, useEffect, useMemo, Suspense } from "react"; 
 import { useSearchParams } from "next/navigation";
 
-import ChatList from "@/app/components/ChatList.jsx";
-import ChatMessage from '@/app/components/ChatMessage.jsx';
-import ChatFitter from "@/app/components/ChatFitter";
-import ControlPanel from "@/app/components/ControlPanel";
-import AddTag from "@/app/components/AddTag";
-import ContactDetails from "@/app/components/ChatContactDetail"; 
-import AddNote from "@/app/components/AddNote";
-import AiSuppBtn from "@/app/components/AiSuppBtn";
-import ChangeStatus from "@/app/components/Changestatus"; 
-import AiAssistantPanel from "@/app/components/AiAssistantPanel";
-import ActivityLogPanel from "@/app/components/ActivityLogPanel";
+import ChatList from "@/app/components/Chat/ChatList.jsx";
+import ChatMessage from '@/app/components/Chat/ChatMessage.jsx';
+import ChatFitter from "@/app/components/Chat/ChatFitter";
+import ControlPanel from "@/app/components/Actions/ControlPanel";
+import AddTag from "@/app/components/Actions/AddTag";
+import ContactDetails from "@/app/components/Chat/ChatContactDetail"; 
+import AddNote from "@/app/components/Actions/AddNote";
+import AiSuppBtn from "@/app/components/AI/AiSuppBtn";
+import ChangeStatus from "@/app/components/Actions/Changestatus"; 
+import AiAssistantPanel from "@/app/components/AI/AiAssistantPanel";
+import ActivityLogPanel from "@/app/components/Actions/ActivityLogPanel";
 
 import "@/app/assets/css/other.css";
+
+// 🟢 [BACKEND NOTE]: ลบการ Import MockData เหล่านี้ออกเมื่อเปลี่ยนไปดึงข้อมูลจาก API จริง
 import { unifiedMockData } from '@/app/data/mockData';
 import { DEFAULT_TAGS } from "@/app/data/defaultTags";
 import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
@@ -45,11 +47,13 @@ const processInitialData = (data) => {
 function FacebookChatContent() {
     const searchParams = useSearchParams();
     
-    //States
+    // 🟢 [BACKEND NOTE]: เปลี่ยนค่าเริ่มต้นจาก processInitialData(unifiedMockData) เป็น [] (อาเรย์ว่าง) เพื่อรอรับจาก API
     const [chats, setChats] = useState(() => processInitialData(unifiedMockData));
     const [selectedChatId, setSelectedChatId] = useState(null);
     const selectedChat = chats.find(chat => chat.id === selectedChatId);
-    const [isLoaded, setIsLoaded] = useState(false); 
+    
+    // 🟢 [BACKEND NOTE]: เริ่มต้นที่ false เมื่อมี API เพื่อให้โชว์ Loading ระหว่างดึงข้อมูล
+    const [isLoaded, setIsLoaded] = useState(true); 
 
     // Panels 
     const [isAddTagModalOpen, setIsAddTagModalOpen] = useState(false);
@@ -63,77 +67,29 @@ function FacebookChatContent() {
     const [activeFilter, setActiveFilter] = useState("All");
     const [activeCompanyFilter, setActiveCompanyFilter] = useState(null);
     const [activityLogs, setActivityLogs] = useState([]); 
-    const [activePrompts, setActivePrompts] = useState([]);
-    const [availableAgents, setAvailableAgents] = useState([]);
-    const [availableTags, setAvailableTags] = useState([]);
-    const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "Admin", avatar: "A" });
+    
+    // 🟢 [BACKEND NOTE]: ข้อมูลเหล่านี้ควร fetch มาจาก Database ของระบบ (เช่น GET /tags, GET /prompts)
+    const [activePrompts, setActivePrompts] = useState(DEFAULT_AI_PROMPTS.filter(p => p.active === true));
+    const [availableAgents, setAvailableAgents] = useState(DEFAULT_AI_AGENTS);
+    const [availableTags, setAvailableTags] = useState(DEFAULT_TAGS);
+    
+    // 🟢 [BACKEND NOTE]: ดึงข้อมูลผู้ใช้จาก Token หรือ API /me 
+    const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "Owner", avatar: "A" });
 
-    // Load User
+    // 🟢 [BACKEND NOTE]: ใช้ useEffect ตัวเดียวสำหรับดึงข้อมูลทั้งหมดเมื่อเข้าหน้าเว็บ
+    /*
     useEffect(() => {
-        try {
-            const storedUser = localStorage.getItem("currentUser");
-            if (storedUser) {
-                const user = JSON.parse(storedUser);
-                setCurrentUser({
-                    name: user.username || "Admin",
-                    role: user.role || "Employee",
-                    avatar: (user.username || "A").charAt(0).toUpperCase()
-                });
-            }
-        } catch (e) { console.error(e); }
-    }, []);
-
-    // Load/Save Chat Data
-    useEffect(() => {
-        const savedChats = localStorage.getItem("onechat_data"); 
-        if (savedChats) {
-            try { setChats(JSON.parse(savedChats)); } catch (e) { console.error(e); }
-        } else {
-            setChats(processInitialData(unifiedMockData));
-            localStorage.setItem("onechat_data", JSON.stringify(processInitialData(unifiedMockData)));
+        const fetchAllData = async () => {
+            try {
+                // ตัวอย่าง: const resChats = await fetch('/api/chats?channel=Facebook');
+                // const chatData = await resChats.json();
+                // setChats(processInitialData(chatData));
+                setIsLoaded(true);
+            } catch (err) { console.error(err); }
         }
-        setIsLoaded(true); 
+        fetchAllData();
     }, []);
-
-    useEffect(() => {
-        if (isLoaded) {
-            localStorage.setItem("onechat_data", JSON.stringify(chats));
-            
-            window.dispatchEvent(new Event("chat-data-updated"));
-        }
-    }, [chats, isLoaded]);
-
-    // Load Agents
-    useEffect(() => {
-        const savedAgents = localStorage.getItem("onechat_ai_agents");
-        if (savedAgents) setAvailableAgents(JSON.parse(savedAgents));
-        else setAvailableAgents(DEFAULT_AI_AGENTS);
-    }, []);
-
-    // Load Prompts
-    useEffect(() => {
-        const savedPrompts = localStorage.getItem("onechat_prompts");
-        let allPrompts = savedPrompts ? JSON.parse(savedPrompts) : DEFAULT_AI_PROMPTS;
-        setActivePrompts(allPrompts.filter(p => p.active === true));
-    }, []);
-
-    // Load Tags
-    useEffect(() => {
-        const savedTags = localStorage.getItem("onechat_tags");
-        if (savedTags) setAvailableTags(JSON.parse(savedTags));
-        else setAvailableTags(DEFAULT_TAGS);
-    }, []);
-
-    // Load/Save Logs
-    useEffect(() => {
-        const savedLogs = localStorage.getItem("onechat_activity_logs");
-        if (savedLogs) setActivityLogs(JSON.parse(savedLogs));
-    }, []);
-
-    useEffect(() => {
-        if (isLoaded && activityLogs.length > 0) 
-            localStorage.setItem("onechat_activity_logs", JSON.stringify(activityLogs));
-    }, [activityLogs, isLoaded]);
+    */
 
     useEffect(() => {
         if (isLoaded) {
@@ -144,32 +100,14 @@ function FacebookChatContent() {
             
                 if (targetChat) {
                     setSelectedChatId(idNum);
-
                     if (targetChat.status === 'New Chat') {
-                        setChats(prev => prev.map(c => 
-                            c.id === idNum ? { ...c, status: 'Open', unreadCount: 0 } : c
-                        ));
+                        // เปลี่ยนสถานะเป็น Open ทันทีที่กดเปิดแชทใหม่
+                        handleUpdateStatus('Open'); 
                     }
                 }
             }
         }
     }, [searchParams, isLoaded, chats]);
-
-    useEffect(() => {
-        if (isLoaded && selectedChatId) {
-            const currentChat = chats.find(c => c.id === selectedChatId);
-            
-            if (currentChat && currentChat.status === "New Chat") {
-                setChats(prevChats => 
-                    prevChats.map(chat => 
-                        chat.id === selectedChatId 
-                            ? { ...chat, status: "Open", unreadCount: 0 } 
-                            : chat
-                    )
-                );
-            }
-        }
-    }, [selectedChatId, isLoaded, chats]);
 
     const addLog = (chatId, type, detail) => {
         if (!chatId) return;
@@ -179,6 +117,7 @@ function FacebookChatContent() {
             timestamp: new Date().toISOString(),
             by: currentUser.name
         };
+        // 🟢 [BACKEND NOTE]: ควรยิง POST ไปเซฟ Log ที่ Backend ด้วย
         setActivityLogs(prev => [...prev, newLog]);
     };
 
@@ -206,36 +145,45 @@ function FacebookChatContent() {
     const handleOpenActivityLog = () => { if(selectedChatId) { closeAllPanels(); setIsActivityLogOpen(true); } else alert("Select a chat first."); };
     const handleCloseActivityLog = () => setIsActivityLogOpen(false);
 
-
-    //Logic Updates
-    const handleToggleTag = (tagName) => {
+    // ==========================================================
+    // 🟢 [BACKEND NOTE]: เปลี่ยนฟังก์ชันด้านล่างนี้ให้เป็น async/await เพื่อยิง API
+    // ==========================================================
+    const handleToggleTag = async (tagName) => {
         if (!selectedChat) return;
+        // 🟢 [BACKEND NOTE]: await fetch(`/api/chats/${selectedChat.id}/tags`, { method: 'PATCH', ... });
+        
         setChats(prev => prev.map(chat => {
             if (chat.id === selectedChat.id) {
                 const currentTags = Array.isArray(chat.tags) ? chat.tags : [];
                 const isSelected = currentTags.includes(tagName);
                 addLog(chat.id, 'tag', isSelected ? `Removed tag "${tagName}"` : `Changed tag to "${tagName}"`);
-                const newTags = isSelected ? [] : [tagName];
+                const newTags = isSelected ? [] : [tagName]; // ถ้าเลือกได้แค่ 1 tag
                 return { ...chat, tags: newTags }; 
             }
             return chat; 
         }));
     };
 
-    const handleUpdateStatus = (newStatus) => {
+    const handleUpdateStatus = async (newStatus) => {
         if (!selectedChat) return;
+        // 🟢 [BACKEND NOTE]: await fetch(`/api/chats/${selectedChat.id}/status`, { method: 'PATCH', body: JSON.stringify({ status: newStatus }) });
+        
         if (selectedChat.status !== newStatus) addLog(selectedChat.id, 'status', `Changed status to "${newStatus}"`);
         setChats(prev => prev.map(c => c.id === selectedChat.id ? { ...c, status: newStatus } : c));
     };
 
-    const handleUpdateContactInfo = (contactId, info) => {
+    const handleUpdateContactInfo = async (contactId, info) => {
         const key = Object.keys(info)[0];
+        // 🟢 [BACKEND NOTE]: await fetch(`/api/contacts/${contactId}`, { method: 'PUT', body: JSON.stringify(info) });
+
         addLog(contactId, 'contact', `Updated ${key} to "${info[key]}"`);
         setChats(prev => prev.map(c => c.id === contactId ? { ...c, ...info } : c));
     };
 
-    const handleAddNote = (noteData) => {
+    const handleAddNote = async (noteData) => {
         if (!selectedChatId) return;
+        // 🟢 [BACKEND NOTE]: await fetch(`/api/chats/${selectedChatId}/notes`, { method: 'POST', body: JSON.stringify(noteData) });
+
         addLog(selectedChatId, 'note', `Added note: "${noteData.title}"`);
         setChats(prev => prev.map(c => {
             if (c.id === selectedChatId) {
@@ -246,16 +194,20 @@ function FacebookChatContent() {
         }));
     };
 
-    const handleDeleteNote = (noteId) => {
+    const handleDeleteNote = async (noteId) => {
         if (!selectedChatId) return;
+        // 🟢 [BACKEND NOTE]: await fetch(`/api/notes/${noteId}`, { method: 'DELETE' });
+
         addLog(selectedChatId, 'note', `Deleted a note`);
         setChats(prev => prev.map(c => 
             c.id === selectedChatId ? { ...c, notes: c.notes.filter(n => n.id !== noteId) } : c
         ));
     };
 
-    const handleSendMessage = (chatId, text) => {
+    const handleSendMessage = async (chatId, text) => {
         if (!chatId || !text.trim()) return;
+        // 🟢 [BACKEND NOTE]: await fetch(`/api/chats/${chatId}/messages`, { method: 'POST', body: JSON.stringify({ text }) });
+
         addLog(chatId, 'message', `Sent message: "${text.substring(0, 20)}..."`);
         setChats(prev => prev.map(c => {
             if (c.id === chatId) {
@@ -268,6 +220,7 @@ function FacebookChatContent() {
 
     const handleSelectAiAgent = (chatId, agent) => {
         if (!chatId) return;
+        // 🟢 [BACKEND NOTE]: อัปเดต AI Agent ใน Database ถ้าจำเป็น
         setChats(prev => prev.map(c => c.id === chatId ? { ...c, activeAiAgent: agent, isAiMode: !!agent } : c));
     };
 
@@ -278,10 +231,10 @@ function FacebookChatContent() {
 
     const availableCompanies = useMemo(() => [...new Set(chats.map(c => c.company).filter(Boolean))], [chats]);
 
-    // Filter 
+    // 🟢 ส่วนนี้คงไว้ กรองเฉพาะ Facebook
     const channelFilteredChats = chats.filter(chat => chat.channel === CHANNEL_FILTER);
 
-    //Filter by Status & Company
+    // Filter by Status & Company
     const finalFilteredChats = channelFilteredChats
         .filter(chat => {
             const statusMatch = activeFilter === "All" || chat.status === activeFilter;
@@ -293,9 +246,12 @@ function FacebookChatContent() {
             return (statusPriority[a.status] || 2) - (statusPriority[b.status] || 2);
         });
 
-// render
+    // render
     if (!isLoaded) return <div className="text-white text-center mt-20 animate-pulse">Loading...</div>;
 
+    // ==========================================================
+    // UI ส่วนล่างนี้ไม่มีการดัดแปลงใดๆ โครงสร้าง Component ยังอยู่ครบ
+    // ==========================================================
     return (
         <div className="container mx-auto ">
             

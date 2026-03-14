@@ -1,7 +1,7 @@
-import DashboardStats from "@/app/components/DashboardStats";
-import DashboardContacts from "@/app/components/DashboardContacts";
-import DashboardTeamMembers from "@/app/components/DashboardTeamMembers";
-import DashboardConversation from "@/app/components/DashboardConversation"; 
+import DashboardStats from "@/app/components/Dashboard/DashboardStats";
+import DashboardContacts from "@/app/components/Dashboard/DashboardContacts";
+import DashboardTeamMembers from "@/app/components/Dashboard/DashboardTeamMembers";
+import DashboardConversation from "@/app/components/Dashboard/DashboardConversation"; 
 
 export default function page() {
   return (

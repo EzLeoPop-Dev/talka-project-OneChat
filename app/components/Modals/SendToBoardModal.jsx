@@ -6,37 +6,43 @@ export default function SendToBoardModal({ onClose, chat }) {
     const [selectedColId, setSelectedColId] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    // 🟢 [BACKEND NOTE]: โหลดรายชื่อ Column ของ Board จาก API
     useEffect(() => {
-        const savedColumns = localStorage.getItem("app_board_columns");
-        if (savedColumns) {
+        const fetchBoardColumns = async () => {
             try {
-                const parsed = JSON.parse(savedColumns);
-                setColumns(parsed);
-                if (parsed.length > 0) setSelectedColId(parsed[0].id);
-            } catch (e) {
-                console.error("Error loading columns", e);
+                // 🟢 [API CALL]: ขอข้อมูล Column ทั้งหมด
+                // const response = await fetch('/api/board/columns');
+                // const data = await response.json();
+                // setColumns(data);
+                // if (data.length > 0) setSelectedColId(data[0].id);
+
+                // ==========================================
+                // [Mock Processing] ข้อมูลจำลองระหว่างรอ Backend
+                const defaultCols = [
+                    { id: "col-1", title: "Inbox" },
+                    { id: "col-2", title: "In Progress" },
+                    { id: "col-3", title: "Done" }
+                ];
+                setColumns(defaultCols);
+                setSelectedColId("col-1");
+                // ==========================================
+
+            } catch (error) {
+                console.error("Error loading columns", error);
             }
-        } else {
-            const defaultCols = [{ id: "col-1", title: "Inbox" }];
-            setColumns(defaultCols);
-            setSelectedColId("col-1");
-        }
+        };
+
+        fetchBoardColumns();
     }, []);
 
-    const handleConfirm = () => {
+    // 🟢 [BACKEND NOTE]: ส่งข้อมูลแชทเข้า Board ผ่าน API
+    const handleConfirm = async () => {
         if (!selectedColId || !chat) return;
         setIsLoading(true);
 
         try {
-            const savedChats = localStorage.getItem("app_board_chats");
-            let boardChats = savedChats ? JSON.parse(savedChats) : [];
-
-            // Check existing
-            const existingIndex = boardChats.findIndex(c => c.id == chat.id);
-
-            const newBoardChat = {
-                ...chat,
-                id: chat.id,
+            const payload = {
+                chatId: chat.id,
                 columnId: selectedColId,
                 platform: chat.platform || (chat.channel === 'Line' ? 'line' : 'facebook'),
                 lastMessage: chat.messages && chat.messages.length > 0 
@@ -44,39 +50,29 @@ export default function SendToBoardModal({ onClose, chat }) {
                     : (chat.message || "No messages"),
                 tags: chat.tags || [],
                 notes: chat.notes || [],
-                messages: chat.messages || []
             };
 
-            if (existingIndex !== -1) {
-                boardChats[existingIndex] = newBoardChat;
-            } else {
-                boardChats.push(newBoardChat);
-            }
+            // 🟢 [API CALL 1]: บันทึก/อัปเดตแชทลงใน Board
+            // await fetch('/api/board/chats', {
+            //     method: 'POST', // หรือ PUT ถ้าเป็นการย้ายคอลัมน์
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(payload)
+            // });
 
-            localStorage.setItem("app_board_chats", JSON.stringify(boardChats));
+            // 🟢 [API CALL 2]: สร้าง Activity Log ว่ามีการย้ายแชท
+            // const targetCol = columns.find(c => c.id === selectedColId);
+            // const colName = targetCol ? targetCol.title : "Board";
+            // await fetch('/api/activity-logs', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         chatId: chat.id,
+            //         type: 'status', 
+            //         detail: `Moved chat to list: "${colName}"`,
+            //     })
+            // });
 
-            // บันทึก Activity Log
-            const savedLogs = localStorage.getItem("onechat_activity_logs");
-            const activityLogs = savedLogs ? JSON.parse(savedLogs) : [];
-            const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-            
-            const targetCol = columns.find(c => c.id === selectedColId);
-            const colName = targetCol ? targetCol.title : "Board";
-
-            const newLog = {
-                id: Date.now(),
-                chatId: chat.id,
-                type: 'status', 
-                detail: `Moved chat to list: "${colName}"`,
-                timestamp: new Date().toISOString(),
-                by: currentUser.username || currentUser.name || "Admin" 
-            };
-
-            activityLogs.push(newLog);
-            localStorage.setItem("onechat_activity_logs", JSON.stringify(activityLogs));
-
-            window.dispatchEvent(new Event("storage"));
-            
+            // จำลอง Delay เพื่อโชว์ปุ่ม Saving...
             setTimeout(() => {
                 setIsLoading(false);
                 onClose(); 
@@ -85,6 +81,7 @@ export default function SendToBoardModal({ onClose, chat }) {
         } catch (error) {
             console.error("Error sending to board:", error);
             setIsLoading(false);
+            alert("Failed to send to board.");
         }
     };
 

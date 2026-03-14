@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -11,14 +11,13 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Info, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-import { calenderData } from "../../../data/calenderData";
 
-
+// 🟢 [BACKEND NOTE]: นำไฟล์ Local ออกแล้ว ไม่ต้อง import calenderData จากเครื่อง
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-// UI Helpers
+
 const Button = ({ children, className = "", ...props }) => (
   <button
     className={`px-3 py-2 rounded-md border border-[rgba(254,253,253,0.5)] text-white hover:bg-[rgba(255,255,255,0.1)] transition ${className}`}
@@ -125,10 +124,21 @@ const isoWithRandomTime = (dateStr, index = 0) => {
   return d.toISOString();
 };
 
+// 🟢 [BACKEND NOTE]: Mock ข้อมูลจำลองสำหรับทดสอบ UI (ลบทิ้งได้เลยเมื่อมี API)
+const mockCalenderData = [
+  { date: "2025-10-26", opened: 10, closed: 5, sent: 20, delivered: 18, read: 15, failed: 2 },
+  { date: "2025-10-27", opened: 15, closed: 8, sent: 25, delivered: 24, read: 20, failed: 1 },
+  { date: "2025-10-28", opened: 8, closed: 12, sent: 30, delivered: 28, read: 25, failed: 2 },
+  { date: "2025-10-29", opened: 20, closed: 15, sent: 40, delivered: 35, read: 30, failed: 5 },
+];
+
+
+// ==========================================================
 // Main Component
+// ==========================================================
 export default function MessagesPage() {
-  const defaultStart = calenderData?.[calenderData.length - 5]?.date || "2025-10-26";
-  const defaultEnd = calenderData?.[calenderData.length - 1]?.date || "2025-10-29";
+  const defaultStart = "2025-10-26";
+  const defaultEnd = "2025-10-29";
 
   const [range, setRange] = useState([
     { startDate: new Date(defaultStart), endDate: new Date(defaultEnd), key: "selection" },
@@ -142,6 +152,13 @@ export default function MessagesPage() {
   const [failedCurrentPage, setFailedCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // 🟢 [BACKEND NOTE]: สร้าง States สำหรับรับข้อมูลจาก API (แทนการใช้ useMemo กับไฟล์ Local)
+  const [filteredDays, setFilteredDays] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [incomingMessagesList, setIncomingMessagesList] = useState([]);
+  const [outgoingMessagesList, setOutgoingMessagesList] = useState([]);
+  const [failedMessagesList, setFailedMessagesList] = useState([]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (calendarRef.current && !calendarRef.current.contains(event.target)) setShowCalendar(false);
@@ -150,99 +167,95 @@ export default function MessagesPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filteredDays = useMemo(() => {
-    const s = range[0].startDate;
-    const e = range[0].endDate;
-    e.setHours(23, 59, 59, 999);
-    return calenderData.filter((d) => {
-      const dd = new Date(d.date);
-      return dd >= s && dd <= e;
-    });
+  // 🟢 [BACKEND NOTE]: useEffect ตัวนี้ทำหน้าที่ดึงข้อมูลเมื่อ Range (วันที่) มีการเปลี่ยนแปลง
+  useEffect(() => {
+    const fetchReportData = async () => {
+      try {
+        const startDateStr = range[0].startDate.toISOString();
+        const endDateStr = range[0].endDate.toISOString();
+
+        // 🟢 [API CALL]: โค้ดดึงข้อมูลจริง
+        // const response = await fetch(`/api/reports/messages?start=${startDateStr}&end=${endDateStr}`);
+        // const data = await response.json();
+        // setFilteredDays(data.summaryData);
+        // setChartData(data.chartData);
+        // setIncomingMessagesList(data.incomingLogs);
+        // setOutgoingMessagesList(data.outgoingLogs);
+        // setFailedMessagesList(data.failedLogs);
+
+        // =======================================================
+        // [Mock Processing]: สร้างข้อมูลชั่วคราวเพื่อให้หน้าเว็บยังคงใช้งานได้ (ลบออกตอนต่อ API)
+        const s = range[0].startDate;
+        const e = new Date(range[0].endDate);
+        e.setHours(23, 59, 59, 999);
+
+        const currentFilteredDays = mockCalenderData.filter((d) => {
+          const dd = new Date(d.date);
+          return dd >= s && dd <= e;
+        });
+
+        setFilteredDays(currentFilteredDays);
+
+        setChartData(currentFilteredDays.map((d) => ({
+          date: formatDisplayDayMonth(d.date),
+          isoDate: d.date,
+          sent: d.sent,
+          delivered: d.delivered,
+          read: d.read,
+          failed: d.failed,
+          incoming: d.opened,
+          outgoing: d.sent,
+        })));
+
+        const contacts = [
+          { id: "C001", name: "Alice" }, { id: "C002", name: "Bob" },
+          { id: "C003", name: "Charlie" }, { id: "C004", name: "David" },
+        ];
+        const channels = ["LINE", "Messenger"];
+        const inc = [], out = [], fail = [];
+        let globalIdx = 0;
+
+        currentFilteredDays.forEach((d) => {
+          const dateStr = d.date;
+          for (let i = 0; i < Math.max(0, d.opened || 0); i++) {
+            const c = contacts[(globalIdx + i) % contacts.length];
+            inc.push({ timestamp: isoWithRandomTime(dateStr, globalIdx + i), contactId: c.id, contactName: c.name, channel: channels[(globalIdx + i) % channels.length], message: `Incoming sample #${globalIdx + i + 1}` });
+          }
+          globalIdx += Math.max(0, d.opened || 0);
+
+          for (let i = 0; i < Math.max(0, d.sent || 0); i++) {
+            const c = contacts[(globalIdx + i) % contacts.length];
+            out.push({ timestamp: isoWithRandomTime(dateStr, globalIdx + i), contactId: c.id, contactName: c.name, channel: channels[(globalIdx + i) % channels.length], message: `Outgoing sample #${globalIdx + i + 1}` });
+          }
+          globalIdx += Math.max(0, d.sent || 0);
+
+          for (let i = 0; i < Math.max(0, d.failed || 0); i++) {
+            const c = contacts[(globalIdx + i) % contacts.length];
+            fail.push({ timestamp: isoWithRandomTime(dateStr, globalIdx + i), contactId: c.id, contactName: c.name, channel: channels[(globalIdx + i) % channels.length], message: `Failed sample #${globalIdx + i + 1}` });
+          }
+          globalIdx += Math.max(0, d.failed || 0);
+        });
+
+        const sortDesc = (arr) => arr.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setIncomingMessagesList(sortDesc(inc));
+        setOutgoingMessagesList(sortDesc(out));
+        setFailedMessagesList(sortDesc(fail));
+
+      } catch (error) {
+        console.error("Error fetching message reports:", error);
+      }
+    };
+
+    fetchReportData();
   }, [range]);
 
-  const chartData = useMemo(() => {
-    return filteredDays.map((d) => ({
-      date: formatDisplayDayMonth(d.date),
-      isoDate: d.date,
-      sent: d.sent,
-      delivered: d.delivered,
-      read: d.read,
-      failed: d.failed,
-      incoming: d.opened,
-      outgoing: d.sent,
-    }));
-  }, [filteredDays]);
-
-  const { incomingMessagesList, outgoingMessagesList, failedMessagesList } = useMemo(() => {
-    const contacts = [
-      { id: "C001", name: "Alice" },
-      { id: "C002", name: "Bob" },
-      { id: "C003", name: "Charlie" },
-      { id: "C004", name: "David" },
-      { id: "C005", name: "Eva" },
-      { id: "C006", name: "Frank" },
-      { id: "C007", name: "Grace" },
-    ];
-    const channels = ["LINE", "Messenger"];
-
-    const inc = [];
-    const out = [];
-    const fail = [];
-    let globalIdx = 0;
-
-    filteredDays.forEach((d) => {
-      const dateStr = d.date;
-      for (let i = 0; i < Math.max(0, d.opened || 0); i++) {
-        const c = contacts[(globalIdx + i) % contacts.length];
-        inc.push({
-          timestamp: isoWithRandomTime(dateStr, globalIdx + i),
-          contactId: c.id,
-          contactName: c.name,
-          channel: channels[(globalIdx + i) % channels.length],
-          message: `Incoming sample #${globalIdx + i + 1}`,
-        });
-      }
-      globalIdx += Math.max(0, d.opened || 0);
-
-      for (let i = 0; i < Math.max(0, d.sent || 0); i++) {
-        const c = contacts[(globalIdx + i) % contacts.length];
-        out.push({
-          timestamp: isoWithRandomTime(dateStr, globalIdx + i),
-          contactId: c.id,
-          contactName: c.name,
-          channel: channels[(globalIdx + i) % channels.length],
-          message: `Outgoing sample #${globalIdx + i + 1}`,
-        });
-      }
-      globalIdx += Math.max(0, d.sent || 0);
-
-      for (let i = 0; i < Math.max(0, d.failed || 0); i++) {
-        const c = contacts[(globalIdx + i) % contacts.length];
-        fail.push({
-          timestamp: isoWithRandomTime(dateStr, globalIdx + i),
-          contactId: c.id,
-          contactName: c.name,
-          channel: channels[(globalIdx + i) % channels.length],
-          message: `Failed sample #${globalIdx + i + 1}`,
-        });
-      }
-      globalIdx += Math.max(0, d.failed || 0);
-    });
-
-    const sortDesc = (arr) => arr.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-    return {
-      incomingMessagesList: sortDesc(inc),
-      outgoingMessagesList: sortDesc(out),
-      failedMessagesList: sortDesc(fail),
-    };
-  }, [filteredDays]);
 
   const blockClass =
     "border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 pb-8 flex flex-col w-full";
 
   const formatDateText = (date) =>
     new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
 
   return (
     <div className="p-6 space-y-8 text-white bg-[rgba(32,41,59,0.25)] backdrop-blur-xl rounded-3xl">

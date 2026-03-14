@@ -16,12 +16,19 @@ import { BarChart3, Coins, TrendingUp, Calendar } from "lucide-react";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-const mockData = [
+// 🟢 [BACKEND NOTE]: นำข้อมูล Mock เหล่านี้ไปเป็น Initial State เพื่อให้หน้าเว็บไม่พังตอนรอ API
+const initialMockChartData = [
   { day: "dec 27", tokens: 3200 },
   { day: "dec 28", tokens: 5000 },
   { day: "dec 29", tokens: 4100 },
   { day: "dec 30", tokens: 8000 },
   { day: "dec 31", tokens: 6200 },
+];
+
+const initialMockBreakdown = [
+  { id: 1, feature: "Support Agent", tokens: 32500, cost: 2.44 },
+  { id: 2, feature: "Receptionist", tokens: 50100, cost: 4.08 },
+  { id: 3, feature: "Sales Agent", tokens: 62700, cost: 5.93 },
 ];
 
 export default function AiToken() {
@@ -36,6 +43,45 @@ export default function AiToken() {
   const [showCalendar, setShowCalendar] = useState(false);
   const calendarRef = useRef(null);
 
+  // 🟢 [BACKEND NOTE]: สร้าง State รับข้อมูลจาก API แทนการ Fix ค่าตายตัว
+  const [chartData, setChartData] = useState(initialMockChartData);
+  const [breakdownData, setBreakdownData] = useState(initialMockBreakdown);
+  const [stats, setStats] = useState({
+    totalTokens: 145300,
+    todayTokens: 6720,
+    estimatedCost: 12.45,
+  });
+
+  // 🟢 [BACKEND NOTE]: useEffect ตัวนี้จะทำงานทุกครั้งที่ผู้ใช้เลือกวันที่ใน Calendar ใหม่
+  // ให้ยิง API ไปขอข้อมูลสถิติของช่วงวันที่นั้นๆ 
+  useEffect(() => {
+    const fetchTokenStats = async () => {
+      try {
+        const start = format(range[0].startDate, "yyyy-MM-dd");
+        const end = format(range[0].endDate, "yyyy-MM-dd");
+
+        // 🟢 โค้ดตัวอย่างสำหรับการยิง API จริง:
+        // const response = await fetch(`/api/tokens/stats?start=${start}&end=${end}`);
+        // const data = await response.json();
+        // 
+        // setChartData(data.chart);
+        // setStats({
+        //    totalTokens: data.total,
+        //    todayTokens: data.today,
+        //    estimatedCost: data.cost
+        // });
+        // setBreakdownData(data.breakdown);
+
+        console.log(`Fetching data for range: ${start} to ${end}`);
+      } catch (error) {
+        console.error("Failed to fetch token stats:", error);
+      }
+    };
+
+    fetchTokenStats();
+  }, [range]); // ทำงานใหม่ทุกครั้งที่ range เปลี่ยน
+
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (calendarRef.current && !calendarRef.current.contains(event.target)) {
@@ -49,6 +95,9 @@ export default function AiToken() {
 
   const chartFontSize = "12px";
 
+  // ==========================================================
+  // UI ส่วนล่างนี้ไม่มีการดัดแปลงคลาสใดๆ แต่เปลี่ยนค่า Fix เป็นตัวแปร State แทน
+  // ==========================================================
   return (
     <>
       <div className="w-full h-full p-2 md:p-4">
@@ -98,7 +147,7 @@ export default function AiToken() {
               </div>
               <div>
                 <p className="text-sm opacity-80">Total Tokens</p>
-                <p className="text-xl font-bold">145,300</p>
+                <p className="text-xl font-bold">{stats.totalTokens.toLocaleString()}</p>
               </div>
             </div>
 
@@ -108,7 +157,7 @@ export default function AiToken() {
               </div>
               <div>
                 <p className="text-sm opacity-80">Tokens Today</p>
-                <p className="text-xl font-bold">6,720</p>
+                <p className="text-xl font-bold">{stats.todayTokens.toLocaleString()}</p>
               </div>
             </div>
 
@@ -118,7 +167,7 @@ export default function AiToken() {
               </div>
               <div>
                 <p className="text-sm opacity-80">Estimated Cost</p>
-                <p className="text-xl font-bold">$12.45</p>
+                <p className="text-xl font-bold">${stats.estimatedCost.toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -127,7 +176,7 @@ export default function AiToken() {
           <div className="bg-white/10 rounded-2xl p-4 border border-white/20 mb-6 h-[32vh]">
             <p className="mb-2 opacity-80">Token Usage</p>
             <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={mockData}>
+              <LineChart data={chartData}>
                 <XAxis
                   dataKey="day"
                   stroke="#fff"
@@ -172,23 +221,13 @@ export default function AiToken() {
               </thead>
 
               <tbody>
-                <tr className="border-b border-white/10">
-                  <td className="py-3">Support Agent</td>
-                  <td>32,500</td>
-                  <td>$2.44</td>
-                </tr>
-
-                <tr className="border-b border-white/10">
-                  <td className="py-3">Receptionist</td>
-                  <td>50,100</td>
-                  <td>$4.08</td>
-                </tr>
-
-                <tr>
-                  <td className="py-3">Sales Agent</td>
-                  <td>62,700</td>
-                  <td>$5.93</td>
-                </tr>
+                {breakdownData.map((item) => (
+                  <tr key={item.id} className="border-b border-white/10 last:border-0">
+                    <td className="py-3">{item.feature}</td>
+                    <td>{item.tokens.toLocaleString()}</td>
+                    <td>${item.cost.toFixed(2)}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

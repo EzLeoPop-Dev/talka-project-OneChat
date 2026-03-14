@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import PageWrapper from "@/app/components/PageWrapper";
-import AccountSidebar from "@/app/components/AccountSidebar";
+import PageWrapper from "@/app/components/Shared/PageWrapper";
+import AccountSidebar from "@/app/components/Layout/AccountSidebar";
 import { User } from "lucide-react";
 
 
