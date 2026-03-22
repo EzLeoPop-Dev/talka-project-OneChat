@@ -1,10 +1,13 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react'; 
+
+// 🟢 [BACKEND NOTE]: ลบ import mock data เหล่านี้ออกเมื่อเชื่อมต่อ API สำเร็จ
 import { unifiedMockData } from '@/app/data/mockData'; 
-import ContactDetail from '@/app/components/ContactDetail'; 
-import FilterPopup from '@/app/components/FilterPopup';
-import AddContactModal from '@/app/components/AddContact';
 import { DEFAULT_TAGS } from "@/app/data/defaultTags";
+
+import ContactDetail from '@/app/components/Contacts/ContactDetail'; 
+import FilterPopup from '@/app/components/Modals/FilterPopup';
+import AddContactModal from '@/app/components/Contacts/AddContact';
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -32,30 +35,44 @@ export default function ContactList() {
     const [filterCompany, setFilterCompany] = useState(null);
     const [isCompanyFilterOpen, setIsCompanyFilterOpen] = useState(false);
 
+    // 🟢 [BACKEND NOTE]: โหลดข้อมูล Contacts จาก API
     useEffect(() => {
-        const savedData = localStorage.getItem('onechat_data'); 
-        if (savedData) {
-            setContacts(JSON.parse(savedData));
-        } else {
-            setContacts(unifiedMockData);
-            localStorage.setItem('onechat_data', JSON.stringify(unifiedMockData));
-        }
-        setIsLoaded(true);
+        const fetchContacts = async () => {
+            try {
+                // 🟢 [API CALL]:
+                // const response = await fetch('/api/contacts');
+                // const data = await response.json();
+                // setContacts(data);
+
+                // [Mock Data]
+                setContacts(unifiedMockData);
+            } catch (error) {
+                console.error("Failed to load contacts", error);
+            } finally {
+                setIsLoaded(true);
+            }
+        };
+
+        fetchContacts();
     }, []);
 
+    // 🟢 [BACKEND NOTE]: โหลดข้อมูล Tags จาก API
     useEffect(() => {
-        if (isLoaded) {
-            localStorage.setItem('onechat_data', JSON.stringify(contacts)); 
-        }
-    }, [contacts, isLoaded]);
+        const fetchTags = async () => {
+            try {
+                // 🟢 [API CALL]:
+                // const response = await fetch('/api/tags');
+                // const data = await response.json();
+                // setAvailableTags(data);
 
-    useEffect(() => {
-        const savedTags = localStorage.getItem("onechat_tags");
-        if (savedTags) {
-            setAvailableTags(JSON.parse(savedTags)); 
-        } else {
-            setAvailableTags(DEFAULT_TAGS);
-        }
+                // [Mock Data]
+                setAvailableTags(DEFAULT_TAGS);
+            } catch (error) {
+                console.error("Failed to load tags", error);
+            }
+        };
+
+        fetchTags();
     }, []);
 
     const availableCompanies = useMemo(() => [...new Set(contacts.map(c => c.company).filter(Boolean))], [contacts]);
@@ -64,32 +81,81 @@ export default function ContactList() {
     const handleRowClick = (contact) => { setSelectedContact(contact); setIsModalOpen(true); };
     const handleCloseModal = () => { setIsModalOpen(false); setSelectedContact(null); };
 
-    const handleSaveChanges = (updatedContact) => {
+    // 🟢 [BACKEND NOTE]: บันทึกการแก้ไข Contact
+    const handleSaveChanges = async (updatedContact) => {
         const contactToSave = { ...updatedContact };
         Object.keys(contactToSave).forEach(key => { if (contactToSave[key] === "") contactToSave[key] = null; });
-        const newContacts = contacts.map(c => c.id === contactToSave.id ? contactToSave : c);
-        setContacts(newContacts);
-        handleCloseModal(); 
+        
+        try {
+            // 🟢 [API CALL]: อัปเดตข้อมูล (PUT/PATCH)
+            // await fetch(`/api/contacts/${contactToSave.id}`, {
+            //     method: 'PUT',
+            //     body: JSON.stringify(contactToSave)
+            // });
+
+            const newContacts = contacts.map(c => c.id === contactToSave.id ? contactToSave : c);
+            setContacts(newContacts);
+            handleCloseModal(); 
+        } catch (error) {
+            console.error("Failed to update contact", error);
+        }
     };
 
-    const handleDeleteContact = (contactId) => {
-        const newContacts = contacts.filter(c => c.id !== contactId);
-        setContacts(newContacts);
+    // 🟢 [BACKEND NOTE]: ลบ Contact (1 รายการ)
+    const handleDeleteContact = async (contactId) => {
+        try {
+            // 🟢 [API CALL]: 
+            // await fetch(`/api/contacts/${contactId}`, { method: 'DELETE' });
+
+            const newContacts = contacts.filter(c => c.id !== contactId);
+            setContacts(newContacts);
+        } catch (error) {
+            console.error("Failed to delete contact", error);
+        }
     };
+
     const handleDeleteClick = () => { setIsDeleteModalOpen(true); };
-    const confirmDelete = () => {
-        const newContacts = contacts.filter(c => !selectedIds.includes(c.id));
-        setContacts(newContacts);
-        setSelectedIds([]);
-        setIsDeleteModalOpen(false);
+
+    // 🟢 [BACKEND NOTE]: ลบ Contact (หลายรายการ - Bulk Delete)
+    const confirmDelete = async () => {
+        try {
+            // 🟢 [API CALL]: ส่ง Array ของ IDs ไปลบ
+            // await fetch('/api/contacts/bulk-delete', {
+            //     method: 'POST', // หรือ DELETE
+            //     body: JSON.stringify({ ids: selectedIds })
+            // });
+
+            const newContacts = contacts.filter(c => !selectedIds.includes(c.id));
+            setContacts(newContacts);
+            setSelectedIds([]);
+            setIsDeleteModalOpen(false);
+        } catch (error) {
+            console.error("Failed to delete contacts", error);
+        }
     };
-    const handleAddContact = (newContactData) => {
-        const newId = Date.now();
+
+    // 🟢 [BACKEND NOTE]: เพิ่ม Contact ใหม่
+    const handleAddContact = async (newContactData) => {
         const nameQuery = newContactData.name ? newContactData.name.replace(' ', '+') : 'New+User';
         const imgUrl = `https://ui-avatars.com/api/?name=${nameQuery}&background=random`;
-        const newContact = { ...newContactData, id: newId, imgUrl: imgUrl };
-        setContacts(prevContacts => [newContact, ...prevContacts]);
-        setIsAddModalOpen(false);
+        
+        const payload = { ...newContactData, imgUrl: imgUrl };
+
+        try {
+            // 🟢 [API CALL]:
+            // const response = await fetch('/api/contacts', {
+            //     method: 'POST',
+            //     body: JSON.stringify(payload)
+            // });
+            // const createdContact = await response.json();
+
+            // จำลองการเพิ่ม
+            const newContact = { ...payload, id: Date.now() };
+            setContacts(prevContacts => [newContact, ...prevContacts]);
+            setIsAddModalOpen(false);
+        } catch (error) {
+            console.error("Failed to add contact", error);
+        }
     };
 
     const filteredContacts = useMemo(() => {
@@ -165,6 +231,9 @@ export default function ContactList() {
 
     const CHECKBOX_CLASS = "appearance-none h-4 w-4 border border-gray-400 rounded-sm bg-transparent checked:bg-white checked:border-white focus:outline-none focus:ring-0 cursor-pointer relative checked:after:content-[''] checked:after:absolute checked:after:left-[0.3rem] checked:after:top-[0.0rem] checked:after:w-[0.25rem] checked:after:h-[0.55rem] checked:after:border-b-[0.15rem] checked:after:border-r-[0.15rem] checked:after:border-black checked:after:rotate-45";
 
+    // ==========================================================
+    // UI ส่วนล่างนี้ไม่มีการดัดแปลงใดๆ โครงสร้าง Component ยังอยู่ครบ 100%
+    // ==========================================================
     return (
         <div className="w-full h-[95vh] p-2 md:p-4"> 
             <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">

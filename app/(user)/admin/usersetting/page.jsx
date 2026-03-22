@@ -16,73 +16,51 @@ export default function UserSettingPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // โหลดข้อมูล
+  // 🟢 [BACKEND NOTE]: โหลดข้อมูลผู้ใช้จาก API แทน LocalStorage
   useEffect(() => {
-    let storedCurrentUser = localStorage.getItem("currentUser");
-    let parsedCurrentUser = null;
-
-    try {
-      parsedCurrentUser = storedCurrentUser ? JSON.parse(storedCurrentUser) : null;
-    } catch (e) {
-      console.error("Error parsing user", e);
-    }
-
-    // ถ้าไม่มีข้อมูล ค่อยสร้าง Mockup
-    if (!parsedCurrentUser) {
-      parsedCurrentUser = {
-        id: 999,
-        name: "Somchai Admin",
-        username: "Somchai Admin", 
-        email: "me@example.com",
-        permission: "Owner",
-        role: "Owner"
-      };
-      localStorage.setItem("currentUser", JSON.stringify(parsedCurrentUser));
-    } else {
-      let isUpdated = false;
-
-      if (!parsedCurrentUser.id) { parsedCurrentUser.id = 999; isUpdated = true; }
-      if (!parsedCurrentUser.name) { parsedCurrentUser.name = parsedCurrentUser.username || "My Name"; isUpdated = true; }
-      if (!parsedCurrentUser.permission) { parsedCurrentUser.permission = parsedCurrentUser.role || "Owner"; isUpdated = true; }
-      if (!parsedCurrentUser.role) { parsedCurrentUser.role = parsedCurrentUser.permission; isUpdated = true; }
-
-      //  เพิ่ม: ถ้าไม่มี email ให้ตั้งค่าเริ่มต้น (เพื่อให้แสดงผลตามที่ขอ)
-      if (!parsedCurrentUser.email) {
-        parsedCurrentUser.email = "me@example.com";
-        isUpdated = true;
-      }
-
-      if (isUpdated) {
-        localStorage.setItem("currentUser", JSON.stringify(parsedCurrentUser));
-      }
-    }
-
-    // อัปเดต State Current User
-    setCurrentUser(parsedCurrentUser);
-
-    const storedUsers = localStorage.getItem("app_users");
-    if (storedUsers) {
+    const fetchUserData = async () => {
       try {
-        const parsedUsers = JSON.parse(storedUsers);
-        setUsers(parsedUsers);
-      } catch (e) {
-        console.error("Error loading app_users", e);
-      }
-    }
+        // 🟢 [API CALL]: ดึงข้อมูลของตัวเอง (Current User)
+        // const meResponse = await fetch('/api/users/me');
+        // const meData = await meResponse.json();
+        // setCurrentUser(meData);
 
-    setIsLoaded(true);
+        // 🟢 [API CALL]: ดึงรายชื่อผู้ใช้ทั้งหมดใน Workspace
+        // const usersResponse = await fetch('/api/users');
+        // const usersData = await usersResponse.json();
+        // setUsers(usersData);
+
+        // ==========================================
+        // [Mock Processing] สร้างข้อมูลจำลองเพื่อให้หน้าเว็บแสดงผลได้ไปก่อน
+        const mockMe = {
+          id: 999,
+          name: "Somchai Admin",
+          username: "Somchai Admin", 
+          email: "me@example.com",
+          permission: "Owner",
+          role: "Owner"
+        };
+        setCurrentUser(mockMe);
+        
+        // จำลองรายชื่อคนอื่น
+        setUsers([
+            { id: 1, name: "Employee A", email: "emp.a@example.com", role: "Employee" }
+        ]);
+        // ==========================================
+
+      } catch (error) {
+        console.error("Error loading users data", error);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
-  // บันทึกข้อมูล
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("app_users", JSON.stringify(users));
-    }
-  }, [users, isLoaded]);
 
   const displayUsers = currentUser ? [currentUser, ...users] : users;
 
-  
   const openAddModal = () => {
     setMode("add");
     setEmail("");
@@ -103,42 +81,90 @@ export default function UserSettingPage() {
     setIsDeleteOpen(true);
   };
 
-  const confirmDelete = () => {
-    setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
-    setIsDeleteOpen(false);
-    setDeleteTarget(null);
+  // 🟢 [BACKEND NOTE]: เปลี่ยนการลบเป็นการยิง API
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    
+    try {
+        // 🟢 [API CALL]: ลบ User
+        // await fetch(`/api/users/${deleteTarget.id}`, { method: 'DELETE' });
+
+        setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+    } catch (error) {
+        console.error("Failed to delete user", error);
+    } finally {
+        setIsDeleteOpen(false);
+        setDeleteTarget(null);
+    }
   };
 
-  const handleAddUser = () => {
+  // 🟢 [BACKEND NOTE]: เปลี่ยนการเพิ่มเป็นยิง API POST
+  const handleAddUser = async () => {
     if (!email.trim()) return alert("Please enter an email.");
-    const newUser = {
-      id: Date.now(),
+    
+    const newUserPayload = {
       name: email.split("@")[0],
       email,
       permission: role,
       role: role, 
     };
-    setUsers((prev) => [...prev, newUser]);
-    setIsOpen(false);
-  };
 
-  const handleEditUser = () => {
-    if (currentUser && editId === currentUser.id) {
-      const updatedMe = { ...currentUser, email: email, permission: role, role: role }; 
-      setCurrentUser(updatedMe);
-      localStorage.setItem("currentUser", JSON.stringify(updatedMe));
-      // ส่ง event บอก component อื่น (เช่น sidebar) ว่า user เปลี่ยนแล้ว
-      window.dispatchEvent(new Event("user_updated"));
-    } else {
-      setUsers((prev) =>
-        prev.map((user) =>
-          user.id === editId ? { ...user, email: email, permission: role, role: role } : user
-        )
-      );
+    try {
+        // 🟢 [API CALL]: เพิ่ม User ใหม่
+        // const response = await fetch('/api/users', { 
+        //     method: 'POST', 
+        //     body: JSON.stringify(newUserPayload) 
+        // });
+        // const createdUser = await response.json();
+
+        // จำลองเพิ่มลง State
+        const newUser = { id: Date.now(), ...newUserPayload };
+        setUsers((prev) => [...prev, newUser]);
+    } catch (error) {
+        console.error("Failed to add user", error);
+    } finally {
+        setIsOpen(false);
     }
-    setIsOpen(false);
   };
 
+  // 🟢 [BACKEND NOTE]: เปลี่ยนการแก้ไขเป็นยิง API PATCH / PUT
+  const handleEditUser = async () => {
+    try {
+        if (currentUser && editId === currentUser.id) {
+            const updatedMePayload = { email: email, permission: role, role: role };
+            
+            // 🟢 [API CALL]: อัปเดตข้อมูลตัวเอง
+            // await fetch('/api/users/me', { method: 'PATCH', body: JSON.stringify(updatedMePayload) });
+
+            const updatedMe = { ...currentUser, ...updatedMePayload }; 
+            setCurrentUser(updatedMe);
+            
+            // ส่ง event บอก component อื่น (เช่น sidebar) ว่า user เปลี่ยนแล้ว
+            window.dispatchEvent(new Event("user_updated"));
+          } else {
+            const updatedUserPayload = { email: email, permission: role, role: role };
+
+            // 🟢 [API CALL]: อัปเดตข้อมูลคนอื่น
+            // await fetch(`/api/users/${editId}`, { method: 'PATCH', body: JSON.stringify(updatedUserPayload) });
+
+            setUsers((prev) =>
+              prev.map((user) =>
+                user.id === editId ? { ...user, ...updatedUserPayload } : user
+              )
+            );
+          }
+    } catch (error) {
+        console.error("Failed to edit user", error);
+    } finally {
+        setIsOpen(false);
+    }
+  };
+
+  if (!isLoaded) return <div className="text-white text-center mt-20 animate-pulse">Loading Users...</div>;
+
+  // ==========================================================
+  // UI ส่วนล่างนี้ไม่มีการดัดแปลงใดๆ โครงสร้าง Component ยังอยู่ครบ 100%
+  // ==========================================================
   return (
     <>
       {/* Modal Delete */}

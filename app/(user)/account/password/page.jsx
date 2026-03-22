@@ -13,18 +13,55 @@ export default function ChangePasswordPage() {
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
+    // 🟢 [BACKEND NOTE]: เพิ่ม State สำหรับแสดงสถานะ Loading ระหว่างรอ API
+    const [isLoading, setIsLoading] = useState(false);
+
     const router = useRouter();
 
-    const handleUpdate = (e) => {
+    // 🟢 [BACKEND NOTE]: เปลี่ยนเป็น async function เพื่อยิง API
+    const handleUpdate = async (e) => {
         e.preventDefault();
+        
+        if (!currentPass || !newPass || !confirm) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
         if (newPass !== confirm) {
             alert("New password and confirm do not match.");
             return;
         }
-        // Demo action
-        alert("Password updated (demo). Redirecting...");
-        router.push("/account/notification");
+
+        setIsLoading(true);
+
+        try {
+            // 🟢 [API CALL]: ยิง API เพื่ออัปเดตรหัสผ่าน
+            // const response = await fetch('/api/users/change-password', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         currentPassword: currentPass,
+            //         newPassword: newPass
+            //     })
+            // });
+
+            // if (!response.ok) {
+            //     const errorData = await response.json();
+            //     throw new Error(errorData.message || "Failed to update password");
+            // }
+
+            // Demo action (ระหว่างรอต่อ API)
+            alert("Password updated successfully!");
+            router.push("/account/notification");
+
+        } catch (error) {
+            console.error("Password update error:", error);
+            alert(error.message || "An error occurred while updating the password.");
+        } finally {
+            setIsLoading(false);
+        }
     };
+
 
     return (
         <div className="text-white flex items-center justify-center p-4 relative overflow-hidden">
@@ -71,7 +108,7 @@ export default function ChangePasswordPage() {
                 {/* Right Column: Form */}
                 <div className="md:w-2/3 p-8 md:p-12">
                     <div className="mb-8">
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-lineart-to-r from-white to-white/60">
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-white/60">
                             Change Password
                         </h1>
                         <p className="text-white/40 text-sm mt-1">Please enter your current password to set a new one.</p>
@@ -154,10 +191,11 @@ export default function ChangePasswordPage() {
                             </button>
                             <button
                                 type="submit"
-                                className="flex items-center gap-2 rounded-xl px-8 py-3 bg-linear-to-r from-emerald-600 to-teal-600 text-white font-semibold shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                disabled={isLoading}
+                                className={`flex items-center gap-2 rounded-xl px-8 py-3 bg-linear-to-r from-emerald-600 to-teal-600 text-white font-semibold shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                             >
-                                Update Password
-                                <ArrowRight size={18} />
+                                {isLoading ? "Updating..." : "Update Password"}
+                                {!isLoading && <ArrowRight size={18} />}
                             </button>
                         </div>
 

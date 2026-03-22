@@ -26,24 +26,19 @@ export default function RegisterPage() {
     success: false,
   });
 
-
-
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     let hasError = false;
 
-   
     if (!username.trim()) {
       setErrorUser("โปรดกรอกชื่อผู้ใช้");
       hasError = true;
     } else setErrorUser("");
 
-   
     if (!email.trim()) {
-        setErrorEmail("โปรดกรอกอีเมล");
-        hasError = true;
+      setErrorEmail("โปรดกรอกอีเมล");
+      hasError = true;
     } else setErrorEmail("");
-
 
     if (!password.trim()) {
       setErrorPass("โปรดกรอกรหัสผ่าน");
@@ -60,32 +55,20 @@ export default function RegisterPage() {
 
     if (hasError) return;
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    if (users.some((u) => u.username === username)) {
-      setErrorUser("ชื่อผู้ใช้นี้มีอยู่แล้ว");
-      return;
-    }
-
-    users.push({ username, password, email });
-    localStorage.setItem("users", JSON.stringify(users));
-
-    localStorage.setItem(
-      "currentUser",
-      JSON.stringify({ username, password, email, role: "Owner" })
-    );
-
-    localStorage.setItem("justRegistered", "true");
+    const isSuccess = true; 
 
     setPopup({
       show: true,
       message: "สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ",
-      success: true,
+      success: isSuccess,
     });
 
-    setTimeout(() => {
-      setPopup((p) => ({ ...p, show: false }));
-      router.push("/Creatworkspace/workspace");
-    }, 2000);
+    if (isSuccess) {
+      setTimeout(() => {
+        setPopup((p) => ({ ...p, show: false }));
+        router.push("/chat/allchat");
+      }, 2000);
+    }
   };
 
   const closePopup = () => {
@@ -107,12 +90,8 @@ export default function RegisterPage() {
 
       <div className="flex w-[1280px] h-[800px] bg-[rgba(152,85,120,0.6)] backdrop-blur-md rounded-3xl shadow-2xl relative overflow-hidden z-10">
         <div className="flex flex-col justify-center pl-16 w-1/2 text-white relative z-10 font-inter">
-          <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">
-            JOIN US
-          </h1>
-          <h2 className="text-[32px] font-light mb-4 text-[#E8E3F2]">
-            At Talka
-          </h2>
+          <h1 className="text-[40px] font-extrabold mb-1 tracking-tight">JOIN US</h1>
+          <h2 className="text-[32px] font-light mb-4 text-[#E8E3F2]">At Talka</h2>
           <p className="text-[18px] font-light text-[#B9B3C9] leading-[140%]">
             สมัครง่ายเพียงไม่กี่ขั้นตอน <br />
             เริ่มต้นแชทกับลูกค้าของคุณได้ทันที!
@@ -121,124 +100,76 @@ export default function RegisterPage() {
 
         <div className="flex justify-center items-center w-1/2 z-20">
           <div className="w-[460px] bg-gradient-to-b from-[#ffffff] via-[#f7ebff] to-[#e6d6ff] rounded-3xl shadow-xl p-10 flex flex-col items-center relative">
-            <h1 className="text-[28px] font-semibold text-gray-800 mb-1">
-              REGISTER
-            </h1>
+            <h1 className="text-[28px] font-semibold text-gray-800 mb-1">REGISTER</h1>
             <p className="text-gray-500 mb-2 text-sm">สมัครสมาชิกเพื่อใช้งาน</p>
 
             <form className="w-full space-y-5" onSubmit={handleRegister}>
-              
               {/* Username */}
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
-                <div
-                  className={`flex items-center border rounded-full px-3 py-2.5 ${
-                    errorUser ? "border-red-500" : "border-gray-300"
-                  } focus-within:ring-1 focus-within:ring-purple-400`}
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <div className={`flex items-center border rounded-full px-3 py-2.5 ${errorUser ? "border-red-500" : "border-gray-300"} focus-within:ring-1 focus-within:ring-purple-400`}>
                   <User className="text-purple-600 mr-2" size={18} />
                   <input
                     type="text"
                     placeholder="Username"
-                    className="w-full outline-none placeholder-gray-400 text-black"
+                    className="w-full outline-none placeholder-gray-400 text-black bg-transparent"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                   />
                 </div>
-                {errorUser && (
-                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">
-                    {errorUser}
-                  </p>
-                )}
+                {errorUser && <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorUser}</p>}
               </div>
 
-              {/*  Email */}
+              {/* Email */}
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <div
-                  className={`flex items-center border rounded-full px-3 py-2.5 ${
-                    errorEmail ? "border-red-500" : "border-gray-300"
-                  } focus-within:ring-1 focus-within:ring-purple-400`}
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <div className={`flex items-center border rounded-full px-3 py-2.5 ${errorEmail ? "border-red-500" : "border-gray-300"} focus-within:ring-1 focus-within:ring-purple-400`}>
                   <Mail className="text-purple-600 mr-2" size={18} />
                   <input
                     type="email"
                     placeholder="example@mail.com"
-                    className="w-full outline-none placeholder-gray-400 text-black"
+                    className="w-full outline-none placeholder-gray-400 text-black bg-transparent"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
-                {errorEmail && (
-                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">
-                    {errorEmail}
-                  </p>
-                )}
+                {errorEmail && <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorEmail}</p>}
               </div>
 
-              {/* Passwor */}
+              {/* Password */}
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
-                </label>
-                <div
-                  className={`flex items-center border rounded-full px-3 py-2.5 ${
-                    errorPass ? "border-red-500" : "border-gray-300"
-                  } focus-within:ring-1 focus-within:ring-purple-400`}
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <div className={`flex items-center border rounded-full px-3 py-2.5 ${errorPass ? "border-red-500" : "border-gray-300"} focus-within:ring-1 focus-within:ring-purple-400`}>
                   <Lock className="text-purple-600 mr-2" size={18} />
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
-                    className="w-full outline-none placeholder-gray-400 text-black"
+                    className="w-full outline-none placeholder-gray-400 text-black bg-transparent"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <span className="w-px h-5 bg-gray-300 mx-2"></span>
-                  <button
-                    type="button"
-                    className="text-gray-500 hover:text-gray-700"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
+                  <button type="button" className="text-gray-500 hover:text-gray-700" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                
-                {errorPass && (
-                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">
-                    {errorPass}
-                  </p>
-                )}
+                {errorPass && <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorPass}</p>}
               </div>
 
               {/* Confirm Password */}
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm Password
-                </label>
-                <div
-                  className={`flex items-center border rounded-full px-3 py-2.5 ${
-                    errorConfirm ? "border-red-500" : "border-gray-300"
-                  } focus-within:ring-1 focus-within:ring-purple-400`}
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                <div className={`flex items-center border rounded-full px-3 py-2.5 ${errorConfirm ? "border-red-500" : "border-gray-300"} focus-within:ring-1 focus-within:ring-purple-400`}>
                   <Lock className="text-purple-600 mr-2" size={18} />
                   <input
                     type="password"
                     placeholder="Confirm Password"
-                    className="w-full outline-none placeholder-gray-400 text-black"
+                    className="w-full outline-none placeholder-gray-400 text-black bg-transparent"
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                   />
                 </div>
-                {errorConfirm && (
-                  <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">
-                    {errorConfirm}
-                  </p>
-                )}
+                {errorConfirm && <p className="text-red-500 text-xs absolute left-3 bottom-[-18px]">{errorConfirm}</p>}
               </div>
 
               <div className="pt-2 space-y-2">
@@ -246,8 +177,7 @@ export default function RegisterPage() {
                   type="submit"
                   style={{
                     background: "#5d3d99",
-                    backgroundImage:
-                      "linear-gradient(140deg, rgba(93, 61, 153, 1) 0%, rgba(201, 117, 173, 1) 100%)",
+                    backgroundImage: "linear-gradient(140deg, rgba(93, 61, 153, 1) 0%, rgba(201, 117, 173, 1) 100%)",
                   }}
                   className="w-full text-white py-2.5 rounded-full transition shadow-md hover:opacity-90"
                 >
@@ -255,29 +185,20 @@ export default function RegisterPage() {
                 </button>
 
                 <Link href="/auth/login">
-                  <button className="w-full bg-white text-purple-700 py-2.5 rounded-full hover:bg-gray-200 transition shadow-sm">
+                  <button type="button" className="w-full bg-white text-purple-700 py-2.5 rounded-full hover:bg-gray-200 transition shadow-sm">
                     เข้าสู่ระบบ
                   </button>
                 </Link>
+                
                 <div className="flex flex-col items-center mt-4">
                   <div className="flex items-center w-full mb-4">
                     <div className="grow h-px bg-gray-300" />
                     <span className="px-2 text-gray-500 text-sm">หรือ</span>
                     <div className="grow h-px bg-gray-300" />
                   </div>
-                  <div className="flex justify-center gap-6">
-                    <button
-                      type="button"
-                      onClick={() => alert("Login with Google")}
-                      className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200"
-                    >
-                      <img
-                        src="/google.png"
-                        className="w-8 h-8 object-contain"
-                        alt="Google login"
-                      />
-                    </button>
-                  </div>
+                  <button type="button" onClick={() => alert("Google signup")} className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200">
+                    <img src="/google.png" className="w-8 h-8 object-contain" alt="Google" />
+                  </button>
                 </div>
               </div>
             </form>
@@ -292,46 +213,24 @@ export default function RegisterPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
           >
             <motion.div
-              className={`relative w-[400px] min-h-[280px] bg-white/90 backdrop-blur-xl border border-white/60 
-              shadow-2xl rounded-3xl p-8 flex flex-col justify-center items-center gap-6 text-center
-              ${popup.success ? "shadow-purple-500/20" : "shadow-red-500/20"}`}
+              className={`relative w-[400px] min-h-[280px] bg-white/90 backdrop-blur-xl border border-white/60 shadow-2xl rounded-3xl p-8 flex flex-col justify-center items-center gap-6 text-center ${popup.success ? "shadow-purple-500/20" : "shadow-red-500/20"}`}
               initial={{ scale: 0.8, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
             >
-              <button
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors hover:rotate-90 duration-300"
-                onClick={closePopup}
-              >
+              <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-transform hover:rotate-90 duration-300" onClick={closePopup}>
                 <X size={20} />
               </button>
 
-              <motion.div
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg mb-2 ${popup.success ? "bg-green-100 text-green-600" : "bg-red-100 text-red-500"}`}>
+                {popup.success ? <CheckCircle size={48} strokeWidth={2.5} /> : <AlertCircle size={48} strokeWidth={2.5} />}
+              </div>
 
-                className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg mb-2
-                ${
-                  popup.success
-                    ? "bg-green-100 text-green-600"
-                    : "bg-red-100 text-red-500"
-                }`}
-              >
-                {popup.success ? (
-                  <CheckCircle size={48} strokeWidth={2.5} />
-                ) : (
-                  <AlertCircle size={48} strokeWidth={2.5} />
-                )}
-              </motion.div>
-
-              <div className="space-y-2 z-10">
-                <h2 className="text-2xl font-bold tracking-tight text-gray-800">
-                  {popup.success ? "Success!" : "Failed"}
-                </h2>
-                <p className="text-gray-500 font-medium text-base px-4">
-                  {popup.message}
-                </p>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold text-gray-800">{popup.success ? "Success!" : "Failed"}</h2>
+                <p className="text-gray-500 font-medium">{popup.message}</p>
               </div>
             </motion.div>
           </motion.div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { GlassBackground } from './GlassBackground'; 
+import { GlassBackground } from '../Shared/GlassBackground'; 
 
 export default function TutorialModal({ tutorial, onClose }) {
     const [currentStep, setCurrentStep] = useState(0);

@@ -18,7 +18,7 @@ import "@/app/assets/css/other.css";
 import "@/app/assets/css/globals.css";
 
 // สมมติว่า Components เหล่านี้มีอยู่จริงตามที่คุณ import มา
-import Navbar from './components/Navbar';
+import Navbar from './components/Layout/Navbar';
 import DarkVeil from './components/Animetion/DarkVeil';
 import LogoLoop from './components/Animetion/LogoLoop';
 import AnimatedContent from './components/Animetion/AnimatedContent';

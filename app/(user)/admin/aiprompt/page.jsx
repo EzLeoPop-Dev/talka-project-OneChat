@@ -5,28 +5,34 @@ import { DEFAULT_AI_PROMPTS } from "@/app/data/defaultPrompts";
 
 export default function AiPromptsPage() {
   const [prompts, setPrompts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [newPrompt, setNewPrompt] = useState({ name: "", action: "" });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPromptId, setEditingPromptId] = useState(null);
   const [deletePrompt, setDeletePrompt] = useState(null);
 
-  // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+  // 🟢 [BACKEND NOTE]: โหลดข้อมูลจาก API เมื่อเปิดหน้าเว็บ
   useEffect(() => {
-    const savedPrompts = localStorage.getItem("onechat_prompts");
-    if (savedPrompts) {
-      setPrompts(JSON.parse(savedPrompts));
-    } else {
-      setPrompts(DEFAULT_AI_PROMPTS);
-    }
-  }, []);
+    const fetchPrompts = async () => {
+      setIsLoading(true);
+      try {
+        // 🟢 โค้ดตัวอย่างสำหรับดึงข้อมูลจริง
+        // const response = await fetch('/api/prompts');
+        // const data = await response.json();
+        // setPrompts(data);
 
-  // 4. useEffect: บันทึกข้อมูลทุกครั้งที่ prompts เปลี่ยนแปลง (Add/Edit/Delete/Toggle)
-  useEffect(() => {
-    if (prompts.length > 0) {
-      localStorage.setItem("onechat_prompts", JSON.stringify(prompts));
-    }
-  }, [prompts]);
+        // [Mock Data] จำลองการโหลดข้อมูลระหว่างรอ Backend
+        setPrompts(DEFAULT_AI_PROMPTS);
+      } catch (error) {
+        console.error("Failed to fetch prompts:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPrompts();
+  }, []);
 
   // เปิด modal สำหรับ add หรือ edit
   const openAddModal = () => {
@@ -41,28 +47,44 @@ export default function AiPromptsPage() {
     setIsModalOpen(true);
   };
 
-  // ฟังก์ชันบันทึก (add หรือ edit)
-  const handleSavePrompt = () => {
+  // 🟢 [BACKEND NOTE]: ฟังก์ชันบันทึก (Add / Edit) ต้องยิง API
+  const handleSavePrompt = async () => {
     if (!newPrompt.name.trim()) return alert("Please enter a prompt name");
 
-    if (editingPromptId) {
-      // แก้ไข prompt เดิม
-      setPrompts(
-        prompts.map((p) =>
-          p.id === editingPromptId ? { ...p, ...newPrompt } : p
-        )
-      );
-    } else {
-      // เพิ่ม prompt ใหม่
-      setPrompts([
-        ...prompts,
-        { id: Date.now(), ...newPrompt, active: true, isDefault: false },
-      ]);
-    }
+    try {
+      if (editingPromptId) {
+        // 🟢 [API CALL]: แก้ไข prompt เดิม
+        // await fetch(`/api/prompts/${editingPromptId}`, {
+        //   method: 'PUT',
+        //   body: JSON.stringify(newPrompt)
+        // });
 
-    setNewPrompt({ name: "", action: "" });
-    setEditingPromptId(null);
-    setIsModalOpen(false);
+        setPrompts(
+          prompts.map((p) =>
+            p.id === editingPromptId ? { ...p, ...newPrompt } : p
+          )
+        );
+      } else {
+        // 🟢 [API CALL]: เพิ่ม prompt ใหม่
+        // const response = await fetch('/api/prompts', {
+        //   method: 'POST',
+        //   body: JSON.stringify({ ...newPrompt, active: true, isDefault: false })
+        // });
+        // const createdPrompt = await response.json();
+
+        setPrompts([
+          ...prompts,
+          { id: Date.now(), ...newPrompt, active: true, isDefault: false }, // แทนที่ Date.now() ด้วย createdPrompt เมื่อต่อ API
+        ]);
+      }
+
+      setNewPrompt({ name: "", action: "" });
+      setEditingPromptId(null);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Failed to save prompt:", error);
+      alert("Failed to save prompt. Please try again.");
+    }
   };
 
   // เปิด modal ลบ
@@ -75,16 +97,38 @@ export default function AiPromptsPage() {
     setDeletePrompt(null);
   };
 
-  // ยืนยันลบ
-  const handleConfirmDelete = () => {
-    setPrompts(prompts.filter((p) => p.id !== deletePrompt.id));
-    setDeletePrompt(null);
+  // 🟢 [BACKEND NOTE]: ยืนยันลบด้วยการยิง API DELETE
+  const handleConfirmDelete = async () => {
+    if (!deletePrompt) return;
+
+    try {
+      // 🟢 [API CALL]: ลบ prompt
+      // await fetch(`/api/prompts/${deletePrompt.id}`, { method: 'DELETE' });
+
+      setPrompts(prompts.filter((p) => p.id !== deletePrompt.id));
+      setDeletePrompt(null);
+    } catch (error) {
+      console.error("Failed to delete prompt:", error);
+      alert("Failed to delete prompt. Please try again.");
+    }
   };
 
-  const handleToggle = (id) => {
-    setPrompts(
-      prompts.map((p) => (p.id === id ? { ...p, active: !p.active } : p))
-    );
+  // 🟢 [BACKEND NOTE]: อัปเดตสถานะ Active/Inactive ผ่าน API
+  const handleToggle = async (id, currentStatus) => {
+    try {
+      // 🟢 [API CALL]: อัปเดตสถานะ (PATCH)
+      // await fetch(`/api/prompts/${id}/status`, {
+      //   method: 'PATCH',
+      //   body: JSON.stringify({ active: !currentStatus })
+      // });
+
+      setPrompts(
+        prompts.map((p) => (p.id === id ? { ...p, active: !currentStatus } : p))
+      );
+    } catch (error) {
+      console.error("Failed to toggle prompt status:", error);
+      // อาจจะเพิ่ม Toast Notification แจ้งเตือนผู้ใช้ตรงนี้
+    }
   };
 
   return (
@@ -116,50 +160,54 @@ export default function AiPromptsPage() {
 
         {/* Prompt list */}
         <div className="flex-1 flex flex-col justify-start text-center overflow-y-auto mt-8 px-10 gap-3">
-          {prompts.map((p) => (
-            <div
-              key={p.id}
-              className="flex justify-between items-center bg-white/10 border border-white/20 rounded-xl p-4"
-            >
-              <div className="text-left">
-                <h3 className="font-semibold">{p.name}</h3>
-                <p className="text-sm text-white/70">{p.action}</p>
-              </div>
+          {isLoading ? (
+            <div className="text-white/50 py-10">Loading prompts...</div>
+          ) : (
+            prompts.map((p) => (
+              <div
+                key={p.id}
+                className="flex justify-between items-center bg-white/10 border border-white/20 rounded-xl p-4"
+              >
+                <div className="text-left">
+                  <h3 className="font-semibold text-white">{p.name}</h3>
+                  <p className="text-sm text-white/70">{p.action}</p>
+                </div>
 
-              <div className="flex items-center gap-3">
-                {!p.isDefault && (
-                  <>
-                    <button
-                      onClick={() => handleOpenDeleteModal(p)}
-                      className="flex items-center gap-1 bg-red-500/30 border border-red-400 text-red-200 rounded-lg px-3 py-1 text-sm hover:bg-red-500/50 transition cursor-pointer"
-                    >
-                      <Trash2 size={16} />
-                      Delete
-                    </button>
-                    <button
-                      onClick={() => openEditModal(p)}
-                      className="flex items-center gap-1 bg-white/20 border border-white/40 text-white rounded-lg px-3 py-1 text-sm hover:bg-white/30 transition cursor-pointer"
-                    >
-                      <Edit size={16} />
-                      Edit
-                    </button>
-                  </>
-                )}
+                <div className="flex items-center gap-3">
+                  {!p.isDefault && (
+                    <>
+                      <button
+                        onClick={() => handleOpenDeleteModal(p)}
+                        className="flex items-center gap-1 bg-red-500/30 border border-red-400 text-red-200 rounded-lg px-3 py-1 text-sm hover:bg-red-500/50 transition cursor-pointer"
+                      >
+                        <Trash2 size={16} />
+                        Delete
+                      </button>
+                      <button
+                        onClick={() => openEditModal(p)}
+                        className="flex items-center gap-1 bg-white/20 border border-white/40 text-white rounded-lg px-3 py-1 text-sm hover:bg-white/30 transition cursor-pointer"
+                      >
+                        <Edit size={16} />
+                        Edit
+                      </button>
+                    </>
+                  )}
 
-                {/* Toggle switch */}
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={p.active}
-                    onChange={() => handleToggle(p.id)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:bg-purple-500 transition-all"></div>
-                  <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-5 transition-all"></div>
-                </label>
+                  {/* Toggle switch */}
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={p.active}
+                      onChange={() => handleToggle(p.id, p.active)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:bg-purple-500 transition-all"></div>
+                    <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-5 transition-all"></div>
+                  </label>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 

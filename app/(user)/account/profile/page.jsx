@@ -27,47 +27,66 @@ export default function ProfilePage() {
         return `#${"0".repeat(6 - color.length) + color}`;
     }
 
-    // Load Data
+    // 🟢 [BACKEND NOTE]: โหลดข้อมูลโปรไฟล์จาก API
     useEffect(() => {
-        try {
-            const storedUser = localStorage.getItem("currentUser");
-            if (storedUser) {
-                const user = JSON.parse(storedUser);
-                
+        const fetchUserProfile = async () => {
+            try {
+                // 🟢 [API CALL]: ดึงข้อมูลของตัวเองจาก Backend
+                // const response = await fetch('/api/users/me');
+                // const user = await response.json();
+
+                // ===============================================
+                // [Mock Data] ข้อมูลจำลองเพื่อให้หน้าเว็บแสดงผลได้ระหว่างรอ API
+                const user = {
+                    username: "Somchai Admin",
+                    email: "somchai@example.com",
+                    role: "Owner",
+                    status: "online",
+                    avatar: ""
+                };
+                // ===============================================
+
                 const nameParts = (user.username || "").split(" ");
                 setFirst(nameParts[0] || "");
                 setLast(nameParts.slice(1).join(" ") || "");
                 
                 setEmail(user.email || "");
                 setRole(user.role || "Employee");
-                
+                if (user.status) setStatus(user.status);
                 setAvatar(user.avatar && user.avatar.length > 10 ? user.avatar : ""); 
+
+            } catch (error) {
+                console.error("Error loading profile:", error);
             }
-        } catch (error) {
-            console.error("Error loading profile:", error);
-        }
+        };
+
+        fetchUserProfile();
     }, []);
 
-    // Save Data
-    const handleSave = (e) => {
+    // 🟢 [BACKEND NOTE]: บันทึกข้อมูลโปรไฟล์ไปยัง API
+    const handleSave = async (e) => {
         e.preventDefault();
         try {
-            const storedUser = localStorage.getItem("currentUser");
-            let userObj = storedUser ? JSON.parse(storedUser) : {};
-
             const fullName = `${first} ${last}`.trim();
-            
-            userObj = {
-                ...userObj,
-                username: fullName, 
+            const payload = {
+                username: fullName,
                 email: email,
+                status: status,
                 avatar: avatar || fullName.charAt(0).toUpperCase()
             };
 
-            localStorage.setItem("currentUser", JSON.stringify(userObj));
-            window.dispatchEvent(new Event("user_updated"));
-            alert("Profile updated successfully!");
+            // 🟢 [API CALL]: อัปเดตข้อมูลส่วนตัว (PATCH / PUT)
+            // const response = await fetch('/api/users/me', {
+            //     method: 'PATCH',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(payload)
+            // });
+            // if (!response.ok) throw new Error('Failed to update profile');
+
+            // 🟢 ส่ง event บอก component อื่น (เช่น Sidebar) ว่า Profile ถูกแก้ไขแล้ว
+            // window.dispatchEvent(new Event("user_updated"));
             
+            alert("Profile updated successfully!");
         } catch (error) {
             console.error("Error saving profile:", error);
             alert("Failed to save profile.");
@@ -89,7 +108,7 @@ export default function ProfilePage() {
                     <div className="relative group">
                         <div className="w-40 h-40 rounded-full p-1 bg-linear-to-tr from-purple-500 to-pink-500 mb-4 shadow-lg">
                             
-                            {/*  Avatar */}
+                            {/* Avatar */}
                             <div className="w-full h-full rounded-full overflow-hidden bg-neutral-800 relative flex items-center justify-center">
                                 {avatar ? (
                                     <img

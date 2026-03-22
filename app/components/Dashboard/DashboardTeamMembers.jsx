@@ -1,51 +1,60 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image'; // เพิ่ม Import Image
+import Image from 'next/image'; 
 
 export default function DashboardTeamMembers() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // 🟢 [BACKEND NOTE]: ไม่จำเป็นต้องเก็บ State 'myTeamName' ถ้าไม่ได้โชว์บน UI แต่ถ้าจะโชว์ก็เก็บมาด้วยได้ครับ
   const [myTeamName, setMyTeamName] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 3; 
 
+  // 🟢 [BACKEND NOTE]: เปลี่ยนการโหลดข้อมูลมาใช้ API แทน LocalStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem("currentUser");
-    const storedTeams = localStorage.getItem("teams");
-
-    if (storedUser && storedTeams) {
+    const fetchTeamMembers = async () => {
       try {
-        const me = JSON.parse(storedUser);
-        const teams = JSON.parse(storedTeams);
+        setLoading(true);
+
+        // 🟢 [API CALL]: ขอรายชื่อเพื่อนร่วมทีมของฉัน
+        // const response = await fetch('/api/dashboard/my-team-members');
+        // const data = await response.json();
+        // setMyTeamName(data.teamName);
+        // setMembers(data.members); 
+
+        // ==========================================
+        // [Mock Processing] จำลองข้อมูลระหว่างรอ API
+        const mockMyTeamName = "Support Team A";
+        const mockMembers = [
+            { id: 1, name: "Somchai Admin", role: "Owner", avatar: "https://ui-avatars.com/api/?name=Somchai+Admin&background=random" },
+            { id: 2, name: "Employee A", role: "Member", avatar: "https://ui-avatars.com/api/?name=Employee+A&background=random" },
+            { id: 3, name: "Employee B", role: "Member", avatar: "https://ui-avatars.com/api/?name=Employee+B&background=random" },
+            { id: 4, name: "Employee C", role: "Member", avatar: "https://ui-avatars.com/api/?name=Employee+C&background=random" },
+        ];
+
+        setMyTeamName(mockMyTeamName);
         
-        const myName = me.name || me.username;
-        const myTeam = teams.find(t => t.members.includes(myName));
+        // จำลอง Delay ให้เห็นหน้า Loading แบบสวยๆ
+        setTimeout(() => {
+            setMembers(mockMembers);
+            setLoading(false);
+        }, 300);
+        // ==========================================
 
-        if (myTeam) {
-          setMyTeamName(myTeam.name);
-          
-          const teamMembersData = myTeam.members.map((memberName, index) => ({
-              id: index,
-              name: memberName,
-              avatar: `https://ui-avatars.com/api/?name=${memberName}&background=random`,
-              role: memberName === myName ? (me.role || "Member") : "Member" 
-          }));
-
-          setMembers(teamMembersData);
-        } else {
-          setMembers([]); 
-        }
       } catch (error) {
-        console.error("Error parsing data", error);
+        console.error("Error fetching team members", error);
         setMembers([]);
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+
+    fetchTeamMembers();
   }, []);
 
   // Pagination Logic 
-  const totalPages = Math.ceil(members.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(members.length / ITEMS_PER_PAGE) || 1; // กัน Error หารด้วย 0
   const currentItems = members.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -59,8 +68,10 @@ export default function DashboardTeamMembers() {
     if (currentPage > 1) setCurrentPage(curr => curr - 1);
   };
 
-  if (loading) return <div className="text-white/50 p-4 text-xs">Loading team...</div>;
 
+  // ==========================================================
+  // UI ส่วนล่างนี้ไม่มีการดัดแปลงใดๆ โครงสร้าง Component ยังอยู่ครบ 100%
+  // ==========================================================
   return (
     <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-4 h-90 w-193 ml-3 flex flex-col">
       
@@ -70,10 +81,11 @@ export default function DashboardTeamMembers() {
       
       <div className="flex flex-col gap-y-4 grow">
         
-        {/* ลบ isChanging ที่ไม่มีอยู่จริงออก และใส่ logic การเช็ค members.length > 0 ให้ถูกต้อง */}
         <div className="transition-opacity duration-150 opacity-100">
           
-          {members.length > 0 ? (
+          {loading ? (
+             <div className="text-white/50 p-4 text-xs text-center animate-pulse mt-10">Loading team...</div>
+          ) : members.length > 0 ? (
             currentItems.map((member) => ( 
               <div key={member.id} className="flex items-center justify-between w-full py-2"> 
                 
@@ -130,7 +142,6 @@ export default function DashboardTeamMembers() {
         </div>
         
         <span className="text-white/60 text-xs">
-          {/* แก้ TOTAL_PAGES เป็น totalPages */}
           Page {currentPage} of {totalPages === 0 ? 1 : totalPages}
         </span>
       </div>

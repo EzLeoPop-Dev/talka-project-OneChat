@@ -1,66 +1,87 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts';
 
-const allChartData = {
-  'Today': [
-    { time: '00:00', opened: 0, closed: 0 },
-    { time: '03:00', opened: 0, closed: 0 },
-    { time: '06:00', opened: 2, closed: 0 },
-    { time: '09:00', opened: 4, closed: 0 },
-    { time: '12:00', opened: 2, closed: 2 },
-    { time: '15:00', opened: 3, closed: 5 },
-    { time: '18:00', opened: 0, closed: 2 },
-    { time: '21:00', opened: 0, closed: 2 },
-    { time: '24:00', opened: 0, closed: 0 },
-  ],
-  'Yesterday': [
-    { time: '00:00', opened: 0, closed: 0 },
-    { time: '03:00', opened: 2, closed: 0 },
-    { time: '06:00', opened: 6, closed: 0 },
-    { time: '09:00', opened: 0, closed: 1 },
-    { time: '12:00', opened: 2, closed: 1 },
-    { time: '15:00', opened: 5, closed: 3 },
-    { time: '18:00', opened: 0, closed: 4 },
-    { time: '21:00', opened: 0, closed: 7 },
-    { time: '24:00', opened: 0, closed: 0 },
-  ],
-  'Last 7 Days': [
-    { time: 'Mon', opened: 7, closed: 0 },
-    { time: 'Tue', opened: 8, closed: 1 },
-    { time: 'Wed', opened: 6, closed: 15 },
-    { time: 'Thu', opened: 7, closed: 5 },
-    { time: 'Fri', opened: 4, closed: 9 },
-    { time: 'Sat', opened: 7, closed: 5 },
-    { time: 'Sun', opened: 3, closed: 7 },
-  ],
-  'Last 30 Days': [
-    { time: 'Week 1', opened: 48, closed: 26 },
-    { time: 'Week 2', opened: 82, closed: 54 },
-    { time: 'Week 3', opened: 77, closed: 57 },
-    { time: 'Week 4', opened: 43, closed: 113 },
-  ]
-};
-
+// 🟢 [BACKEND NOTE]: เปลี่ยนข้อมูลตรงนี้ให้เป็นเพียงค่า Default รอระหว่าง API โหลด
+const initialMockData = [
+  { time: '00:00', opened: 0, closed: 0 },
+  { time: '03:00', opened: 0, closed: 0 },
+  { time: '06:00', opened: 2, closed: 0 },
+  { time: '09:00', opened: 4, closed: 0 },
+  { time: '12:00', opened: 2, closed: 2 },
+  { time: '15:00', opened: 3, closed: 5 },
+  { time: '18:00', opened: 0, closed: 2 },
+  { time: '21:00', opened: 0, closed: 2 },
+  { time: '24:00', opened: 0, closed: 0 },
+];
 
 export default function DashboardConversation() {
   
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState('Today');
 
+  // 🟢 [BACKEND NOTE]: สร้าง State สำหรับรับข้อมูลกราฟจาก API
+  const [currentData, setCurrentData] = useState(initialMockData);
+  const [isLoading, setIsLoading] = useState(false);
+
   const options = ['Today', 'Yesterday', 'Last 7 Days', 'Last 30 Days'];
+
+  // 🟢 [BACKEND NOTE]: useEffect สำหรับยิง API เมื่อเปลี่ยน Option
+  useEffect(() => {
+    const fetchChartData = async () => {
+      setIsLoading(true);
+      try {
+        // 🟢 [API CALL]: ส่ง selectedOption ไปให้ Backend ประมวลผล
+        // ตัวอย่างเช่น: /api/dashboard/conversations?period=Today
+        // const response = await fetch(`/api/dashboard/conversations?period=${selectedOption}`);
+        // const data = await response.json();
+        // setCurrentData(data);
+
+        // ===============================================
+        // [Mock Processing]: จำลองข้อมูลเพื่อไม่ให้หน้าเว็บพังตอนรอต่อ Backend
+        const allChartDataMock = {
+          'Today': [
+            { time: '00:00', opened: 0, closed: 0 }, { time: '03:00', opened: 0, closed: 0 }, { time: '06:00', opened: 2, closed: 0 },
+            { time: '09:00', opened: 4, closed: 0 }, { time: '12:00', opened: 2, closed: 2 }, { time: '15:00', opened: 3, closed: 5 },
+            { time: '18:00', opened: 0, closed: 2 }, { time: '21:00', opened: 0, closed: 2 }, { time: '24:00', opened: 0, closed: 0 },
+          ],
+          'Yesterday': [
+            { time: '00:00', opened: 0, closed: 0 }, { time: '03:00', opened: 2, closed: 0 }, { time: '06:00', opened: 6, closed: 0 },
+            { time: '09:00', opened: 0, closed: 1 }, { time: '12:00', opened: 2, closed: 1 }, { time: '15:00', opened: 5, closed: 3 },
+            { time: '18:00', opened: 0, closed: 4 }, { time: '21:00', opened: 0, closed: 7 }, { time: '24:00', opened: 0, closed: 0 },
+          ],
+          'Last 7 Days': [
+            { time: 'Mon', opened: 7, closed: 0 }, { time: 'Tue', opened: 8, closed: 1 }, { time: 'Wed', opened: 6, closed: 15 },
+            { time: 'Thu', opened: 7, closed: 5 }, { time: 'Fri', opened: 4, closed: 9 }, { time: 'Sat', opened: 7, closed: 5 },
+            { time: 'Sun', opened: 3, closed: 7 },
+          ],
+          'Last 30 Days': [
+            { time: 'Week 1', opened: 48, closed: 26 }, { time: 'Week 2', opened: 82, closed: 54 },
+            { time: 'Week 3', opened: 77, closed: 57 }, { time: 'Week 4', opened: 43, closed: 113 },
+          ]
+        };
+
+        setCurrentData(allChartDataMock[selectedOption] || allChartDataMock['Today']);
+        // ===============================================
+
+      } catch (error) {
+        console.error("Failed to fetch chart data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChartData();
+  }, [selectedOption]);
+
 
   const handleSelect = (option) => {
     setSelectedOption(option);
     setIsOpen(false);
   };
 
-  const currentData = allChartData[selectedOption] || allChartData['Today'];
-
-  
   const { totals, yAxisConfig } = useMemo(() => {
-    
     let maxDataValue = 0;
     const totals = currentData.reduce(
         (acc, curr) => {
@@ -75,7 +96,6 @@ export default function DashboardConversation() {
         { opened: 0, closed: 0 }
     );
 
-    
     let domainMax = 10;
     let step = 2;
 
@@ -102,10 +122,12 @@ export default function DashboardConversation() {
   }, [currentData]);
   
   
+  // ==========================================================
+  // UI ส่วนล่างนี้ไม่มีการดัดแปลงใดๆ โครงสร้าง Component ยังอยู่ครบ 100%
+  // ==========================================================
   return (
     <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-4 flex flex-col min-h-[400px]">
       
-     
       <div className="flex justify-between items-center shrink-0 relative z-10">
         <div className="flex items-center gap-2">
           <h2 className="text-white/90 text-sm">Conversations Overview</h2>

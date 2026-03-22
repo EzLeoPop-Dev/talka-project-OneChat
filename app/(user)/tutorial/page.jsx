@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
-import { GlassBackground } from '@/app/components/GlassBackground';
-import TutorialModal from '@/app/components/TutorialModal';
+import { GlassBackground } from '@/app/components/Shared/GlassBackground';
+import TutorialModal from '@/app/components/Modals/TutorialModal';
 
+// 🟢 [BACKEND NOTE]: ปัจจุบันข้อมูล tutorials เป็นแบบ Static (ฝังในโค้ด)
+// หากในอนาคตต้องการให้ Admin เพิ่ม/ลด/แก้ไข บทช่วยสอนได้เองผ่านระบบหลังบ้าน 
+// คุณสามารถเปลี่ยนให้ fetch ข้อมูลชุดนี้มาจาก API แทนได้ (เช่น GET /api/tutorials)
 const tutorials = [
     {
         id: 1,
@@ -129,26 +132,29 @@ const tutorials = [
     }
 ];
 
-
 export default function Page() {
-
     const [userName, setUserName] = useState("");
+    
     useEffect(() => {
-        try {
-            // Simulate user data if missing for demo purposes
-            if (!localStorage.getItem("currentUser")) {
-                localStorage.setItem("currentUser", JSON.stringify({ username: "Demo User" }));
-            }
-            const storedUser = localStorage.getItem("currentUser");
-            if (storedUser) {
-                const user = JSON.parse(storedUser);
-                setUserName(user.username || "Unknown User");
-            } else {
+        // 🟢 [BACKEND NOTE]: แทนที่การดึงข้อมูลจาก localStorage ด้วยการยิง API 
+        // เพื่อดึงข้อมูล Profile ของผู้ใช้ที่ Login อยู่ปัจจุบัน (เช่น GET /api/users/me)
+        const fetchUserProfile = async () => {
+            try {
+                // 🟢 [BACKEND NOTE]: โค้ดสำหรับดึงข้อมูลจริง
+                // const response = await fetch('/api/users/me');
+                // if (!response.ok) throw new Error("Failed to fetch user");
+                // const userData = await response.json();
+                // setUserName(userData.username);
+
+                // [Mock Data]: จำลองระหว่างรอ Backend
+                setUserName("Demo User");
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
                 setUserName("Guest");
             }
-        } catch (error) {
-            console.error("Error reading user from localStorage:", error);
-        }
+        };
+
+        fetchUserProfile();
     }, []);
 
     const [selectedCard, setSelectedCard] = useState(null);
@@ -230,7 +236,6 @@ export default function Page() {
                             ยินดีต้อนรับเข้าสู้ Talka
                         </span>
                     </h1>
-                    <Sparkles className="absolute -bottom-4 -right-8 w-6 h-6 text-blue-400 animate-pulse delay-75" />
                     <div className="h-1 w-40 mx-auto mt-6 bg-linear-to-r from-transparent via-purple-500 to-transparent rounded-full opacity-70"></div>
                 </motion.div>
                 <p className='text-lg font-semibold mt-6 text-purple-300 tracking-widest uppercase'>Tutorials</p>

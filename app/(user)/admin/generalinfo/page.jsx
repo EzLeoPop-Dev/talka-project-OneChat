@@ -3,7 +3,6 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Home, Save } from "lucide-react";
 
-// 1. แยก Logic การทำงานหลักมาไว้ใน Component ย่อย (Inner Component)
 function GeneralInfoContent() {
   const searchParams = useSearchParams();
   const workspaceId = searchParams.get("id");
@@ -12,54 +11,77 @@ function GeneralInfoContent() {
   const [timezone, setTimezone] = useState("(GMT+07:00) Asia/Bangkok");
   const [workspaceName, setWorkspaceName] = useState("");
 
-  const [workspaces, setWorkspaces] = useState([]);
   const [currentWsId, setCurrentWsId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // โหลดข้อมูลเมื่อเปิดหน้า
+  // 🟢 [BACKEND NOTE]: โหลดข้อมูล Workspace จาก API 
   useEffect(() => {
-    // ต้องเช็ค window/localStorage เพื่อป้องกัน Error ฝั่ง Server (Next.js SSR)
-    if (typeof window !== "undefined") {
-      const storedWorkspaces = JSON.parse(localStorage.getItem("workspaces") || "[]");
-      setWorkspaces(storedWorkspaces);
+    const fetchWorkspaceInfo = async () => {
+      try {
+        setLoading(true);
 
-      if (storedWorkspaces.length > 0) {
-        const targetWs = workspaceId
-          ? storedWorkspaces.find(ws => ws.id.toString() === workspaceId)
-          : storedWorkspaces[0];
+        // 🟢 [API CALL]: ตัวอย่างการดึงข้อมูล Workspace ที่ต้องการ
+        // let url = '/api/workspaces/current'; // ดึง default
+        // if (workspaceId) url = `/api/workspaces/${workspaceId}`;
+        // 
+        // const response = await fetch(url);
+        // const targetWs = await response.json();
+
+        // ==========================================
+        // [Mock Processing] จำลองข้อมูลระหว่างรอ API
+        const targetWs = {
+          id: workspaceId || 1,
+          name: "My Workspace",
+          timeout: 30,
+          timezone: "(GMT+07:00) Asia/Bangkok"
+        };
+        // ==========================================
 
         if (targetWs) {
           setCurrentWsId(targetWs.id);
-          setWorkspaceName(targetWs.name);
-
+          setWorkspaceName(targetWs.name || "");
           if (targetWs.timeout !== undefined) setTimeoutValue(targetWs.timeout);
           if (targetWs.timezone !== undefined) setTimezone(targetWs.timezone);
         }
+      } catch (error) {
+        console.error("Error fetching workspace info:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }
+    };
+
+    fetchWorkspaceInfo();
   }, [workspaceId]);
 
-  // ฟังก์ชันบันทึกข้อมูลทั้งหมดลง Local Storage
-  const handleSave = () => {
+  // 🟢 [BACKEND NOTE]: บันทึกข้อมูลที่แก้ไขกลับไปที่ API (PUT/PATCH)
+  const handleSave = async () => {
     if (!currentWsId) return;
 
-    const updatedWorkspaces = workspaces.map((ws) =>
-      ws.id === currentWsId ? {
-        ...ws,
-        name: workspaceName,
-        timeout: timeout,
-        timezone: timezone
-      } : ws
-    );
+    const payload = {
+      name: workspaceName,
+      timeout: Number(timeout), // ตรวจสอบชนิดข้อมูล
+      timezone: timezone
+    };
 
-    localStorage.setItem("workspaces", JSON.stringify(updatedWorkspaces));
-    setWorkspaces(updatedWorkspaces);
-    alert("Saved successfully!");
+    try {
+      // 🟢 [API CALL]: 
+      // const response = await fetch(`/api/workspaces/${currentWsId}`, {
+      //   method: 'PATCH',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(payload)
+      // });
+      // if (!response.ok) throw new Error("Failed to save");
+
+      alert("Saved successfully!");
+    } catch (error) {
+      console.error("Error saving workspace:", error);
+      alert("Error saving. Please try again.");
+    }
   };
 
-  if (loading) return <div className="p-10 text-white">Loading workspace data...</div>;
+  if (loading) return <div className="p-10 text-white animate-pulse">Loading workspace data...</div>;
 
+ 
   return (
     <div className="w-full h-[94vh] p-2 md:p-4">
       <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
@@ -153,7 +175,7 @@ function GeneralInfoContent() {
 export default function GeneralInfoPage() {
   return (
     // Fallback จะแสดงระหว่างที่ Next.js กำลังโหลด URL Params
-    <Suspense fallback={<div className="p-10 text-white">Loading page...</div>}>
+    <Suspense fallback={<div className="p-10 text-white animate-pulse">Loading page...</div>}>
       <GeneralInfoContent />
     </Suspense>
   );

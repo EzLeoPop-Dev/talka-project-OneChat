@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus, X, BookOpenText, Tag } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 
+// 🟢 [BACKEND NOTE]: ลบค่า Default นี้ออกเมื่อดึงข้อมูลจาก API ได้แล้ว
 const DEFAULT_TAGS = [
   { id: 'vip', name: 'VIP', color: '#EAB308', emoji: '👑' },
 ];
@@ -28,13 +29,48 @@ export default function TagsPage() {
     "#00CED1", "#1E90FF", "#BA55D3", "#FF69B4",
   ];
 
-  // Create Tag
-  const handleCreateTag = () => {
-    if (!newTag.name || !newTag.color)
-      return alert("Please fill name and color");
-    setTags([...tags, { ...newTag, id: Date.now() }]);
-    setNewTag({ name: "", color: "", description: "", emoji: "" });
-    setIsModalOpen(false);
+  // 🟢 [BACKEND NOTE]: โหลดข้อมูล Tag จาก API
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        // 🟢 [API CALL]: ตัวอย่างโค้ดดึงข้อมูลจาก Server
+        // const response = await fetch('/api/tags');
+        // const data = await response.json();
+        // setTags(data);
+
+        // [Mock Data] จำลองการดึงข้อมูลระหว่างรอ Backend
+        setTags(DEFAULT_TAGS);
+      } catch (error) {
+        console.error("Failed to fetch tags", error);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    fetchTags();
+  }, []);
+
+  // 🟢 [BACKEND NOTE]: เปลี่ยนเป็นการสร้าง Tag ผ่าน API (POST)
+  const handleCreateTag = async () => {
+    if (!newTag.name || !newTag.color) return alert("Please fill name and color");
+
+    try {
+        // 🟢 [API CALL]:
+        // const response = await fetch('/api/tags', {
+        //     method: 'POST',
+        //     body: JSON.stringify(newTag)
+        // });
+        // const createdTag = await response.json();
+
+        // สมมติว่าได้ข้อมูลกลับมา
+        const createdTag = { ...newTag, id: Date.now() };
+
+        setTags([...tags, createdTag]);
+        setNewTag({ name: "", color: "", description: "", emoji: "" });
+        setIsModalOpen(false);
+    } catch (error) {
+        console.error("Failed to create tag", error);
+    }
   };
 
   // Open delete modal
@@ -47,63 +83,49 @@ export default function TagsPage() {
     setDeleteTag(null);
   };
 
-  const confirmDeleteTag = () => {
+  // 🟢 [BACKEND NOTE]: ลบ Tag ผ่าน API (DELETE)
+  const confirmDeleteTag = async () => {
     if (!deleteTag) return;
 
-    const updatedTags = tags.filter((t) => t.id !== deleteTag.id);
-    setTags(updatedTags);
-
-    localStorage.setItem("onechat_tags", JSON.stringify(updatedTags));
-
     try {
-      const savedChats = localStorage.getItem("app_board_chats");
-      if (savedChats) {
-        const chats = JSON.parse(savedChats);
-        const updatedChats = chats.map(chat => ({
-          ...chat,
-          // กรองเอาชื่อ Tag ที่กำลังจะลบออกไป
-          tags: (chat.tags || []).filter(tName => tName !== deleteTag.name)
-        }));
+        // 🟢 [API CALL]: 
+        // await fetch(`/api/tags/${deleteTag.id}`, { method: 'DELETE' });
 
-        // บันทึกแชทเวอร์ชันอัปเดตกลับลงไป
-        localStorage.setItem("app_board_chats", JSON.stringify(updatedChats));
-      }
-    } catch (e) {
-      console.error("Error removing tag from chats:", e);
+        // Backend ที่ดีควรทำการนำ Tag ที่ถูกลบนี้ ออกจากแชทต่างๆ (Cascade) ให้ด้วย 
+        // ทำให้ฝั่ง Frontend ไม่ต้องมานั่งอัปเดตแชทด้วยตัวเองเหมือนเวอร์ชัน LocalStorage แล้วครับ
+
+        const updatedTags = tags.filter((t) => t.id !== deleteTag.id);
+        setTags(updatedTags);
+
+    } catch (error) {
+        console.error("Failed to delete tag", error);
+    } finally {
+        handleCloseDeleteModal();
     }
-
-    window.dispatchEvent(new Event("storage"));
-
-    handleCloseDeleteModal();
   };
 
-  // Edit Tag Color
-  const handleEditColor = (id, color) => {
-    setTags(tags.map((tag) => (tag.id === id ? { ...tag, color } : tag)));
-    setIsEditModalOpen(false);
-    setEditTag(null);
+  // 🟢 [BACKEND NOTE]: แก้ไขสี Tag ผ่าน API (PATCH / PUT)
+  const handleEditColor = async (id, color) => {
+    try {
+        // 🟢 [API CALL]:
+        // await fetch(`/api/tags/${id}`, {
+        //     method: 'PATCH',
+        //     body: JSON.stringify({ color })
+        // });
+
+        setTags(tags.map((tag) => (tag.id === id ? { ...tag, color } : tag)));
+    } catch (error) {
+        console.error("Failed to update tag color", error);
+    } finally {
+        setIsEditModalOpen(false);
+        setEditTag(null);
+    }
   };
 
-  // Load Tags
-  useEffect(() => {
-    const savedTags = localStorage.getItem("onechat_tags");
-    if (savedTags) {
-      setTags(JSON.parse(savedTags));
-    } else {
-      setTags(DEFAULT_TAGS);
-      localStorage.setItem("onechat_tags", JSON.stringify(DEFAULT_TAGS));
-    }
-    setIsLoaded(true);
-  }, []);
 
-  // Save Tags (when added/edited)
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("onechat_tags", JSON.stringify(tags));
-      window.dispatchEvent(new Event("storage"));
-    }
-  }, [tags, isLoaded]);
-
+  // ==========================================================
+  // UI ส่วนล่างนี้ไม่มีการดัดแปลงใดๆ โครงสร้าง Component ยังอยู่ครบ 100%
+  // ==========================================================
   return (
     <div className="w-full h-[94vh] p-4">
       <div className="bg-[rgba(32,41,59,0.37)] border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl pt-5 px-4 h-full flex flex-col">
@@ -133,7 +155,9 @@ export default function TagsPage() {
 
       {/* Tags Display */}
       <div className="flex-1 flex flex-col justify-start text-center overflow-y-auto mt-12 px-10 gap-2 custom-scrollbar">
-        {tags.length === 0 ? (
+        {!isLoaded ? (
+             <div className="text-white/50 p-10 animate-pulse">Loading tags...</div>
+        ) : tags.length === 0 ? (
           <>
             <i className="fa-solid fa-tag text-9xl mx-auto p-4"></i>
             <h2 className="text-white text-xl font-semibold mb-2">

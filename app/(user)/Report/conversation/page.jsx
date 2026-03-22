@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import React, { useState, useRef, useEffect } from "react";
 import {
@@ -11,6 +11,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Info, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+
+// 🟢 [BACKEND NOTE]: เมื่อเชื่อมต่อ API แล้ว ให้ลบการนำเข้า Mock Data นี้ออก
 import { calenderData } from "../../../data/calenderData";
 
 import { DateRange } from "react-date-range";
@@ -118,6 +120,60 @@ export default function ConversationsReport() {
   const [showCalendar, setShowCalendar] = useState(false);
   const calendarRef = useRef(null);
 
+  // 🟢 [BACKEND NOTE]: State สำหรับเก็บข้อมูล API 
+  const [chartData, setChartData] = useState([]);
+  const [conversationLogs, setConversationLogs] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Pagination State
+  const [convItemsPerPage] = useState(5);
+  const [convCurrentPage, setConvCurrentPage] = useState(1);
+
+
+  // 🟢 [BACKEND NOTE]: useEffect นี้รับหน้าที่ยิง API ดึงข้อมูลรายงานเมื่อเปลี่ยนวันที่
+  useEffect(() => {
+    const fetchReportData = async () => {
+      setIsLoading(true);
+      try {
+        const startDate = range[0].startDate.toISOString();
+        const endDate = range[0].endDate.toISOString();
+
+        // 🟢 โค้ดตัวอย่างการเรียก API 
+        // const response = await fetch(`/api/reports/conversations?start=${startDate}&end=${endDate}`);
+        // const data = await response.json();
+        // setChartData(data.charts);
+        // setConversationLogs(data.logs);
+
+        // [Mock Processing]: กรองข้อมูลจำลอง ระหว่างรอ API
+        const filteredMock = calenderData
+            .filter((d) => {
+            const dDate = new Date(d.date);
+            const s = range[0].startDate;
+            const e = range[0].endDate;
+            e.setHours(23, 59, 59, 999);
+            return dDate >= s && dDate <= e;
+            })
+            .map((d) => ({
+            ...d,
+            total: d.opened + d.closed,
+            displayDate: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+            }));
+        setChartData(filteredMock);
+        
+        // จำลอง Log เป็นอาร์เรย์ว่าง
+        setConversationLogs([]);
+
+      } catch (error) {
+        console.error("Error fetching report data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReportData();
+  }, [range]);
+
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (calendarRef.current && !calendarRef.current.contains(event.target)) setShowCalendar(false);
@@ -128,25 +184,9 @@ export default function ConversationsReport() {
 
   const chartFontSize = "12px";
 
-  const filteredData = calenderData
-    .filter((d) => {
-      const dDate = new Date(d.date);
-      const s = range[0].startDate;
-      const e = range[0].endDate;
-      e.setHours(23, 59, 59, 999);
-      return dDate >= s && dDate <= e;
-    })
-    .map((d) => ({
-      ...d,
-      total: d.opened + d.closed,
-      displayDate: new Date(d.date).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
-    }));
-
-  const totalOpened = filteredData.reduce((sum, d) => sum + d.opened, 0);
-  const totalClosed = filteredData.reduce((sum, d) => sum + d.closed, 0);
+  // คำนวณสรุปผลจาก Data 
+  const totalOpened = chartData.reduce((sum, d) => sum + d.opened, 0);
+  const totalClosed = chartData.reduce((sum, d) => sum + d.closed, 0);
   const totalConversations = totalOpened + totalClosed;
 
   const openedPercent = totalConversations > 0 ? ((totalOpened / totalConversations) * 100).toFixed(2) : "0.00";
@@ -154,10 +194,6 @@ export default function ConversationsReport() {
 
   const blockClass =
     "border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 pb-8 flex flex-col h-full";
-
-  const [convItemsPerPage] = useState(5);
-  const [convCurrentPage, setConvCurrentPage] = useState(1);
-  const totalConversationsItems = 0;
 
   const formatDateText = (date) =>
     new Date(date).toLocaleDateString("en-US", {
@@ -220,7 +256,7 @@ export default function ConversationsReport() {
         </div>
 
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={filteredData}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#555" />
             <XAxis dataKey="displayDate" stroke="#ccc" style={{ fontSize: chartFontSize }} />
             <YAxis stroke="#ccc" style={{ fontSize: chartFontSize }} />
@@ -238,7 +274,7 @@ export default function ConversationsReport() {
           Conversations Opened <InfoTooltip text="จำนวนแชทที่ถูกเปิดขึ้นมาใหม่ในช่วงเวลาที่เลือก" />
         </h2>
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={filteredData}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#555" />
             <XAxis dataKey="displayDate" stroke="#ccc" style={{ fontSize: chartFontSize }} />
             <YAxis stroke="#ccc" style={{ fontSize: chartFontSize }} />
@@ -254,7 +290,7 @@ export default function ConversationsReport() {
           Conversations Closed <InfoTooltip text="จำนวนแชทที่ถูกปิดหรือจบการสนทนาในช่วงเวลาที่เลือก" />
         </h2>
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={filteredData}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#555" />
             <XAxis dataKey="displayDate" stroke="#ccc" style={{ fontSize: chartFontSize }} />
             <YAxis stroke="#ccc" style={{ fontSize: chartFontSize }} />
@@ -275,15 +311,27 @@ export default function ConversationsReport() {
             "Contact Name",
           ]}
         >
-          <tr>
-            <td colSpan={5} className="text-center py-6 text-gray-400">
-              No Available Data
-            </td>
-          </tr>
+            {conversationLogs.length > 0 ? (
+                conversationLogs.map((log, index) => (
+                    <tr key={index} className="border-b border-gray-500/30">
+                        <td className="py-3 px-4">{log.closedTimestamp}</td>
+                        <td className="py-3 px-4">{log.openedTimestamp}</td>
+                        <td className="py-3 px-4">{log.conversationId}</td>
+                        <td className="py-3 px-4">{log.contactId}</td>
+                        <td className="py-3 px-4">{log.contactName}</td>
+                    </tr>
+                ))
+            ) : (
+                <tr>
+                    <td colSpan={5} className="text-center py-6 text-gray-400">
+                        No Available Data
+                    </td>
+                </tr>
+            )}
         </Table>
 
         <PaginationControls
-          totalItems={totalConversationsItems}
+          totalItems={conversationLogs.length}
           itemsPerPage={convItemsPerPage}
           currentPage={convCurrentPage}
           setCurrentPage={setConvCurrentPage}

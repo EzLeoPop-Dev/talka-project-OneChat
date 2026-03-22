@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import "@/app/assets/css/other.css";
 
 //Import Data
+// 🟢 [BACKEND NOTE]: ลบข้อมูลจำลองนี้ออกเมื่อต่อ API จริง
 import initialChatData from "@/app/data/mockData.js";
 
 // Helper Data Processing
@@ -20,12 +21,15 @@ const processInitialData = (data) => {
 
 export default function ChatBoardInlineFinal() {
   // State 
+  // 🟢 [BACKEND NOTE]: เปลี่ยนค่าเริ่มต้นเป็น [] (อาเรย์ว่าง) เพื่อรอข้อมูลจาก API
   const [chats, setChats] = useState([]);
   const [columns, setColumns] = useState([
     { id: "col-1", title: "Inbox" },
   ]);
 
+  // 🟢 [BACKEND NOTE]: ให้เริ่มต้นเป็น false พอ fetch ข้อมูลเสร็จค่อยเปลี่ยนเป็น true
   const [isLoaded, setIsLoaded] = useState(false);
+  
   const [selectedChatIds, setSelectedChatIds] = useState([]);
   const [activeDropdownChatId, setActiveDropdownChatId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
@@ -39,109 +43,27 @@ export default function ChatBoardInlineFinal() {
   const [isAddColumnMode, setIsAddColumnMode] = useState(false);
   const [newColumnTitle, setNewColumnTitle] = useState("");
 
-  const isUpdatingRef = useRef(false);
-
+  // จำลองฐานข้อมูลหลัก (ทดแทน LocalStorage เพื่อให้กดเพิ่มแชทลง Board ได้)
+  // 🟢 [BACKEND NOTE]: ลบตัวแปรนี้ออกเมื่อต่อ API จริง
+  const mockDatabaseChats = processInitialData(initialChatData);
 
   useEffect(() => {
+    // 🟢 [BACKEND NOTE]: ตรงนี้ให้เรียกฟังก์ชัน Fetch API เช่น GET /api/board
     loadData();
-    loadUser();
-
-    const handleStorageSync = (e) => {
-      if (isUpdatingRef.current) return;
-      if (e.type === "chat-data-updated" || e.type === "board-data-updated" || e.type === "storage") {
-        loadData();
-      }
-    };
-
-    window.addEventListener("storage", handleStorageSync);
-    window.addEventListener("chat-data-updated", handleStorageSync);
-    window.addEventListener("board-data-updated", handleStorageSync);
-
-    const intervalId = setInterval(() => {
-      if (!isUpdatingRef.current) loadData();
-    }, 2000);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageSync);
-      window.removeEventListener("chat-data-updated", handleStorageSync);
-      window.removeEventListener("board-data-updated", handleStorageSync);
-      clearInterval(intervalId);
-    };
+    
+    // จำลองการดึง User (ในของจริงดึงจาก Session/Token)
+    setCurrentUser({ username: "Admin", role: "Owner" });
   }, []);
 
-  const loadUser = () => {
-    const savedUser = localStorage.getItem("currentUser");
-    if (savedUser) {
-      try { setCurrentUser(JSON.parse(savedUser)); } catch (e) { }
-    }
-  };
-
   const loadData = () => {
-    try {
-      let mainChatDataRaw = localStorage.getItem("onechat_data");
-      let mainChats = [];
-
-      // เช็คว่าถ้าไม่มีข้อมูล หรือเป็น [] ให้โหลด Mock Data
-      const isDataEmpty = !mainChatDataRaw || mainChatDataRaw === "[]";
-
-      if (isDataEmpty) {
-        const processedInitial = processInitialData(initialChatData);
-        localStorage.setItem("onechat_data", JSON.stringify(processedInitial));
-        mainChats = processedInitial;
-      } else {
-        mainChats = JSON.parse(mainChatDataRaw);
-      }
-
-      const boardChatsRaw = localStorage.getItem("app_board_chats");
-      const boardChats = boardChatsRaw ? JSON.parse(boardChatsRaw) : [];
-
-      const savedColumns = localStorage.getItem("app_board_columns");
-      if (savedColumns) setColumns(JSON.parse(savedColumns));
-
-      let mergedChats = boardChats.map(bChat => {
-        const freshChat = mainChats.find(m => m.id === bChat.id);
-        if (freshChat) {
-          return {
-            ...bChat,
-            messages: freshChat.messages,
-            lastMessage: freshChat.messages && freshChat.messages.length > 0
-              ? freshChat.messages[freshChat.messages.length - 1].text
-              : freshChat.message,
-            time: freshChat.time || bChat.time,
-            status: freshChat.status || bChat.status,
-            tags: freshChat.tags || bChat.tags,
-            isAiMode: freshChat.isAiMode,
-            activeAiAgent: freshChat.activeAiAgent
-          };
-        }
-        return bChat;
-      });
-
-      if (mergedChats.length === 0 && !boardChatsRaw) {
-        setChats(mainChats);
-      } else {
-        setChats(prev => {
-          if (JSON.stringify(prev) !== JSON.stringify(mergedChats)) {
-            return mergedChats;
-          }
-          return prev;
-        });
-      }
-
-      setIsLoaded(true);
-    } catch (error) {
-      console.error("Load Data Error:", error);
-    }
+    // 🟢 [BACKEND NOTE]: จุดนี้คือการ Set ข้อมูลจาก API ใส่ State (ตอนนี้ใช้ Mock ไปก่อน)
+    setChats(mockDatabaseChats.map(c => ({ ...c, columnId: "col-1" }))); // สมมติให้อยู่ col-1 หมด
+    setColumns([
+      { id: "col-1", title: "Inbox" },
+      { id: "col-2", title: "In Progress" }
+    ]);
+    setIsLoaded(true);
   };
-
-  useEffect(() => {
-    if (isLoaded) {
-      isUpdatingRef.current = true;
-      localStorage.setItem("app_board_chats", JSON.stringify(chats));
-      localStorage.setItem("app_board_columns", JSON.stringify(columns));
-      setTimeout(() => { isUpdatingRef.current = false; }, 100);
-    }
-  }, [chats, columns, isLoaded]);
 
   //Logic Functions
 
@@ -149,10 +71,13 @@ export default function ChatBoardInlineFinal() {
     setMessageDrafts(prev => ({ ...prev, [chatId]: value }));
   };
 
-  const handleSendMessage = (chatId) => {
+  const handleSendMessage = async (chatId) => {
     const text = messageDrafts[chatId]?.trim();
     if (!text) return;
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // 🟢 [BACKEND NOTE]: ใส่คำสั่ง POST ข้อความไปที่เซิร์ฟเวอร์
+    // await fetch(`/api/chat/${chatId}/message`, { method: 'POST', body: JSON.stringify({ text }) });
 
     const updatedChats = chats.map(chat => {
       if (chat.id === chatId) {
@@ -163,32 +88,27 @@ export default function ChatBoardInlineFinal() {
     });
     setChats(updatedChats);
     setMessageDrafts(prev => ({ ...prev, [chatId]: "" }));
-
-    try {
-      const mainChatsRaw = localStorage.getItem("onechat_data");
-      let mainChats = mainChatsRaw ? JSON.parse(mainChatsRaw) : [];
-      mainChats = mainChats.map(chat => {
-        if (chat.id === chatId) {
-          const updatedMessages = [...(chat.messages || []), { text, from: "me", time: currentTime }];
-          return { ...chat, messages: updatedMessages, message: text, time: currentTime };
-        }
-        return chat;
-      });
-      localStorage.setItem("onechat_data", JSON.stringify(mainChats));
-      window.dispatchEvent(new Event("chat-data-updated"));
-    } catch (e) { console.error(e); }
   };
 
-  const handleAddColumn = () => {
+  const handleAddColumn = async () => {
     if (!newColumnTitle.trim()) return;
     if (columns.length >= 3) return;
-    setColumns([...columns, { id: `col-${Date.now()}`, title: newColumnTitle }]);
+    
+    // 🟢 [BACKEND NOTE]: ใส่คำสั่ง POST สร้าง Column ใหม่ที่เซิร์ฟเวอร์
+    // const res = await fetch('/api/board/columns', { method: 'POST', ... });
+    // const newCol = await res.json();
+    
+    const newColId = `col-${Date.now()}`;
+    setColumns([...columns, { id: newColId, title: newColumnTitle }]);
     setNewColumnTitle("");
     setIsAddColumnMode(false);
   };
 
-  const handleDeleteColumn = (colId, e) => {
+  const handleDeleteColumn = async (colId, e) => {
     e.stopPropagation();
+    // 🟢 [BACKEND NOTE]: ใส่คำสั่ง DELETE Column ที่เซิร์ฟเวอร์
+    // await fetch(`/api/board/columns/${colId}`, { method: 'DELETE' });
+
     setColumns(columns.filter((c) => c.id !== colId));
     setChats((prev) => prev.map((chat) => chat.columnId === colId ? { ...chat, columnId: "col-1" } : chat));
   };
@@ -198,8 +118,11 @@ export default function ChatBoardInlineFinal() {
     setTempColTitle(col.title);
   };
 
-  const saveColumnTitle = () => {
+  const saveColumnTitle = async () => {
     if (tempColTitle.trim()) {
+      // 🟢 [BACKEND NOTE]: ใส่คำสั่ง PATCH แก้ไขชื่อ Column ที่เซิร์ฟเวอร์
+      // await fetch(`/api/board/columns/${editingColId}`, { method: 'PATCH', ... });
+
       setColumns((prev) => prev.map((c) => c.id === editingColId ? { ...c, title: tempColTitle } : c));
     }
     setEditingColId(null);
@@ -211,42 +134,27 @@ export default function ChatBoardInlineFinal() {
     setIsSelectChatModalOpen(true);
   };
 
-  //ย้ายเข้ามาเเล้ว Local เปลี่ยน
-  const handleAddChatToColumn = (chatId) => {
-    const mainChatsRaw = localStorage.getItem("onechat_data");
-    const mainChats = mainChatsRaw ? JSON.parse(mainChatsRaw) : [];
-    const freshChat = mainChats.find(c => c.id === chatId);
+  const handleAddChatToColumn = async (chatId) => {
+    // 🟢 [BACKEND NOTE]: ตรงนี้ต้องเรียก API เพื่ออัปเดต columnId ของ Chat นั้นใน Database
+    // await fetch(`/api/board/chats/${chatId}/move`, { method: 'PATCH', body: JSON.stringify({ columnId: targetColumnIdForAdd }) });
 
-    // เช็คว่ามีอยู่เเล้วใน State รึป่าว
     const existingInBoard = chats.find(c => c.id === chatId);
+    const freshChat = mockDatabaseChats.find(c => c.id === chatId); // ในของจริงดึงจาก All Chats API
 
     if (existingInBoard) {
-      // ถ้ามีแล้ว ให้เปลี่ยน columnId เป็นอันใหม่ที่กด Add
       setChats((prev) => prev.map((chat) =>
-        chat.id === chatId
-          ? { ...chat, columnId: targetColumnIdForAdd } // ย้าย Column
-          : chat
+        chat.id === chatId ? { ...chat, columnId: targetColumnIdForAdd } : chat
       ));
     } else if (freshChat) {
-      //ถ้ายังไม่มี ให้เพิ่มใหม่
-      const newBoardChat = {
-        ...freshChat,
-        columnId: targetColumnIdForAdd,
-        messages: freshChat.messages || []
-      };
+      const newBoardChat = { ...freshChat, columnId: targetColumnIdForAdd, messages: freshChat.messages || [] };
       setChats(prev => [...prev, newBoardChat]);
     }
-
     setIsSelectChatModalOpen(false);
   };
 
-  //แสดงทั้งหมดเสมอ ไม่ซ่อนคนที่มีแล้ว 
   const getFilteredChats = () => {
-    const mainChatsRaw = localStorage.getItem("onechat_data");
-    const allMainChats = mainChatsRaw ? JSON.parse(mainChatsRaw) : [];
-
-    let available = allMainChats;
-
+    // 🟢 [BACKEND NOTE]: ในของจริง ข้อมูลส่วนนี้อาจจะดึงมาจาก API (GET /api/chats) แยกต่างหากเพื่อแสดงรายชื่อทั้งหมด
+    let available = mockDatabaseChats;
     if (chatFilter === "LINE") return available.filter((c) => (c.platform || c.channel) === "Line" || c.platform === "line");
     if (chatFilter === "FACEBOOK") return available.filter((c) => (c.platform || c.channel) === "Facebook" || c.platform === "facebook");
     return available;
@@ -264,6 +172,7 @@ export default function ChatBoardInlineFinal() {
   };
 
   if (!isLoaded) return <div className="bg-slate-900 h-screen w-full flex items-center justify-center text-white/50">Loading...</div>;
+
 
   return (
     <div className="relative w-full h-screen overflow-hidden p-4 font-sans text-white" onClick={() => { setActiveDropdownChatId(null); setShowAiModelSelectId(null); }}>
@@ -446,7 +355,6 @@ export default function ChatBoardInlineFinal() {
             <div className="overflow-y-auto space-y-2 no-scrollbar pr-2 flex-1">
               {getFilteredChats().length === 0 ? (<p className="text-center text-white/30 py-8">No chats found</p>) : (
                 getFilteredChats().map(chat => {
-                  // เช็คว่าคนนี้อยู่ column ไหน (ถ้ามี)
                   const currentChatOnBoard = chats.find(c => c.id === chat.id);
                   const isInCurrentColumn = currentChatOnBoard?.columnId === targetColumnIdForAdd;
 
@@ -456,8 +364,8 @@ export default function ChatBoardInlineFinal() {
                       onClick={() => handleAddChatToColumn(chat.id)}
                       className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition-all relative overflow-hidden
                                     ${isInCurrentColumn
-                          ? "bg-white/5 border-white/5 opacity-70" // อยู่ Column นี้แล้ว ให้ดูจางๆ
-                          : "hover:bg-white/10 border-transparent hover:border-white/10" // ยังไม่อยู่ หรือ อยู่ที่อื่น พร้อมย้าย
+                          ? "bg-white/5 border-white/5 opacity-70"
+                          : "hover:bg-white/10 border-transparent hover:border-white/10"
                         }`}
                     >
                       {isInCurrentColumn && <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>}

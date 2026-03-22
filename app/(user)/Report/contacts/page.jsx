@@ -11,6 +11,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Info, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+
+// 🟢 [BACKEND NOTE]: ลบไฟล์ mock นี้ออกเมื่อต่อ API
 import { calenderData } from "../../../data/calenderData";
 
 import { DateRange } from "react-date-range";
@@ -114,6 +116,62 @@ export default function ContactsReport() {
   const [showCalendar, setShowCalendar] = useState(false);
   const calendarRef = useRef(null);
 
+  // 🟢 [BACKEND NOTE]: สร้าง State สำหรับเก็บข้อมูลที่ได้จาก API
+  const [chartData, setChartData] = useState([]);
+  const [addedLogs, setAddedLogs] = useState([]);
+  const [deletedLogs, setDeletedLogs] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Pagination states
+  const [addedCurrentPage, setAddedCurrentPage] = useState(1);
+  const [deletedCurrentPage, setDeletedCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // 🟢 [BACKEND NOTE]: useEffect นี้จะยิง API ทุกครั้งที่ผู้ใช้เปลี่ยนวันที่
+  useEffect(() => {
+    const fetchReportData = async () => {
+      setIsLoading(true);
+      try {
+        const startDate = range[0].startDate.toISOString();
+        const endDate = range[0].endDate.toISOString();
+
+        // 🟢 โค้ดตัวอย่างการเรียก API จริง:
+        // const response = await fetch(`/api/reports/contacts?start=${startDate}&end=${endDate}`);
+        // const data = await response.json();
+        // setChartData(data.charts);
+        // setAddedLogs(data.addedLogs);
+        // setDeletedLogs(data.deletedLogs);
+
+        // [Mock Processing] กรองข้อมูลจำลองระหว่างรอ Backend
+        const filteredMock = calenderData
+            .filter((d) => {
+            const dDate = new Date(d.date);
+            const s = range[0].startDate;
+            const e = range[0].endDate;
+            e.setHours(23, 59, 59, 999);
+            return dDate >= s && dDate <= e;
+            })
+            .map((d) => ({
+            ...d,
+            totalContacts: d.opened + d.closed,
+            displayDate: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+            }));
+        setChartData(filteredMock);
+        
+        // จำลอง Log ว่างๆ
+        setAddedLogs([]);
+        setDeletedLogs([]);
+
+      } catch (error) {
+        console.error("Error fetching report data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReportData();
+  }, [range]); // ทำงานใหม่เมื่อ range เปลี่ยน
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (calendarRef.current && !calendarRef.current.contains(event.target)) setShowCalendar(false);
@@ -124,31 +182,13 @@ export default function ContactsReport() {
 
   const chartFontSize = "12px";
 
-  const filteredData = calenderData
-    .filter((d) => {
-      const dDate = new Date(d.date);
-      const s = range[0].startDate;
-      const e = range[0].endDate;
-      e.setHours(23, 59, 59, 999);
-      return dDate >= s && dDate <= e;
-    })
-    .map((d) => ({
-      ...d,
-      totalContacts: d.opened + d.closed,
-      displayDate: new Date(d.date).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
-    }));
-
-  const totalAdded = filteredData.reduce((sum, d) => sum + d.opened, 0);
-  const totalDeleted = filteredData.reduce((sum, d) => sum + d.closed, 0);
+  // คำนวณสรุปผลจาก Data
+  const totalAdded = chartData.reduce((sum, d) => sum + d.opened, 0);
+  const totalDeleted = chartData.reduce((sum, d) => sum + d.closed, 0);
   const totalContacts = totalAdded + totalDeleted;
 
-  const addedPercent =
-    totalContacts > 0 ? ((totalAdded / totalContacts) * 100).toFixed(2) : "0.00";
-  const deletedPercent =
-    totalContacts > 0 ? ((totalDeleted / totalContacts) * 100).toFixed(2) : "0.00";
+  const addedPercent = totalContacts > 0 ? ((totalAdded / totalContacts) * 100).toFixed(2) : "0.00";
+  const deletedPercent = totalContacts > 0 ? ((totalDeleted / totalContacts) * 100).toFixed(2) : "0.00";
 
   const blockClass =
     "border border-[rgba(254,253,253,0.5)] backdrop-blur-xl rounded-3xl shadow-2xl p-6 pb-8 flex flex-col h-full";
@@ -160,9 +200,6 @@ export default function ContactsReport() {
       year: "numeric",
     });
 
-  const [addedCurrentPage, setAddedCurrentPage] = useState(1);
-  const [deletedCurrentPage, setDeletedCurrentPage] = useState(1);
-  const itemsPerPage = 5;
 
   return (
     <div className="bg-[rgba(32,41,59,0.25)] backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-white space-y-8">
@@ -220,7 +257,7 @@ export default function ContactsReport() {
         </div>
 
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={filteredData}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#555" />
             <XAxis dataKey="displayDate" stroke="#ccc" style={{ fontSize: chartFontSize }} />
             <YAxis stroke="#ccc" style={{ fontSize: chartFontSize }} />
@@ -238,7 +275,7 @@ export default function ContactsReport() {
           Contacts Added <InfoTooltip text="จำนวนผู้ติดต่อที่ถูกเพิ่มใหม่ในช่วงเวลาที่เลือก" />
         </h2>
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={filteredData}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#555" />
             <XAxis dataKey="displayDate" stroke="#ccc" style={{ fontSize: chartFontSize }} />
             <YAxis stroke="#ccc" style={{ fontSize: chartFontSize }} />
@@ -254,7 +291,7 @@ export default function ContactsReport() {
           Contacts Deleted <InfoTooltip text="จำนวนผู้ติดต่อที่ถูกลบออกในช่วงเวลาที่เลือก" />
         </h2>
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={filteredData}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#555" />
             <XAxis dataKey="displayDate" stroke="#ccc" style={{ fontSize: chartFontSize }} />
             <YAxis stroke="#ccc" style={{ fontSize: chartFontSize }} />
@@ -267,14 +304,25 @@ export default function ContactsReport() {
       {/* Contact Added Log */}
       <Card title="Contact Added Log">
         <Table headers={["Timestamp", "Contact ID", "Contact Name", "Channel"]}>
-          <tr>
-            <td colSpan={4} className="text-center py-6 text-gray-400">
-              No Available Data
-            </td>
-          </tr>
+          {addedLogs.length > 0 ? (
+            addedLogs.map((log, index) => (
+                <tr key={index} className="border-b border-gray-500/30">
+                    <td className="py-3 px-4">{log.timestamp}</td>
+                    <td className="py-3 px-4">{log.contactId}</td>
+                    <td className="py-3 px-4">{log.contactName}</td>
+                    <td className="py-3 px-4">{log.channel}</td>
+                </tr>
+            ))
+          ) : (
+            <tr>
+                <td colSpan={4} className="text-center py-6 text-gray-400">
+                No Available Data
+                </td>
+            </tr>
+          )}
         </Table>
         <PaginationControls
-          totalItems={0}
+          totalItems={addedLogs.length}
           itemsPerPage={itemsPerPage}
           currentPage={addedCurrentPage}
           setCurrentPage={setAddedCurrentPage}
@@ -284,14 +332,25 @@ export default function ContactsReport() {
       {/* Contact Deleted Log */}
       <Card title="Contact Deleted Log">
         <Table headers={["Timestamp", "Contact ID", "Contact Name", "Channel"]}>
-          <tr>
-            <td colSpan={4} className="text-center py-6 text-gray-400">
-              No Available Data
-            </td>
-          </tr>
+          {deletedLogs.length > 0 ? (
+             deletedLogs.map((log, index) => (
+                <tr key={index} className="border-b border-gray-500/30">
+                    <td className="py-3 px-4">{log.timestamp}</td>
+                    <td className="py-3 px-4">{log.contactId}</td>
+                    <td className="py-3 px-4">{log.contactName}</td>
+                    <td className="py-3 px-4">{log.channel}</td>
+                </tr>
+            ))
+          ) : (
+            <tr>
+                <td colSpan={4} className="text-center py-6 text-gray-400">
+                No Available Data
+                </td>
+            </tr>
+          )}
         </Table>
         <PaginationControls
-          totalItems={0}
+          totalItems={deletedLogs.length}
           itemsPerPage={itemsPerPage}
           currentPage={deletedCurrentPage}
           setCurrentPage={setDeletedCurrentPage}

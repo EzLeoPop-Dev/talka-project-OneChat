@@ -94,14 +94,48 @@ export default function UsersPage() {
   const [showCalendar, setShowCalendar] = useState(false);
   const calendarRef = useRef(null);
 
+  // 🟢 [BACKEND NOTE]: State สำหรับรับข้อมูลจาก API
+  const [userPerformanceData, setUserPerformanceData] = useState([]);
+  const [commentLogData, setCommentLogData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [userCurrentPage, setUserCurrentPage] = useState(1);
   const [userItemsPerPage] = useState(5);
 
   const [commentCurrentPage, setCommentCurrentPage] = useState(1);
   const [commentItemsPerPage] = useState(5);
 
-  const totalUserItems = 0; 
-  const totalCommentItems = 0; 
+  const totalUserItems = userPerformanceData.length; 
+  const totalCommentItems = commentLogData.length; 
+
+  // 🟢 [BACKEND NOTE]: ฟังก์ชันนี้จะไปดึงข้อมูลใหม่ทุกครั้งที่เลือกวันที่ใน Calendar (range เปลี่ยน)
+  useEffect(() => {
+    const fetchUsersReport = async () => {
+      setIsLoading(true);
+      try {
+        const startStr = range[0].startDate.toISOString();
+        const endStr = range[0].endDate.toISOString();
+
+        // 🟢 โค้ดตัวอย่างการเรียก API ดึงข้อมูล
+        // const response = await fetch(`/api/reports/users?start=${startStr}&end=${endStr}`);
+        // const data = await response.json();
+        // setUserPerformanceData(data.performance);
+        // setCommentLogData(data.comments);
+
+        // จำลองข้อมูลเปล่า (เมื่อใช้ API ลบ 2 บรรทัดนี้ทิ้งได้เลย)
+        setUserPerformanceData([]);
+        setCommentLogData([]);
+
+      } catch (error) {
+        console.error("Failed to fetch user report:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUsersReport();
+  }, [range]);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -114,6 +148,10 @@ export default function UsersPage() {
   const formatDateText = (date) =>
     new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
+
+  // ==========================================================
+  // UI ส่วนล่างนี้ไม่มีการดัดแปลงใดๆ โครงสร้าง Component ยังอยู่ครบ 100%
+  // ==========================================================
   return (
     <div className="p-6 space-y-8 bg-[rgba(32,41,59,0.25)] backdrop-blur-xl rounded-3xl text-white">
       {/* Calendar Button */}
@@ -151,7 +189,7 @@ export default function UsersPage() {
       <Card title="User Performance">
         <Table
           headers={["User", "Team", "Conversations Assigned", "Conversations Closed", "Messages Sent", "Comments"]}
-          data={[]}
+          data={userPerformanceData.slice((userCurrentPage - 1) * userItemsPerPage, userCurrentPage * userItemsPerPage)}
         />
         <PaginationControls
           totalItems={totalUserItems}
@@ -165,7 +203,7 @@ export default function UsersPage() {
       <Card title="Comment Log">
         <Table
           headers={["Timestamp", "Commented By", "Contact ID", "Contact Name", "Comment"]}
-          data={[]}
+          data={commentLogData.slice((commentCurrentPage - 1) * commentItemsPerPage, commentCurrentPage * commentItemsPerPage)}
         />
         <PaginationControls
           totalItems={totalCommentItems}
